@@ -45,6 +45,8 @@ function index() {
     if (!listContainer) return;
     
     listContainer.innerHTML = "";
+   
+    console.log(`ブログ「最初のブログ:SecretZero」の読み込みに失敗しました`);
     
     // 0.htmlは隠し記事なので、インデックス1以降（通常の記事）のみトップに表示
     for (let i = 1; i < articles.length; i++) {
@@ -62,6 +64,8 @@ function index() {
             </article>
         `;
         listContainer.insertAdjacentHTML("beforeend", articleHtml);
+
+        console.log(`ブログ「${item.title}」の読み込みに成功しました`)
     }
 }
 
