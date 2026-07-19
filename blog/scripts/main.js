@@ -10,7 +10,7 @@ const articles = [
         comments: [
             { author: "あﾇゅ御さ", text: "文化祭頑張ってね", date: "2026/09/17 19:05" }
         ]
-    }
+    },
     {
         id: 2,
         title: "明日から学校",
@@ -22,7 +22,8 @@ const articles = [
         comments: [
             { author: "次きヤﾝ", text: "宿題終わらない...", date: "2026/09/05 22:56" }
         ]
-    }    {
+    },
+    {
         id: 3,
         title: "海に行ったよ",
         summary: "友達と千葉の海に遊びに行きました。",
