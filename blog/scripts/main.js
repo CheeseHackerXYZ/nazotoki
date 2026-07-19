@@ -1,3 +1,5 @@
+window.onerror = (msg, src, line, col) => alert(`${msg}\n${src}:${line}:${col}`);
+
 const articles = [
     {
         id:0
