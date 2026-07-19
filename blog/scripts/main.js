@@ -2,7 +2,10 @@ window.onerror = (msg, src, line, col) => alert(`${msg}\n${src}:${line}:${col}`)
 
 const articles = [
     {
-        id:0
+        id: 0,
+        title: "最初のブログ:SecretZero",
+        summary: "",
+        content:"<p>開発者の1人であるジュッセン・パイヤンは俺の暴走を危惧して万が一のために定期的にデータリセットするプログラムを仕込んでいた。</p><p>だから俺はブログに隠したデータにリセットされた状態からリセット前のデータに辿り着けるよう謎解きを作った。</p>"
     },
     {
         id: 1,
