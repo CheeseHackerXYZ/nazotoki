@@ -1,7 +1,12 @@
 #log{
-  display:none;
-  position:fixed;
-  bottom:0;
-  right:0;
+  display: none;
+  position: fixed;
+  bottom: 0;
+  right: 0;
   padding: 16px;
+}
+#logBtn{
+  position: fixed;
+  bottom: 0;
+  right: 0;
 }
