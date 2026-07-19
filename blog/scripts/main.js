@@ -118,7 +118,7 @@ function article(id) {
 
 function mylog(x){
     console.log(x);
-    p = createElement('p');
+    const p = document.createElement('p');
     p.textContent = x;
     document.getElementById('log').appendChild(p);
 }
