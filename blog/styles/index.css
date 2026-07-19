@@ -8,6 +8,8 @@
 #logBtn{
   position: fixed;
   font-size: 16px;
-  bottom: 10%;
-  right: 10%;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 25%;
+  bottom: 5%;
+  right: 5%;
 }
