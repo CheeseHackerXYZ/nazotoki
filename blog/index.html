@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日常の断片</title>
+    <style>
+        :root {
+            --bg-color: #f7f9fa;
+            --container-bg: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #34495e;
+            --muted-color: #7f8c8d;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--container-bg);
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        header h1 a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-container input[type="text"] {
+            width: 200px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            outline: none;
+            color: var(--text-color);
+            background-color: #f8fafc;
+            transition: width 0.2s ease, border-color 0.2s ease;
+        }
+
+        .search-container input[type="text"]:focus {
+            border-color: var(--accent-color);
+            width: 240px;
+            background-color: #ffffff;
+        }
+
+        .search-container button {
+            padding: 8px 14px;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .search-container button:hover {
+            opacity: 0.9;
+        }
+
+        main {
+            background-color: var(--container-bg);
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .post-item {
+            margin-bottom: 45px;
+            padding-bottom: 35px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .post-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .post-meta {
+            font-size: 0.85rem;
+            color: var(--muted-color);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .post-title {
+            margin: 0 0 15px;
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+
+        .post-title a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .post-title a:hover {
+            color: var(--muted-color);
+        }
+
+        .post-content {
+            color: #334155;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        /* 記事下のフッターエリア（リアクションと読むボタンを横並びに） */
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .reaction-area {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--muted-color);
+        }
+
+        .reaction-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .reaction-btn:hover {
+            background-color: #f1f5f9;
+            color: var(--text-color);
+        }
+
+        /* 「この記事を読む」ボタンの装飾 */
+        .read-more-btn {
+            display: inline-block;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background-color 0.2s, border-color 0.2s;
+            font-weight: 500;
+        }
+
+        .read-more-btn:hover {
+            background-color: #f8fafc;
+            border-color: var(--accent-color);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            font-size: 0.8rem;
+            color: var(--muted-color);
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 0;
+                padding: 0;
+            }
+            header {
+                flex-direction: column;
+                gap: 15px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                align-items: flex-start;
+                padding: 20px 15px;
+            }
+            .search-container {
+                width: 100%;
+            }
+            .search-container input[type="text"] {
+                flex: 1;
+                width: auto;
+            }
+            .search-container input[type="text"]:focus {
+                width: auto;
+            }
+            main {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: 30px 15px;
+            }
+            .post-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .read-more-btn {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ヘッダー -->
+        <header>
+            <h1><a href="#">ひでのブログ</a></h1>
+            
+            <div class="search-container">
+                <input id="search_box"type="text" placeholder="ブログ内を検索..." id="search-input">
+                <button id="search_btn" type="button">検索</button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main>
+            <!-- 記事 1 -->
+            <article class="post-item">
+                <div class="post-meta">2026/09/17 21:32</div>
+                <h2 class="post-title"><a href="1.html">ここに大名を入れます。例:明日は文化祭</a></h2>
+                <div class="post-content">
+                    <p>ここに概要文を入れます。</p>
+                </div>
+                
+                <div class="post-footer">
+                    <!-- リアクションボタン -->
+                    <div class="reaction-area">
+                        <button type="button" class="reaction-btn">
+                            高評価 (<span class="count">5</span>)
+                        </button>
+                        <button type="button" class="reaction-btn">
+                            低評価 (<span class="count">0</span>)
+                        </button>
+                    </div>
+                    <!-- この記事を読むボタン -->
+                    <a href="1.html" class="read-more-btn">この記事を読む →</a>
+                </div>
+            </article>
+
+            <!-- 記事 2 -->
+            <article class="post-item">
+                <div class="post-meta">2026/09/16 21:15</div>
+                <h2 class="post-title"><a href="2.html">各駅停車で帰宅</a></h2>
+                <div class="post-content">
+                    <p>これはChatGPTの案1。なんか路線図とかに謎隠せそうじゃね？<p>
+                </div>
+
+                <div class="post-footer">
+                    <div class="reaction-area">
+                        <button type="button" class="reaction-btn">
+                            高評価 (<span class="count">4</span>)
+                        </button>
+                        <button type="button" class="reaction-btn">
+                            低評価 (<span class="count">1</span>)
+                        </button>
+                    </div>
+                    <a href="2.html" class="read-more-btn">この記事を読む →</a>
+                </div>
+            </article>
+        </main>
+
+        <footer>
+            <p>&copy; あいうえお All Rights Reserved.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
