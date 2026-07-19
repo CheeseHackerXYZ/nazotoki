@@ -46,7 +46,7 @@ function index() {
     
     listContainer.innerHTML = "";
    
-    console.log(`ブログ「最初のブログ:SecretZero」の読み込みに失敗しました`);
+    mylog(`ブログ「最初のブログ:SecretZero」の読み込みに失敗しました`);
     
     // 0.htmlは隠し記事なので、インデックス1以降（通常の記事）のみトップに表示
     for (let i = 1; i < articles.length; i++) {
@@ -65,7 +65,7 @@ function index() {
         `;
         listContainer.insertAdjacentHTML("beforeend", articleHtml);
 
-        console.log(`ブログ「${item.title}」の読み込みに成功しました`)
+        mylog(`ブログ「${item.title}」の読み込みに成功しました`)
     }
 }
 
@@ -114,4 +114,11 @@ function article(id) {
             </li>
         `).join("");
     }
+}
+
+function mylog(x){
+    console.log(x);
+    p = createElement('p');
+    p.textContent = x;
+    document.getElementById('log').appendChild(p);
 }
