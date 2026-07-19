@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{題名}｜{name}の雑記ブログ</title>
+    <!-- 前回のCSSを外部ファイルとして読み込み -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- 共通ヘッダー -->
+        <header>
+            <h1><a href="index.html">{name}のブログ</a></h1>
+            
+            <div class="search-container">
+                <input type="text" placeholder="ブログ内を検索..." id="search-input">
+                <button type="button">検索</button>
+            </div>
+        </header>
+
+        <!-- トップページへ戻るリンク -->
+        <div class="breadcrumb">
+            <a href="index.html">← ブログトップへ戻る</a>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <main>
+            <article class="post-article">
+                <div class="post-meta">2026/07/19 16:23</div>
+                <h1 class="post-title">{題名}</h1>
+                
+                <div class="post-body">
+                    <p>かきくけこ、さしすせそ。たちつてとなにぬねの。はひふへほまみむめも、やゆよらりるれろわをん。</p>
+                    <p>あいうえおかきくけこ、さしすせそたちつてと。</p>
+                </div>
+            </article>
+
+            <!-- 高評価/低評価 -->
+            <div class="reaction-area">
+                <button type="button" class="reaction-btn">
+                    高評価 (<span class="count">7</span>)
+                </button>
+                <button type="button" class="reaction-btn">
+                    低評価 (<span class="count">0</span>)
+                </button>
+            </div>
+
+            <!-- 前のブログへ / 次のブログへ ナビゲーション -->
+            <div class="post-navigation">
+                <a href="0.html" class="nav-link">← 前の記事へ</a>
+                <div class="nav-empty"></div>
+            </div>
+
+            <!-- コメント欄 -->
+            <section class="comment-area">
+                <h3>コメント</h3>
+                <ul class="comment-list">
+                    <li class="comment-item">
+                        <div class="comment-meta">{コメント投稿者} - 2026/07/19 17:05</div>
+                        <div class="comment-text">{コメント}</div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; {name}のブログ.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
