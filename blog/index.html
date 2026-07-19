@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日常の断片</title>
+    <title>{name}のブログ｜トップページ</title>
     <style>
         :root {
             --bg-color: #f7f9fa;
@@ -247,7 +247,7 @@
     <div class="container">
         <!-- ヘッダー -->
         <header>
-            <h1><a href="#">ひでのブログ</a></h1>
+            <h1><a href="#">{name}のブログ</a></h1>
             
             <div class="search-container">
                 <input id="search_box"type="text" placeholder="ブログ内を検索..." id="search-input">
@@ -260,9 +260,9 @@
             <!-- 記事 1 -->
             <article class="post-item">
                 <div class="post-meta">2026/09/17 21:32</div>
-                <h2 class="post-title"><a href="1.html">ここに大名を入れます。例:明日は文化祭</a></h2>
+                <h2 class="post-title"><a href="1.html">{題名}例:明日は文化祭</a></h2>
                 <div class="post-content">
-                    <p>ここに概要文を入れます。</p>
+                    <p>{概要}//2行を想定</p>
                 </div>
                 
                 <div class="post-footer">
@@ -285,7 +285,7 @@
                 <div class="post-meta">2026/09/16 21:15</div>
                 <h2 class="post-title"><a href="2.html">各駅停車で帰宅</a></h2>
                 <div class="post-content">
-                    <p>これはChatGPTの案1。なんか路線図とかに謎隠せそうじゃね？<p>
+                    <p>これはGeminiの案1。なんか路線図とかに謎隠せそうじゃね？<p>
                 </div>
 
                 <div class="post-footer">
@@ -303,7 +303,7 @@
         </main>
 
         <footer>
-            <p>&copy; あいうえお All Rights Reserved.</p>
+            <p>&copy; {name}のブログ</p>
         </footer>
     </div>
 
