@@ -3,7 +3,7 @@ window.onerror = (msg, src, line, col) => alert(`${msg}\n${src}:${line}:${col}`)
 const articles = [
     {
         id: 0,
-        title: "最初のブログ:SecretZero",
+        title: "最初のブログ",
         summary: "",
         content:"<p>開発者の1人であるジュッセン・パイヤンは俺の暴走を危惧して万が一のために定期的にデータリセットするプログラムを仕込んでいた。</p><p>だから俺はブログに隠したデータにリセットされた状態からリセット前のデータに辿り着けるよう謎解きを作った。</p>",
         date: "",
@@ -55,7 +55,7 @@ function index() {
     
     listContainer.innerHTML = "";
    
-    mylog(`ブログ「最初のブログ:SecretZero」の読み込みに失敗しました`);
+    mylog(`ブログ「最初のブログ」の読み込みに失敗しました`);
     
     // 0.htmlは隠し記事なので、インデックス1以降（通常の記事）のみトップに表示
     for (let i = 1; i < articles.length; i++) {
