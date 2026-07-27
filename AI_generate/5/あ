@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脱出謎解きゲーム『HIDDEN LOCKDOWN』</title>
+<style>
+    :root {
+        --main-color: #0f0;
+        --alert-color: #f00;
+        --bg-color: #050505;
+        --dark-bg: #000000;
+    }
+    body {
+        background-color: var(--bg-color);
+        color: var(--main-color);
+        font-family: 'Courier New', Courier, monospace, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    #game-container {
+        width: 100%;
+        max-width: 800px;
+        background-color: var(--dark-bg);
+        border: 2px solid var(--main-color);
+        border-radius: 5px;
+        padding: 30px;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    }
+    h1, h2, h3 { margin-top: 0; }
+    p { line-height: 1.6; font-size: 16px; }
+    
+    .page { display: none; }
+    .active { display: block; }
+    
+    /* ボタン装飾 */
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    button {
+        background-color: transparent;
+        color: var(--main-color);
+        border: 1px solid var(--main-color);
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+    }
+    button:hover {
+        background-color: var(--main-color);
+        color: var(--dark-bg);
+    }
+    .module-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 15px;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+    /* チャット風装飾 */
+    .chat-box {
+        border-left: 3px solid var(--main-color);
+        padding-left: 15px;
+        margin: 15px 0;
+        background: rgba(0, 255, 0, 0.05);
+        padding: 10px 15px;
+    }
+    .chat-name { font-weight: bold; margin-bottom: 5px; }
+    
+    /* ギミック装飾 */
+    .alert {
+        color: var(--alert-color);
+        border-color: var(--alert-color);
+    }
+    .alert-box {
+        border: 2px dashed var(--alert-color);
+        padding: 20px;
+        text-align: center;
+        background: rgba(255, 0, 0, 0.1);
+        margin-top: 20px;
+    }
+    .blink { animation: blinker 1s linear infinite; }
+    @keyframes blinker { 50% { opacity: 0; } }
+
+    /* 隠し文字ギミック */
+    .hidden-text {
+        color: var(--dark-bg);
+        background-color: var(--dark-bg);
+        user-select: text;
+        cursor: text;
+    }
+    input[type="text"] {
+        background: transparent;
+        border: 1px solid var(--main-color);
+        color: var(--main-color);
+        padding: 10px;
+        font-family: inherit;
+        font-size: 18px;
+        width: 80%;
+        max-width: 300px;
+    }
+    input[type="text"]:focus { outline: none; box-shadow: 0 0 5px var(--main-color); }
+
+    #countdown-display {
+        font-size: 48px;
+        font-weight: bold;
+        color: var(--alert-color);
+        margin: 20px 0;
+    }
+
+    .hint-box {
+        border: 1px solid #888;
+        padding: 15px;
+        color: #ccc;
+        background: #111;
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <!-- タイトル画面 -->
+    <div id="title" class="page active">
+        <h1 class="blink">HIDDEN LOCKDOWN</h1>
+        <p>【極秘任務】<br>ロックダウンを解除し、奪われたAIデータを死守せよ。</p>
+        <button onclick="startGame()">SYSTEM BOOT (ゲーム開始)</button>
+    </div>
+
+    <!-- Page 1: プロローグとチャット -->
+    <div id="page1" class="page">
+        <h2>【PROLOGUE】</h2>
+        <p>頭痛と共に目を覚ます。室内の非常灯が赤く点滅し、重厚なセキュリティドアは完全に閉じられている。<br>
+        周りの同僚を見渡すと皆倒れている。気絶しているようだ。</p>
+        <p>防犯カメラの映像を確認すると、仮面の侵入者が研究員たちを襲撃し、最重要AI「プロジェクト-OMEGA」のコアデータを奪って逃走する姿が映っていた。<br>
+        奴らは証拠隠滅と足止めのため、この研究所を極秘ロックダウン（完全閉鎖）モードに強制移行させたらしい。</p>
+        
+        <hr style="border-color: #0f0; margin: 20px 0;">
+        <p><i>（PCの画面にノイズが走り、暗号化されたチャットウィンドウが立ち上がる）</i></p>
+        
+        <div class="chat-box">
+            <div class="chat-name">＞ アイリス（セキュリティ統括）</div>
+            「無事だったか！AI研究所はロックダウンされたようだ。データは盗まれたが、奴らもまだ持ち出した暗号データを完全解読できていない（鍵がかかっている）。解除される前にロックダウンを解除して、犯人からデータを守るんだ。」
+        </div>
+        
+        <div class="btn-group" id="choice1">
+            <button onclick="nextChat('わかった')">わかった</button>
+            <button onclick="nextChat('承知した')">承知した</button>
+        </div>
+
+        <div id="chat2" style="display: none;">
+            <div class="chat-box">
+                <div class="chat-name">＞ アイリス</div>
+                「助かる。まずはこちらの制御を取り戻すため、メインシステムのロックダウンを解除してくれ。」
+            </div>
+            <button onclick="changePage('page2')">次へ</button>
+        </div>
+    </div>
+
+    <!-- Page 2: 隠しパスワード -->
+    <div id="page2" class="page">
+        <h2 class="alert blink">⚠️ SYSTEM LOCKDOWN ENABLED</h2>
+        <p>解除用パスワードを入力してください。</p>
+        <div style="margin-bottom: 30px;">
+            <input type="text" id="password-input" placeholder="PASSWORD">
+            <button onclick="checkPassword()">ENTER</button>
+        </div>
+        <p id="pw-error" class="alert" style="display: none;">[ERROR] パスワードが一致しません。</p>
+        
+        <hr style="border-color: #0f0;">
+        <p>メッセージ<br>
+        「真実は常に目に見えるとは限らない。画面の闇に隠された『真実』を見つけ出せ。」<span class="hidden-text">HIDDENTRUTH</span></p>
+    </div>
+
+    <!-- Page 3: ウイルスの注入と緊急退避 -->
+    <div id="page3" class="page">
+        <div class="chat-box">
+            <div class="chat-name">＞ アイリス</div>
+            「ロックダウン解除ありがとう！犯人のサーバーの特定に成功した。奴ら、まだ暗号化されたデータの解凍に手間取っている。<br>
+            今なら間に合う。私が作った<b>『データ自己崩壊ウイルス』</b>を、この端末から犯人のサーバーへ流し込んでくれ！」
+        </div>
+        <button id="access-btn" onclick="startHack()">ウイルスを送信する</button>
+
+        <div id="hack-event" style="display: none;">
+            <div class="alert-box">
+                <h2 class="alert blink">???? WARNING: ENEMY TRACE DETECTED</h2>
+                <p>⚠️ 警告： ウイルスの注入に成功。しかし、敵の防壁が作動し、逆探知によるカウンターハックが開始されました！</p>
+                <div class="chat-box" style="border-color: red; color: red;">
+                    「まずい、ウイルスは仕込めたが、このままじゃ君の端末を経由してこっちのシステムまで破壊される！<br>
+                    <b>敵の逆探知が完了する前に、回線を切断して、物理的にカウンターハックから逃げ切るんだ！</b>」
+                </div>
+                <div id="countdown-display">30</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 4: オフラインでのシステム復旧 (ロジックパズル) -->
+    <div id="page4" class="page">
+        <h2>ℹ️ SYSTEM SAFE MODE</h2>
+        <p>「緊急遮断成功。敵の逆探知を回避しました。<br>
+        <span class="alert">警告：強制切断の影響により、AIコアが停止しています。オンラインに復帰する前に、手動で再起動してください。</span>」</p>
+        
+        <div class="hint-box">
+            <p><b>【復旧手順マニュアル】</b><br>
+            システムは繊細だ。まず<b>電力</b>を供給しなければ何も始まらない。<br>
+            電力が通ったら、記憶を呼び起こす前に、思考の枠組みである<b>論理</b>を安定させろ。<br>
+            枠組みが整って初めて<b>記憶</b>は定着する。<br>
+            全ての準備が整った時、最後に<b>中枢</b>を目覚めさせよ。</p>
+        </div>
+
+        <div class="btn-group">
+            <button class="module-btn" onclick="pressModule('POWER')">POWER</button>
+            <button class="module-btn" onclick="pressModule('MEMORY')">MEMORY</button>
+            <button class="module-btn" onclick="pressModule('LOGIC')">LOGIC</button>
+            <button class="module-btn" onclick="pressModule('CORE')">CORE</button>
+        </div>
+
+        <h3 id="puzzle-status" style="margin-top: 20px;">[モジュール未接続]</h3>
+
+        <div id="reboot-success" class="alert-box" style="display: none; border-color: #0f0; background: rgba(0,255,0,0.1);">
+            <h3 class="blink" style="color: #0f0;">???? SYSTEM REBOOT SUCCESS</h3>
+            <p>「AIコアの復旧・安定化が完了しました。<br>安全にネットワークへ再接続できます。」</p>
+        </div>
+    </div>
+
+    <!-- Page 5: 最終報告 -->
+    <div id="page5" class="page">
+        <div class="chat-box">
+            <div class="chat-name">＞ アイリス</div>
+            「通信復旧を確認！無事だったか！<br>
+            君が仕込んでくれたウイルスが敵のサーバー内で完全に作動し、奪われたデータは奴らのシステムごと物理的に消去されたよ！<br>
+            こっちのコアシステムの再起動も完璧だ。見事な手際だった、本当にありがとう！」
+        </div>
+        <button onclick="showEnding()">エンディングへ</button>
+    </div>
+
+    <!-- Ending & Game Over -->
+    <div id="ending" class="page" style="text-align: center;">
+        <h1>???? GAME CLEAR!!</h1>
+        <h2>「任務完了」</h2>
+        <p style="text-align: left;">あなたは間一髪のところで研究所のロックダウンを解除し、巧妙なサイバー反撃を退けて最重要AIデータを守り抜いた。<br>気絶していた同僚たちも意識を取り戻しつつある。</p>
+        <hr style="border-color: #0f0; margin: 30px 0;">
+        <h3 id="score-display"></h3>
+        <h3 id="time-display"></h3>
+        <button onclick="location.reload()" style="margin-top: 20px;">タイトルに戻る</button>
+    </div>
+
+    <div id="gameover" class="page" style="text-align: center;">
+        <h1 class="alert">???? GAME OVER</h1>
+        <p id="gameover-reason" class="alert">IP特定完了。データは完全に消去され、研究所の全システムが破壊された。</p>
+        <button onclick="location.reload()" class="alert">システム再起動 (リトライ)</button>
+    </div>
+
+</div>
+
+<script>
+    let startTime;
+    let timerInterval;
+    let isHacking = false;
+    let isSystemRebooted = false;
+    
+    // パズル用変数
+    let puzzleSequence = [];
+    const correctSequence = ['POWER', 'LOGIC', 'MEMORY', 'CORE'];
+
+    function changePage(pageId) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    function startGame() {
+        startTime = Date.now();
+        changePage('page1');
+    }
+
+    function nextChat(choice) {
+        document.getElementById('choice1').style.display = 'none';
+        document.getElementById('chat2').style.display = 'block';
+    }
+
+    function checkPassword() {
+        const input = document.getElementById('password-input').value.trim();
+        if (input.toUpperCase() === 'HIDDENTRUTH') {
+            document.getElementById('pw-error').style.display = 'none';
+            document.getElementById('password-input').value = "ACCESS GRANTED";
+            setTimeout(() => {
+                changePage('page3');
+            }, 1000);
+        } else {
+            document.getElementById('pw-error').style.display = 'block';
+        }
+    }
+
+    function startHack() {
+        document.getElementById('access-btn').style.display = 'none';
+        document.getElementById('hack-event').style.display = 'block';
+        isHacking = true;
+
+        let timeLeft = 30;
+        const display = document.getElementById('countdown-display');
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            display.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                isHacking = false;
+                triggerGameOver("タイムオーバー：逆探知が完了し、システムが完全に破壊されました。");
+            }
+        }, 1000);
+    }
+
+    // パズルギミックの処理
+    function pressModule(moduleName) {
+        if (isSystemRebooted) return; // 既にクリア済みの場合は無視
+
+        puzzleSequence.push(moduleName);
+        const currentIndex = puzzleSequence.length - 1;
+        const statusDisplay = document.getElementById('puzzle-status');
+
+        // 順番が間違っていた場合
+        if (puzzleSequence[currentIndex] !== correctSequence[currentIndex]) {
+            statusDisplay.innerHTML = `<span class="alert">ERROR: 起動シーケンス不一致。システムをリセットします。</span>`;
+            puzzleSequence = []; // リセット
+        } else {
+            // 順番が合っている場合
+            statusDisplay.textContent = "▶ 接続中... " + puzzleSequence.join(" > ");
+            
+            // 全て正解した場合
+            if (puzzleSequence.length === correctSequence.length) {
+                isSystemRebooted = true;
+                statusDisplay.style.display = "none";
+                document.getElementById('reboot-success').style.display = "block";
+            }
+        }
+    }
+
+    // ブラウザのオフライン（通信切断）検知
+    window.addEventListener('offline', () => {
+        if (isHacking) {
+            clearInterval(timerInterval);
+            isHacking = false;
+            changePage('page4');
+        }
+    });
+
+    // ブラウザのオンライン（通信復帰）検知
+    window.addEventListener('online', () => {
+        const page4 = document.getElementById('page4');
+        
+        if (page4.classList.contains('active')) {
+            if (isSystemRebooted) {
+                // パズルクリア後にオンラインにした場合は成功
+                changePage('page5');
+            } else {
+                // パズルをクリアする前（復旧前）にオンラインにしてしまった場合のエラー処理
+                triggerGameOver("システム復旧前にネットワークに接続したため、AIデータが致命的なエラーを起こし消滅しました。");
+            }
+        }
+    });
+
+    function triggerGameOver(reason) {
+        document.getElementById('gameover-reason').textContent = reason;
+        changePage('gameover');
+    }
+
+    function showEnding() {
+        const endTime = Date.now();
+        const totalSeconds = Math.floor((endTime - startTime) / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        let score = "B";
+        if (totalSeconds <= 180) score = "S";
+        else if (totalSeconds <= 300) score = "A";
+
+        document.getElementById('score-display').textContent = `[ SCORE: ${score} ]`;
+        document.getElementById('time-display').textContent = `[ PLAY TIME: ${minutes}分 ${seconds}秒 ]`;
+        
+        changePage('ending');
+    }
+</script>
+</body>
+</html>
