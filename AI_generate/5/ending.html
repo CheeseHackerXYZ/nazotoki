@@ -1,3 +1,98 @@
-おめでとうクリアだ
-エンディング文章をここに書く
-Xにポスト欄
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロックダウン研究所からの脱出 - Ending</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #1a1a1a;
+            border: 2px solid #00ffcc;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+            padding: 25px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #00ffcc;
+            margin-top: 0;
+            animation: blink 1.5s infinite;
+        }
+
+        .story-box {
+            background-color: #050505;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin: 20px 0;
+            text-align: left;
+            color: #e0e0e0;
+        }
+
+        .restart-btn {
+            display: block;
+            width: 100%;
+            background-color: #1a1a1a;
+            color: #00ffcc;
+            border: 2px solid #00ffcc;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        .restart-btn:hover {
+            background-color: #00ffcc;
+            color: #121212;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>GAME CLEAR!</h1>
+    
+    <div class="story-box">
+        <p>「パスワード認証完了。ロックダウンを全セクションで解除します。」</p>
+        <p>システム音声と共に、重々しい音を立てて研究室の自動ドアが左右に開いた。</p>
+        <p>外からの新鮮な空気が流れ込み、セキュリティシステムが正常動作へ復帰する。すぐに救急隊と警備チームを要請し、同僚たちの安全も確保された。</p>
+        <p><strong>あなたは無事にロックダウンされた研究所からの脱出に成功した！</strong></p>
+    </div>
+
+    <a href="./index.html" class="restart-btn">タイトルへ戻る</a>
+</div>
+
+</body>
+</html>
