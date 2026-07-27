@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metis OS - バッファメモリオーバーライド</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="background: var(--guild-bg); color: var(--guild-text);">
+
+  <header class="metis-header" style="background: #111827; border-bottom: 1px solid #374151;">
+    <div class="metis-logo" style="color: var(--guild-primary);">
+      [GUILD_OVERRIDE_MODE] <span class="metis-badge" style="background: var(--guild-alert);">Phase 3: ジャンクデータ注入</span>
+    </div>
+    <div class="timer-box warning">
+      限界時間: <span id="metis-timer">--:--</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" style="background: var(--guild-card); border-color: #374151;">
+      <h2 style="color: var(--guild-primary);">都市OSコアバッファ・オーバーフロー実験</h2>
+      <p style="color: #9ca3af; font-size: 0.9rem;">
+        冷徹な自動制御システムに「整然としたコード」を送ると、システムはそれを最適化パッチと誤認して永久固定化されます（危険）。<br>
+        システムを揺さぶるには、かつて人間が持っていた<strong>非効率で不完全な「ジャンクデータ（雑音・思い出・愚痴）」</strong>を叩き込み、メモリをパンクさせてください。
+      </p>
+
+      <div class="meter-container">
+        <div class="meter-bar" id="buffer-bar"></div>
+        <div class="meter-text" id="buffer-text">バッファメモリ充填率: 0%</div>
+      </div>
+    </section>
+
+    <!-- データブロック選択 -->
+    <section class="card" style="background: var(--guild-card); border-color: #374151;">
+      <h3 style="color: #fff;">注入データパケットの選択</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+        
+        <!-- Trap Option (Bad End B) -->
+        <button class="btn btn-secondary" style="text-align: left; justify-content: flex-start;" onclick="injectData('smart')">
+          <div>
+            <strong>[データA] 高効率都市最適化アルゴリズム v4.03</strong><br>
+            <span style="font-size: 0.8rem; color: #6b7280;">完全整列されたスマートコード。処理速度を劇的に向上させる。</span>
+          </div>
+        </button>
+
+        <!-- Correct Option 1 -->
+        <button class="btn btn-secondary" style="text-align: left; justify-content: flex-start;" onclick="injectData('junk1')">
+          <div>
+            <strong>[データB] 1998年 渋谷ガード下の雨音と路上ライブ音源</strong><br>
+            <span style="font-size: 0.8rem; color: #6b7280;">不規則なリズム、観客の歓声、チューニングのずれたギターノイズ。</span>
+          </div>
+        </button>
+
+        <!-- Correct Option 2 -->
+        <button class="btn btn-secondary" style="text-align: left; justify-content: flex-start;" onclick="injectData('junk2')">
+          <div>
+            <strong>[データC] 市民の未整理な日記「雨の日に傘を忘れて最悪だった」</strong><br>
+            <span style="font-size: 0.8rem; color: #6b7280;">無駄な感情の吐露、非合理な愚痴、答えのない悩みのログ。</span>
+          </div>
+        </button>
+
+        <!-- Correct Option 3 -->
+        <button class="btn btn-secondary" style="text-align: left; justify-content: flex-start;" onclick="injectData('junk3')">
+          <div>
+            <strong>[データD] 教科書の余白に描かれた下手な手書きの落書き</strong><br>
+            <span style="font-size: 0.8rem; color: #6b7280;">幾何学的に不完全な線、意味を持たない記号、失敗した計算式。</span>
+          </div>
+        </button>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+  <script>
+    let bufferVal = parseInt(localStorage.getItem('metis_buffer') || '0', 10);
+    updateBufferUI();
+
+    function injectData(type) {
+      if (type === 'smart') {
+        game.playBeep(100, 'sawtooth', 0.5);
+        alert("【致命的エラー】システムがデータを「高効率パッチ」として正常受容しました。完全固定化ルーチンが起動します。");
+        window.location.href = 'ending_bad_b.html';
+        return;
+      }
+
+      game.playGlitchSound();
+      bufferVal += 35;
+      if (bufferVal > 100) bufferVal = 100;
+      
+      localStorage.setItem('metis_buffer', bufferVal.toString());
+      updateBufferUI();
+
+      if (bufferVal >= 100) {
+        setTimeout(() => {
+          triggerPhase4Critical();
+        }, 600);
+      }
+    }
+
+    function updateBufferUI() {
+      const bar = document.getElementById('buffer-bar');
+      const text = document.getElementById('buffer-text');
+      bar.style.width = bufferVal + '%';
+      text.textContent = `バッファメモリ充填率: ${bufferVal}% (限界値 100%)`;
+    }
+
+    function triggerPhase4Critical() {
+      document.body.classList.add('glitch-active');
+      alert("――警報：未処理の非定型データ（個人の散漫な記憶・不規則なノイズ）がバッファメモリの限界値（100%）を超過しました！");
+      alert("自動最適化ルーチンを緊急遮断します。");
+      window.location.href = 'ending_true.html';
+    }
+  </script>
+</body>
+</html>
