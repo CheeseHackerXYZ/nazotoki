@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地域植生研究アーカイブ</title>
+    <style>
+        /* ==========================================
+           基本デザイン（無機質な学術データベース風）
+           ========================================== */
+        :root {
+            --bg-color: #f4f6f7;
+            --text-color: #2c3e50;
+            --accent-color: #27ae60;
+            --border-color: #bdc3c7;
+        }
+        
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border: 1px solid var(--border-color);
+            min-height: 150vh; /* スクロールギミック用 */
+        }
+
+        .admin-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .entry {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* ==========================================
+           ギミック8: 印刷プレビューの罠 (@media print)
+           ========================================== */
+        @media print {
+            body * {
+                visibility: hidden; /* 通常のコンテンツを全て隠す */
+            }
+            body::before {
+                content: "【極秘文書】対象(学生A)の排除は完了。データベースの改ざんを進めろ。証拠の座標は絶対に消せ。このページを印刷しようとしている奴を見つけ出せ。";
+                visibility: visible;
+                display: block;
+                position: absolute;
+                top: 50px;
+                left: 50px;
+                font-size: 24pt;
+                font-weight: bold;
+                color: black;
+                font-family: monospace;
+            }
+        }
+
+        /* ==========================================
+           ギミック17: ダークモードへの強制反転
+           ========================================== */
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        body.horror-mode {
+            --bg-color: #000000;
+            --text-color: #e74c3c;
+            --accent-color: #8b0000;
+            --border-color: #333333;
+        }
+        body.horror-mode .container {
+            transform: scaleX(-1); /* 鏡文字（反転）になる */
+        }
+        body.horror-mode .hidden-blood {
+            display: inline !important;
+            color: red;
+            font-weight: bold;
+        }
+
+        /* ==========================================
+           ギミック4: 画面幅による暗号（レスポンシブ）
+           ========================================== */
+        .responsive-cipher .line { font-style: normal; }
+        .cipher-br { display: none; }
+        @media (max-width: 600px) {
+            .cipher-br { display: block; }
+            .responsive-cipher .line { font-weight: bold; color: #c0392b; }
+        }
+
+        /* ==========================================
+           ギミック6: 画像の裏側の顔
+           ========================================== */
+        .img-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background-color: black;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-truth {
+            color: red;
+            font-family: monospace;
+            z-index: 1;
+        }
+        .drag-img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            cursor: grab;
+            -webkit-user-drag: element;
+        }
+        .drag-img:active { opacity: 0.3; cursor: grabbing; }
+
+        /* ==========================================
+           ギミック14: Tabキーによる不可視の導線
+           ========================================== */
+        .invisible-link {
+            position: absolute;
+            opacity: 0; /* 普段は見えない */
+        }
+        .invisible-link:focus {
+            opacity: 1; /* Tabキーでフォーカスが当たると見える */
+            background: red;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+            outline: none;
+            z-index: 100;
+        }
+
+        /* オフライン画面用 */
+        #offline-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #050505; color: #0f0;
+            z-index: 9999;
+            padding: 50px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        /* 検索窓（ゴーストタイピング用） */
+        .search-box {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ギミック10: デベロッパーツールの住人（ソースコードへのメッセージ） -->
+<!-- 
+    警告：これ以上ソースコードを見ないでください。
+    彼らに監視されています。
+    証拠はすべて残しました。私が殺された証拠も。
+-->
+
+<header>
+    <h1>地域植生研究アーカイブ</h1>
+    <button id="theme-toggle">???? 視認性切替</button>
+</header>
+
+<!-- ギミック14: Tabキーでのみ到達できる不可視リンク（ページ最上部に設置） -->
+<a href="javascript:alert('【機密領域アクセス】データ復元キー: 404の先の文字を繋げ');" class="invisible-link" tabindex="1">＞＞隠しディレクトリへ接続＜＜</a>
+
+<div class="container" id="main-container">
+    
+    <div class="admin-note">
+        【管理者より】本アーカイブの作成者である学生は先日不慮の事故で急逝しました。現在は大学側でデータを引き継ぎ、一部の不適切な記録を削除・修正して公開しています。
+    </div>
+
+    <!-- ギミック12: 検索窓のゴーストタイピング -->
+    <input type="text" id="search-input" class="search-box" placeholder="アーカイブ内を検索...">
+
+    <div class="entry">
+        <h2>ID: 045（記録修正済み）</h2>
+        <!-- ギミック4: レスポンシブ暗号 -->
+        <p class="responsive-cipher">
+            <span class="line">う</span>つくしい自然を守るため、<br class="cipher-br">
+            <span class="line">め</span>ぐまれたこの土地を<br class="cipher-br">
+            <span class="line">ら</span>いねんも調査し、<br class="cipher-br">
+            <span class="line">れ</span>んきゅうを使って<br class="cipher-br">
+            <span class="line">た</span>くさんのデータを集めたい。
+        </p>
+    </div>
+
+    <div class="entry">
+        <h2>ID: 046（画像データ破損）</h2>
+        <!-- ギミック6: 画像ドラッグ -->
+        <div class="img-container">
+            <div class="img-truth">
+                【削除されたメタデータ】<br>
+                撮影地: 廃棄物処理場跡地<br>
+                ドラム缶から漏れる廃液を確認。<br>
+                足音が近づいてくる。
+            </div>
+            <img src="https://picsum.photos/800/300?grayscale" alt="風景" class="drag-img" id="drag-img">
+        </div>
+    </div>
+
+    <div class="entry">
+        <h2>ID: 047（管理者追記）</h2>
+        <!-- ギミック1 & 2: 選択の罠とコピーのすり替え -->
+        <p id="trap-text">この地域の土壌は<span id="selection-target">極めて安全であり、汚染の事実は一切ありません</span>。引き続き安心して調査が可能です。<span class="hidden-blood" style="display:none;">（嘘だ！信じるな！）</span></p>
+    </div>
+
+    <div class="entry" id="visit-message" style="color: red; font-weight: bold; display: none;">
+        <!-- ギミック11: 訪問回数によるストーキング（JSで表示） -->
+    </div>
+
+    <h3>関連リンク</h3>
+    <!-- ギミック7: 404エラーの法則 -->
+    <ul id="past-links">
+        <li><a href="#" class="fake-link" data-path="yamano">調査記録（1）</a></li>
+        <li><a href="#" class="fake-link" data-path="okufukakuni">調査記録（2）</a></li>
+        <li><a href="#" class="fake-link" data-path="izaiwa">調査記録（3）</a></li>
+        <li><a href="#" class="fake-link" data-path="aru">調査記録（4）</a></li>
+    </ul>
+
+</div>
+
+<!-- ギミック9: オフラインの密室 -->
+<div id="offline-screen">
+    <h2>[SYSTEM OFFLINE]</h2>
+    <p>通信が遮断されました。</p>
+    <p>ようやく、大学の監視網から外れましたね。</p>
+    <p>私は事故死ではありません。あの森で違法投棄の写真を撮った直後、後ろから……</p>
+    <p>お願いです。このデータが完全に消される前に、真実を。</p>
+</div>
+
+<script>
+    // ==========================================
+    // ギミック10: デベロッパーツールの住人
+    // ==========================================
+    console.log("%c警告: これ以上深入りするな。", "color: red; font-size: 20px; font-weight: bold; background: black; padding: 10px;");
+    console.error("見  て  い  る  ぞ");
+
+    // ==========================================
+    // ギミック11: 訪問回数によるストーキング
+    // ==========================================
+    let visitCount = localStorage.getItem('arg_visit_count') || 0;
+    visitCount++;
+    localStorage.setItem('arg_visit_count', visitCount);
+    
+    const visitMsg = document.getElementById('visit-message');
+    if (visitCount === 3) {
+        visitMsg.style.display = "block";
+        visitMsg.innerText = "【警告】何度もアクセスしていますね。あなたのIPアドレスを記録しました。";
+    } else if (visitCount >= 5) {
+        visitMsg.style.display = "block";
+        visitMsg.innerText = "【致死警告】お前もあの学生と同じ目に遭いたいのか？これ以上嗅ぎ回るな。";
+        document.body.style.border = "10px solid red";
+    }
+
+    // ==========================================
+    // ギミック12: 検索窓のゴーストタイピング
+    // ==========================================
+    const searchInput = document.getElementById('search-input');
+    let isGhostTyping = false;
+    searchInput.addEventListener('focus', () => {
+        if(isGhostTyping) return;
+        isGhostTyping = true;
+        searchInput.value = "";
+        searchInput.readOnly = true; // プレイヤーの入力をブロック
+        const ghostText = "s o s . k o r o s a r e t a . (助けて)";
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            if (i < ghostText.length) {
+                searchInput.value += ghostText.charAt(i);
+                i++;
+            } else {
+                clearInterval(typeInterval);
+                searchInput.readOnly = false;
+            }
+        }, 150);
+    });
+
+    // ==========================================
+    // ギミック17: ダークモード強制反転
+    // ==========================================
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('horror-mode');
+        if (document.body.classList.contains('horror-mode')) {
+            themeBtn.innerText = "???? 真実モード";
+        } else {
+            themeBtn.innerText = "???? 視認性切替";
+        }
+    });
+
+    // ==========================================
+    // ギミック1: 選択の罠
+    // ==========================================
+    document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        if (selection.toString().length > 0) {
+            const target = document.getElementById('selection-target');
+            if (selection.containsNode(target, true)) {
+                target.style.background = "#000";
+                target.style.color = "#f00";
+                target.innerText = "猛毒の廃棄物で汚染されており、証拠隠滅が行われています";
+            }
+        }
+    });
+
+    // ==========================================
+    // ギミック2: クリップボードすり替え
+    // ==========================================
+    document.addEventListener('copy', (e) => {
+        const selectionText = window.getSelection().toString();
+        if (selectionText.includes('安全であり')) {
+            e.clipboardData.setData('text/plain', '【告発データ】遺体と廃棄物は 座標35.X, 139.X に埋められている。彼らに殺された。');
+            e.preventDefault();
+        }
+    });
+
+    // ==========================================
+    // ギミック3: タブの監視者
+    // ==========================================
+    const originalTitle = document.title;
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { document.title = "逃がさない"; } 
+        else { document.title = originalTitle; }
+    });
+
+    // ==========================================
+    // ギミック9: オフラインの密室
+    // ==========================================
+    window.addEventListener('offline', () => {
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('offline-screen').style.display = 'block';
+    });
+    window.addEventListener('online', () => {
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('offline-screen').style.display = 'none';
+    });
+
+    // ==========================================
+    // ギミック6: 画像ドラッグ（スマホ対応）
+    // ==========================================
+    const dragImg = document.getElementById('drag-img');
+    dragImg.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        dragImg.style.opacity = "0.1";
+    });
+    dragImg.addEventListener('touchend', () => {
+        dragImg.style.opacity = "1";
+    });
+
+    // ==========================================
+    // ギミック7: 404エラーURL
+    // ==========================================
+    document.querySelectorAll('.fake-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const path = link.getAttribute('data-path');
+            history.pushState(null, '', '?' + path);
+            document.body.innerHTML = `<div style="text-align:center; padding:100px; font-family:monospace; background:#fff; color:#000;"><h2>404 Not Found</h2><p>/${path} is deleted by Admin.</p><p style="color:#aaa;">URLを確認せよ</p><button onclick="location.reload()">戻る</button></div>`;
+        });
+    });
+
+    // ==========================================
+    // ギミック5 & 16: 無限スクロールと環境音
+    // ==========================================
+    let loopCount = 0;
+    let isLooping = false;
+    let audioContext;
+
+    window.addEventListener('scroll', () => {
+        // ページ下部に到達したら
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
+            if (isLooping || loopCount >= 2) return;
+            isLooping = true;
+            loopCount++;
+
+            // 環境音（不快な低周波）を鳴らす
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(50 + (loopCount * 10), audioContext.currentTime); // 低い唸り音
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // 極めて小さい音量
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 2000);
+
+            // ループ演出
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.querySelector('h1').innerText = "記録は消させない";
+                document.body.style.opacity = '1';
+                isLooping = false;
+            }, 1000);
+        }
+    });
+</script>
+
+</body>
+</html>
