@@ -1,401 +1,365 @@
 /* ==========================================================================
-   Metis OS & Tokyo Rebirth Guild Visual Design
+   『停滞都市のノイズ ―The 71% Illusion―』 統合スタイルシート
    ========================================================================== */
 
 :root {
-  --bg-primary: #f0f4f8;
-  --bg-card: #ffffff;
-  --text-main: #1a202c;
-  --accent-metis: #0066cc;
-  --accent-metis-light: #e6f0fa;
-  --danger: #e53e3e;
-  --guild-green: #00ff66;
-  --guild-bg: #0d1117;
-  --border-color: #cbd5e0;
+  /* Metis Official Colors (無菌室の清涼感) */
+  --metis-bg: #f4f7f6;
+  --metis-card: #ffffff;
+  --metis-primary: #0066cc;
+  --metis-accent: #00d2ff;
+  --metis-text: #2c3e50;
+  --metis-subtext: #7f8c8d;
+  --metis-gold: #d4af37;
+
+  /* Guild / Dark Theme Colors (反体制・ノイズ) */
+  --guild-bg: #0a0e14;
+  --guild-card: #121820;
+  --guild-primary: #00ff66;
+  --guild-alert: #ff3366;
+  --guild-warning: #ffaa00;
+  --guild-text: #d0d7de;
+  --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body.metis-mode {
-  background-color: var(--bg-primary);
-  color: var(--text-main);
+body {
+  font-family: var(--font-sans);
+  background-color: var(--metis-bg);
+  color: var(--metis-text);
+  line-height: 1.6;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* Header & Status Bar */
-#system-bar {
-  background-color: #ffffff;
-  border-bottom: 2px solid var(--accent-metis);
+/* --- Metis Top Bar --- */
+.metis-header {
+  background: linear-gradient(135deg, #0052cc, #0088ff);
+  color: #fff;
   padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.logo {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: var(--accent-metis);
-}
-
-.status-items {
+.metis-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
 }
 
-.status-box {
-  font-size: 0.9rem;
-  padding: 4px 12px;
-  background: var(--bg-primary);
-  border-radius: 4px;
-}
-
-.status-box.highlight {
-  background: #fff5f5;
-  border: 1px solid var(--danger);
-}
-
-.status-box .val {
+.metis-badge {
+  background: var(--metis-gold);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
   font-weight: bold;
-  margin-left: 6px;
-  color: var(--accent-metis);
 }
 
-.status-box.highlight .val {
-  color: var(--danger);
+.timer-box {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.guild-btn {
-  background: #2d3748;
-  color: var(--guild-green);
-  border: 1px solid var(--guild-green);
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: monospace;
+.timer-box.warning {
+  background: rgba(255, 51, 102, 0.3);
+  color: #ff99aa;
+  animation: pulse 1s infinite alternate;
 }
 
-/* Tabs & Main Container */
-#app-container {
+@keyframes pulse {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+/* --- Main Layout --- */
+.container {
   max-width: 900px;
   margin: 30px auto;
-  width: 90%;
-  flex-grow: 1;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tab-btn {
+  padding: 0 20px;
   flex: 1;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  background: #ffffff;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 6px 6px 0 0;
-  transition: all 0.2s;
-}
-
-.tab-btn.active {
-  background: var(--accent-metis);
-  color: white;
-  border-color: var(--accent-metis);
-}
-
-.tab-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
+  width: 100%;
 }
 
 .card {
-  background: var(--bg-card);
+  background: var(--metis-card);
+  border-radius: 12px;
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+  border: 1px solid #e1e8ed;
 }
 
-.card.danger-border {
-  border: 2px solid var(--danger);
+h1, h2, h3 {
+  color: var(--metis-primary);
+  margin-bottom: 16px;
 }
 
 .subtitle {
-  color: #718096;
-  font-size: 0.9rem;
-  margin-top: 4px;
-  margin-bottom: 15px;
-}
-
-hr {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin-bottom: 20px;
-}
-
-/* Form Styles */
-.form-group {
+  color: var(--metis-subtext);
+  font-size: 0.95rem;
   margin-bottom: 24px;
 }
 
-.form-group label {
-  display: block;
+/* --- Form & Interactive Elements --- */
+.survey-group {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.survey-label {
   font-weight: 600;
+  display: block;
   margin-bottom: 10px;
 }
 
-.radio-label {
-  font-weight: normal !important;
-  margin-left: 10px;
-  cursor: pointer;
+.survey-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.alert-box {
-  background: var(--accent-metis-light);
-  padding: 15px;
-  border-radius: 6px;
-  border-left: 4px solid var(--accent-metis);
-}
-
-/* Buttons */
-.btn-primary {
-  background: var(--accent-metis);
-  color: white;
+.btn {
+  background: var(--metis-primary);
+  color: #fff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  background: #0052cc;
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #718096;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
+  background: #e2e8f0;
+  color: var(--metis-text);
+}
+
+.btn-secondary:hover {
+  background: #cbd5e1;
 }
 
 .btn-danger {
-  background: var(--danger);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
+  background: var(--guild-alert);
 }
 
-.btn-small {
-  padding: 6px 12px;
-  background: var(--accent-metis);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.btn-danger:hover {
+  background: #e02454;
 }
 
-/* Archive List */
-.archive-list {
-  margin-top: 20px;
-}
-
-.archive-item {
-  background: var(--bg-primary);
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  border-left: 3px solid var(--accent-metis);
-}
-
-.archive-item h5 {
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-
-.archive-item p {
-  font-size: 0.85rem;
-  color: #4a5568;
-}
-
-/* Phase 3 Buffer */
-.buffer-status {
-  margin: 20px 0;
-}
-
-.progress-bar-bg {
-  background: #e2e8f0;
-  height: 24px;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.progress-bar-fill {
-  background: var(--danger);
-  height: 100%;
-  color: white;
-  text-align: center;
-  font-size: 0.8rem;
-  line-height: 24px;
-  transition: width 0.3s;
-}
-
-.payload-selection {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.payload-card {
-  border: 1px solid var(--border-color);
-  padding: 15px;
-  border-radius: 6px;
-}
-
-/* Terminal Styling */
-.terminal-window {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 400px;
-  height: 300px;
+/* --- Guild Terminal Component (Intervention Overlay) --- */
+.guild-terminal {
   background: var(--guild-bg);
-  color: var(--guild-green);
-  border: 1px solid var(--guild-green);
-  border-radius: 6px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-  font-family: monospace;
+  color: var(--guild-primary);
+  font-family: var(--font-mono);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.15);
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
-.terminal-header {
-  background: #161b22;
-  padding: 8px;
+.guild-header {
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--guild-warning);
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  border-bottom: 1px solid #30363d;
 }
 
-.terminal-header button {
-  background: none;
-  border: none;
-  color: var(--guild-green);
-  cursor: pointer;
-}
-
-.terminal-body {
-  padding: 10px;
-  flex-grow: 1;
+.terminal-logs {
+  height: 180px;
   overflow-y: auto;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  padding-right: 8px;
 }
 
-.sys-msg {
-  margin-bottom: 8px;
-  line-height: 1.3;
+.terminal-logs p {
+  margin-bottom: 6px;
 }
 
-.terminal-footer {
+.terminal-input-group {
   display: flex;
-  padding: 8px;
-  background: #161b22;
+  gap: 8px;
 }
 
-.terminal-footer input {
-  background: transparent;
-  border: none;
-  color: var(--guild-green);
+.terminal-input {
+  flex: 1;
+  background: var(--guild-card);
+  border: 1px solid #374151;
+  color: var(--guild-primary);
+  font-family: var(--font-mono);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.terminal-input:focus {
   outline: none;
-  width: 100%;
-  margin-left: 8px;
-  font-family: monospace;
+  border-color: var(--guild-primary);
 }
 
-/* Endings */
-.ending-screen {
-  position: fixed;
+/* --- Glitch Effect --- */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+}
+
+.glitch-active {
+  animation: glitch-anim 0.3s infinite;
+}
+
+@keyframes glitch-anim {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); color: #ff0055; }
+  40% { transform: translate(-2px, -2px); color: #00ffff; }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* --- Data Table / Archive --- */
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.archive-table th, .archive-table td {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.archive-table th {
+  background: #f1f5f9;
+  color: var(--metis-text);
+}
+
+.highlight-anomaly {
+  background: #fff0f3;
+  color: var(--guild-alert);
+  font-weight: bold;
+}
+
+/* --- Progress Meter --- */
+.meter-container {
+  background: #1f2937;
+  border-radius: 8px;
+  height: 28px;
+  width: 100%;
+  overflow: hidden;
+  margin: 16px 0;
+  border: 1px solid #374151;
+  position: relative;
+}
+
+.meter-bar {
+  background: linear-gradient(90deg, var(--guild-warning), var(--guild-alert));
+  height: 100%;
+  width: 0%;
+  transition: width 0.5s ease-in-out;
+}
+
+.meter-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* --- Bad End / True End Fullscreen Overlays --- */
+.fullscreen-end {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 40px 20px;
   text-align: center;
-  padding: 20px;
 }
 
-.ending-screen.bad-a {
-  background: #ffffff;
-  color: #000;
+.bad-a-bg {
+  background: linear-gradient(135deg, #0052cc, #002266);
+  color: #fff;
 }
 
-.ending-screen.bad-b {
-  background: #1a202c;
-  color: #e53e3e;
-  font-family: monospace;
+.bad-b-bg {
+  background: #050505;
+  color: #888;
+  font-family: var(--font-mono);
 }
 
-.ending-screen.true-end {
-  background: #0d1117;
-  color: #ffffff;
+.true-end-bg {
+  background: #faf9f6;
+  color: #2b2b2b;
 }
 
-.ending-content {
-  max-width: 600px;
-}
-
-.prime-minister-banner {
-  background: #fbf0b2;
-  border: 2px solid #d69e2e;
-  padding: 20px;
-  margin: 20px 0;
-  border-radius: 8px;
-}
-
-.btn-restart {
-  margin-top: 30px;
-  padding: 10px 20px;
-  cursor: pointer;
-  background: #3182ce;
-  color: white;
-  border: none;
-  border-radius: 4px;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.error-text {
-  color: var(--danger);
-  font-size: 0.85rem;
-  margin-top: 8px;
+.prime-minister-img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%20066cc"><circle cx="12" cy="8" r="4"/><path d="M12 14c-6.1 0-8 4-8 4v2h16v-2s-1.9-4-8-4z"/></svg>') center/60% no-repeat;
 }
