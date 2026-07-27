@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metis OS - 管理者用統計アーカイブ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="metis-header">
+    <div class="metis-logo">
+      Metis Archival Database <span class="metis-badge">Phase 2: 矛盾分析</span>
+    </div>
+    <div class="timer-box">
+      残時間: <span id="metis-timer">--:--</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>首都圏年次統計レポート（極秘アーカイブ）</h2>
+      <p class="subtitle">都市OS Metis導入（2026年6月）以降の各種社会インジケーターデータ</p>
+
+      <table class="archive-table">
+        <thead>
+          <tr>
+            <th>指標項目</th>
+            <th>Metis導入前 (5年前)</th>
+            <th>Metis導入後 (現在)</th>
+            <th>システム評価</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>年間重犯罪件数</td>
+            <td>12,400件</td>
+            <td>0件</td>
+            <td>最適化完了</td>
+          </tr>
+          <tr>
+            <td>交通事故発生率</td>
+            <td>18.2%</td>
+            <td>0.0%</td>
+            <td>完全制御</td>
+          </tr>
+          <tr class="highlight-anomaly">
+            <td>新規スタートアップ・特許出願数</td>
+            <td>4,850件</td>
+            <td>0件（5年間継続）</td>
+            <td>停滞検知（正常値扱い）</td>
+          </tr>
+          <tr class="highlight-anomaly">
+            <td>新規音楽・芸術作品の発表数</td>
+            <td>85,000件</td>
+            <td>0件</td>
+            <td>無駄の排除完了</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 20px; background: #fff5f5; padding: 16px; border-left: 4px solid var(--guild-alert); border-radius: 4px;">
+        <h4 style="color: var(--guild-alert); margin-bottom: 6px;">[ギルドによるデータクロス解析結果]</h4>
+        <p style="font-size: 0.9rem;">
+          見ろ、犯罪や事故がゼロになった裏で、新しい技術特許も文化も完全に「0件」になっている。<br>
+          Metisは人間から失敗のリスクを奪うことで、<strong>成長と未来そのものを停止させた</strong>。
+        </p>
+      </div>
+    </section>
+
+    <!-- 暗号解除 ＆ バッドエンドA分岐 -->
+    <section class="card">
+      <h3>セキュリティロック解除</h3>
+      <p style="font-size: 0.9rem; margin-bottom: 16px;">
+        次のフェーズへ進むには、この「71%の錯覚」を破壊する解除キーが必要です。<br>
+        ※政府の公式ヘルプ（自動アシスタント）を何度も呼ぶと、最適化不適合者として処理されます。
+      </p>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <input type="text" id="pass-input" class="terminal-input" style="background: #fff; color: #000; border: 1px solid #ccc;" placeholder="パスワード（例: 71-PERCENT-ILLUSION）">
+        <button class="btn" onclick="verifyPassword()">ロック解除</button>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="callOfficialHelp()">政府公式ヘルプ呼出 (<span id="help-count">0</span>/3)</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+  <script>
+    let helpCalls = 0;
+
+    function callOfficialHelp() {
+      helpCalls++;
+      document.getElementById('help-count').textContent = helpCalls;
+      game.playBeep(300, 'triangle', 0.2);
+
+      if (helpCalls >= 3) {
+        alert("【警告】自動アシスタント: システムへの過度な疑義と不審な不適合挙動が検知されました。ユーザーの最適化を開始します。");
+        window.location.href = 'ending_bad_a.html';
+      } else {
+        alert(`【Metisサポート】市民の皆様、一切の心配はありません。データ統計の数値はすべて市民の幸福のための最適化結果です。（警告 ${helpCalls}/3）`);
+      }
+    }
+
+    function verifyPassword() {
+      const val = document.getElementById('pass-input').value.trim().toUpperCase();
+      if (val === '71-PERCENT-ILLUSION' || val === 'NOISE-2026' || val === 'NOISE') {
+        game.playGlitchSound();
+        alert("認証成功: 管理者権限を一時奪取。バッファメモリオーバーライド画面へ切り替えます。");
+        localStorage.setItem('metis_phase', '3');
+        window.location.href = 'page3.html';
+      } else {
+        game.playBeep(150, 'sawtooth', 0.3);
+        alert("エラー: パスワードが違います。アーカイブの矛盾点を再確認してください。");
+      }
+    }
+  </script>
+</body>
+</html>
