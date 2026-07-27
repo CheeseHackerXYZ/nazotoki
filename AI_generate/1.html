@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>観葉植物と定点観測の記録</title>
+    <style>
+        /* --- 基本デザイン（ブログ風） --- */
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+            background-color: #f9fdf9; /* 優しい緑がかった白 */
+            color: #2c3e50;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            transition: opacity 0.5s ease, background-color 1s ease, color 1s ease;
+        }
+
+        #site-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 1s ease;
+        }
+
+        #site-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        #content {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 40px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            /* スクロール（無限回廊）を発生させるために高さを確保 */
+            min-height: 150vh; 
+        }
+
+        .article-title {
+            font-size: 1.5rem;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        .post-body p {
+            margin-bottom: 20px;
+        }
+
+        /* --- ギミック1: 選択の罠 --- */
+        #selection-trap-container {
+            padding: 10px;
+            background: #fdfdfd;
+            border-left: 3px solid #ccc;
+        }
+
+        /* --- ギミック4: 画面幅による暗号（縦読み） --- */
+        .responsive-cipher {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f8f0;
+            border-left: 5px solid #4CAF50;
+            font-style: italic;
+        }
+        .cipher-br {
+            display: none; /* デフォルトでは改行しない */
+        }
+        /* ウィンドウ幅が600px以下（スマホサイズ）になったら発動 */
+        @media (max-width: 600px) {
+            .cipher-br {
+                display: block;
+            }
+            .responsive-cipher .line {
+                font-weight: bold;
+                color: #d32f2f; /* 縦読みの頭文字を少し強調 */
+                font-style: normal;
+            }
+        }
+
+        /* --- ギミック6: 画像の裏側の顔 --- */
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            margin: 40px 0;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .hidden-bg {
+            color: #f00;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 2px;
+            line-height: 2;
+        }
+        .drag-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            cursor: grab;
+            -webkit-user-drag: element; /* PC用ドラッグ有効化 */
+            -webkit-touch-callout: none; /* スマホ長押しメニュー禁止 */
+            transition: opacity 0.2s;
+        }
+        .drag-img:active {
+            cursor: grabbing;
+            opacity: 0.7; /* PCドラッグ時に透けさせる */
+        }
+
+        /* --- ギミック7: 404エラーの法則 --- */
+        #past-links {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        #past-links li {
+            margin-bottom: 10px;
+        }
+        #past-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        #past-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* 偽の404エラー画面 */
+        #error-404 {
+            display: none;
+            text-align: center;
+            padding: 150px 20px;
+            font-family: monospace;
+            background-color: #fff;
+            height: 100vh;
+        }
+        #error-404 h2 {
+            font-size: 3rem;
+            color: #d32f2f;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            padding: 10px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <h1 id="site-title">観葉植物と定点観測の記録</h1>
+</header>
+
+<main id="content">
+    <h2 class="article-title" id="article-title">青い花が咲いた日</h2>
+    <div class="date" id="date">2023.10.15</div>
+    
+    <div class="post-body">
+        <p id="p1">今日はサボテンに毎日たっぷりと水をやりました。どんどん大きくなってほしいです。</p>
+        <p id="p2">夜中ですが、ヒマワリが太陽の方向を向いています。植物の生命力って不思議ですね。</p>
+        <p id="p3">今日は一日中快晴でした。でも写真には水たまりが写っていますね、おかしいな。</p>
+        
+        <!-- ギミック2: コピーのすり替え -->
+        <p id="copy-trap">私は元気です。これからも植物を育てます。</p>
+        
+        <!-- ギミック1: 選択の罠 -->
+        <p id="selection-trap-container">この記録はずっと残しておきたいと思います。<span id="selection-trap-target">大切な自然の記録</span>だからです。</p>
+
+        <!-- ギミック4: レスポンシブ暗号 -->
+        <div class="responsive-cipher">
+            <span class="line">こ</span>の植物はとても美しく、<br class="cipher-br">
+            <span class="line">ろ</span>うそくの火のように<br class="cipher-br">
+            <span class="line">さ</span>わやかな香りが<br class="cipher-br">
+            <span class="line">れ</span>んじつ漂って<br class="cipher-br">
+            <span class="line">た</span>くさんの虫が来ます。
+        </div>
+
+        <!-- ギミック6: 画像の裏側 -->
+        <div class="image-wrapper">
+            <div class="hidden-bg">拉致現場の山林<br>座標: 35.8XX, 139.3XX<br>たすけて</div>
+            <!-- APIを利用したダミーの綺麗な植物画像 -->
+            <img src="https://picsum.photos/seed/plant123/700/400" alt="観察記録の写真" class="drag-img" id="drag-img">
+        </div>
+
+        <h3 style="margin-top: 50px; border-bottom: 1px solid #eee;">過去の記録</h3>
+        <!-- ギミック7: 404エラー（URLのメッセージ） -->
+        <ul id="past-links">
+            <li><a href="#" class="fake-link" data-path="a">10月1日の記録</a></li>
+            <li><a href="#" class="fake-link" data-path="no">10月2日の記録</a></li>
+            <li><a href="#" class="fake-link" data-path="naka">10月3日の記録</a></li>
+            <li><a href="#" class="fake-link" data-path="ni">10月4日の記録</a></li>
+            <li><a href="#" class="fake-link" data-path="iru">10月5日の記録</a></li>
+        </ul>
+    </div>
+</main>
+
+<!-- 404エラー表示領域 -->
+<div id="error-404"></div>
+
+<script>
+    // ==========================================
+    // ギミック1: テキスト選択の罠
+    // ==========================================
+    document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        if (selection.toString().length > 0) {
+            const trapContainer = document.getElementById('selection-trap-container');
+            const trapTarget = document.getElementById('selection-trap-target');
+            
+            // 怪しい文章が選択範囲に含まれたら、中身を告発文に書き換える
+            if (selection.containsNode(trapContainer, true) && !trapTarget.classList.contains('revealed')) {
+                trapTarget.innerHTML = "<span style='background:#000; color:#f00; font-weight:bold; padding:0 5px;'>【殺される、あの組織に】</span>";
+                trapTarget.classList.add('revealed');
+            }
+        }
+    });
+
+    // ==========================================
+    // ギミック2: クリップボードのすり替え
+    // ==========================================
+    document.addEventListener('copy', (e) => {
+        const selectionText = window.getSelection().toString();
+        // 特定の不自然な文章をコピーしようとした時だけ発動
+        if (selectionText.includes('私は元気です')) {
+            e.clipboardData.setData('text/plain', 'tasukete_koko_ha_kurai (助けて、ここは暗い。彼らが戻ってくる)');
+            e.preventDefault();
+            // 不気味な通知で気づかせる
+            setTimeout(() => { alert('クリップボードに情報を記録しました。'); }, 100);
+        }
+    });
+
+    // ==========================================
+    // ギミック3: タブの監視者
+    // ==========================================
+    const originalTitle = document.title;
+    document.addEventListener('visibilitychange', () => {
+        // 別のタブに移動した時だけタイトルが変化する
+        if (document.hidden) {
+            document.title = "どこにいくの？ 見捨てないで";
+        } else {
+            document.title = originalTitle;
+        }
+    });
+
+    // ==========================================
+    // ギミック6: 画像のドラッグ＆ドロップ（裏側の顔）
+    // ==========================================
+    const dragImg = document.getElementById('drag-img');
+    const imageWrapper = document.querySelector('.image-wrapper');
+
+    // スマホのスワイプ操作で画像を動かせるようにする処理
+    dragImg.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // 画面全体のスクロールを防ぐ
+        const touch = e.touches[0];
+        const rect = imageWrapper.getBoundingClientRect();
+        // 指の位置に合わせて画像をずらす
+        const x = touch.clientX - rect.left - (dragImg.offsetWidth / 2);
+        const y = touch.clientY - rect.top - (dragImg.offsetHeight / 2);
+        
+        dragImg.style.transform = `translate(${x}px, ${y}px)`;
+        dragImg.style.opacity = "0.5"; // 透けさせて裏を見せる
+    });
+
+    // 指を離したら元の位置に戻る
+    dragImg.addEventListener('touchend', () => {
+        dragImg.style.transform = `translate(0px, 0px)`;
+        dragImg.style.opacity = "1";
+    });
+
+    // ==========================================
+    // ギミック7: 404エラーの法則
+    // ==========================================
+    const fakeLinks = document.querySelectorAll('.fake-link');
+    const contentDiv = document.getElementById('content');
+    const errorDiv = document.getElementById('error-404');
+
+    fakeLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const path = link.getAttribute('data-path');
+            // ページ遷移せずに、ブラウザのURL欄（クエリパラメータ）だけを書き換える
+            history.pushState(null, '', '?' + path);
+            show404(path);
+        });
+    });
+
+    function show404(path) {
+        contentDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        document.body.style.backgroundColor = "#fff";
+        errorDiv.innerHTML = `
+            <h2>404 Not Found</h2>
+            <p style="font-size: 1.2rem;">The requested URL <strong>/${path}</strong> was not found on this server.</p>
+            <p style="color: #888; margin-top: 40px; font-size: 0.9rem;">※ブラウザのURL欄をご確認ください...</p>
+            <button class="back-btn" onclick="backToHome()">ブログに戻る</button>
+        `;
+    }
+
+    window.backToHome = function() {
+        // URLを元に戻す
+        history.pushState(null, '', window.location.pathname);
+        contentDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+        document.body.style.backgroundColor = "#f9fdf9";
+    }
+
+    // ==========================================
+    // ギミック5: スクロールの無限回廊（ループと変異）
+    // ==========================================
+    let loopCount = 0;
+    let isLooping = false;
+
+    window.addEventListener('scroll', () => {
+        if (loopCount >= 3) return; // 3回目でループ終了
+        if (isLooping) return;
+
+        // ページの一番下までスクロールしたかを判定
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+            isLooping = true;
+            loopCount++;
+            
+            // フェードアウト演出
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.scrollTo(0, 0); // トップに戻す
+                mutatePage(loopCount); // サイトを変異させる
+                document.body.style.opacity = '1';
+                isLooping = false;
+            }, 500);
+        }
+    });
+
+    function mutatePage(count) {
+        const siteTitle = document.getElementById('site-title');
+        const siteHeader = document.getElementById('site-header');
+        const dateDiv = document.getElementById('date');
+        const p1 = document.getElementById('p1');
+        const p2 = document.getElementById('p2');
+        const p3 = document.getElementById('p3');
+        
+        if (count === 1) {
+            // 1周目：少しおかしな状態になる
+            document.body.style.backgroundColor = "#eef5ee";
+            siteTitle.innerText = "観葉植物と定点観測の記緑"; // 録が緑に化けている
+            dateDiv.innerText = "記録が存在しません";
+            p1.innerHTML = "きょうは　サボテンに　みずを　やりました。";
+            p2.innerHTML = "よるなのに　ひまわりが　こっちをむいています。";
+        } else if (count === 2) {
+            // 2周目：より異常な状態へ
+            document.body.style.backgroundColor = "#ddd";
+            siteHeader.style.backgroundColor = "#333";
+            siteTitle.innerText = "かんようしょくぶつと　ていてんかんそくの　きろく";
+            document.body.style.fontFamily = "'MS Gothic', monospace";
+            p1.innerHTML = "みずみずみずみずみずみずみずみずみずみず";
+            p2.innerHTML = "ひまわりじゃない　めだま　めだまがみてる";
+            p3.innerHTML = "あめがふっている　やまのなかに　うめられた";
+        } else if (count === 3) {
+            // 3周目：完全に崩壊し、真実が現れる
+            document.body.style.backgroundColor = "#050505";
+            document.body.style.color = "#d32f2f";
+            siteHeader.style.backgroundColor = "#4a0000";
+            siteTitle.innerText = "見ツケタ";
+            
+            contentDiv.innerHTML = `
+                <div style="padding: 40px; text-align: center; border: 2px solid #d32f2f; border-radius: 8px;">
+                    <h2 style="color: #f00;">[SYSTEM: 偽装プロトコル強制終了]</h2>
+                    <p style="color: #fff;">ブログの無限ループは解除されました。</p>
+                    <p style="color: #fff;">Aはすでにこの世にいません。不法投棄の証拠データと座標を抽出完了。</p>
+                    <p style="color: #fff;">警察機関への匿名送信シークエンスへ移行します...</p>
+                    <div style="margin-top:50px; font-size:2rem; font-weight:bold; color: #f00;">
+                        彼らは、あの山の中にいる
+                    </div>
+                </div>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>
