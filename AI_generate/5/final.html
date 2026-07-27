@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パスワード入力</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .glowing-text {
+            color: #ff3333;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.8),
+                         0 0 20px rgba(255, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .password-target {
+            color: #ff6666;
+            -webkit-user-select: all;
+            user-select: all;
+            cursor: pointer;
+        }
+
+        .input-box {
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #ff3333;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            outline: none;
+            width: 250px;
+            text-align: center;
+        }
+
+        .input-box:focus {
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .input-submit-box {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #ff3333;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            outline: none;
+            width: 100px;
+            text-align: center;
+        }
+
+        .input-submit-box:focus {
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glowing-text">
+        コピーした<span id="copyTarget" class="password-target">パスワード</span>を入力してください
+    </div>
+
+    <input type="password" id="passwordInput" class="input-box" placeholder="ここに入力">
+    <input type="button" id="passwordSubmit" class="input-submit-box" value="送信">
+
+    <script>
+        const copyTarget = document.getElementById('copyTarget');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordSubmit = document.getElementById('passwordSubmit');
+        const password = "HiddenTruth"
+
+        copyTarget.addEventListener('copy', (event) => {
+            event.preventDefault();
+            if (event.clipboardData) {
+                event.clipboardData.setData('text/plain', password);
+            }
+        });
+        
+        passwordSubmit.addEventListener('click', (event) => {
+            if (passwordInput.value === password) window.location.href('./ending.html');
+        })
+    </script>
+
+</body>
+</html>
