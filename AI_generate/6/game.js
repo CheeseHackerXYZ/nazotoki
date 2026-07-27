@@ -2,7 +2,7 @@
    『停滞都市のノイズ ―The 71% Illusion―』 コアゲームエンジン
    ========================================================================== */
 
-const GAME_DURATION = 90 * 60; // 90分 (5400秒)
+const GAME_DURATION = 15 * 60; // 15分 (900秒)
 
 class MetisGameEngine {
   constructor() {
