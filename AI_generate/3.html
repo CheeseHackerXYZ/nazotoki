@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <!-- iPadでのピンチズームや意図しない拡大を防ぐ設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>緑化推進プロジェクト</title>
+    <style>
+        /* ==========================================
+           iPad向け基本デザイン（クリーンで大きめなUI）
+           ========================================== */
+        :root {
+            --bg-color: #f0f8ff;
+            --text-color: #333;
+            --main-green: #2ecc71;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            /* 引っ張って更新（オーバースクロール）時の背景色を真っ赤にして違和感を出す */
+            background-color: #8b0000; 
+            -webkit-user-select: none; /* テキスト選択を無効化 */
+        }
+
+        #app-wrapper {
+            background-color: #f0f8ff;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            background-color: var(--main-green);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 1.5em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            font-size: 1.2em;
+            line-height: 1.8;
+        }
+
+        h2 {
+            border-bottom: 3px solid var(--main-green);
+            padding-bottom: 10px;
+            margin-top: 50px;
+        }
+
+        /* ギミック1: 引っ張り（オーバースクロール）の裏側 */
+        #pull-reveal {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 1; /* メイン画面の「裏」に配置 */
+            opacity: 0.8;
+        }
+
+        /* ギミック2: 横スワイプギャラリー */
+        .gallery-container {
+            display: flex;
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .gallery-container::-webkit-scrollbar { display: none; }
+        
+        .gallery-item {
+            flex: 0 0 80%;
+            height: 300px;
+            background-color: #ddd;
+            scroll-snap-align: center;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: #555;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .gallery-last {
+            background-color: #111;
+            color: #f00;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        /* ギミック3: スクラッチ（こすって消す） */
+        .scratch-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            margin-top: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: #000;
+        }
+        .scratch-truth {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: red;
+            font-weight: bold;
+            font-family: monospace;
+            text-align: center;
+            z-index: 1;
+        }
+        #scratch-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            touch-action: none; /* スクラッチ中に画面がスクロールしないようにする */
+        }
+
+        /* ギミック4: 仮想キーボードの乗っ取り */
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.2em;
+            box-sizing: border-box;
+        }
+        textarea { height: 150px; resize: none; }
+
+        /* ギミック5: マルチタッチ（2本指）用の隠しレイヤー */
+        #multi-touch-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #ff0000;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            font-family: monospace;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ギミック1: オーバースクロール時に見える裏の文字 -->
+<div id="pull-reveal">
+    見　つ　け　て<br>あ　の　土　の　下　に　い　る
+</div>
+
+<div id="app-wrapper">
+    <header>緑化推進プロジェクト</header>
+
+    <div class="content">
+        <p>本プロジェクトは、市内の遊休地を活用し、豊かな自然を取り戻すための活動記録です。美しい植物たちの成長をご覧ください。</p>
+        <p style="color:#aaa; font-size:0.8em; text-align:center;">※画面を二本指で同時に押さえないでください</p>
+
+        <h2>活動ギャラリー</h2>
+        <p>右にスワイプして写真を確認できます。</p>
+        <!-- ギミック2: 横スワイプギャラリー -->
+        <div class="gallery-container">
+            <div class="gallery-item" style="background:#d4efdf;">綺麗な花壇の写真</div>
+            <div class="gallery-item" style="background:#a9dfbf;">成長する木々の写真</div>
+            <div class="gallery-item" style="background:#7dcea0;">青空と緑の写真</div>
+            <div class="gallery-item gallery-last">【検閲済】遺体遺棄現場の証拠写真</div>
+        </div>
+
+        <h2>土壌調査の記録</h2>
+        <p>以下の画像は現在の土壌の様子です。（指で土を払って確認できます）</p>
+        <!-- ギミック3: スクラッチ（こする） -->
+        <div class="scratch-container">
+            <div class="scratch-truth">
+                有害物質の数値異常<br>
+                記録係は口封じに埋められた<br>
+                座標: 35.8, 139.3
+            </div>
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+
+        <h2>お問い合わせ</h2>
+        <p>プロジェクトへのご意見をお寄せください。</p>
+        <!-- ギミック4: 仮想キーボード乗っ取り -->
+        <div class="contact-form">
+            <label>お名前</label>
+            <input type="text" id="ghost-input-name" placeholder="タップして入力">
+            
+            <label style="display:block; margin-top:20px;">メッセージ</label>
+            <textarea id="ghost-input-msg" placeholder="タップして入力"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- ギミック5: 2本指タッチで出現するレイヤー -->
+<div id="multi-touch-overlay">
+    <p>［ SYSTEM OVERRIDE ］</p>
+    <p>真実はすべて残した。<br>警察にこのサイトを渡してくれ。</p>
+</div>
+
+<script>
+    // ==========================================
+    // ギミック3: スクラッチ（こすって消す）
+    // Canvas APIを使用して、指でなぞった部分を透明にする
+    // ==========================================
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+
+    // Canvasのサイズを親要素に合わせる
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        // 「土」に見立てた茶色で塗りつぶす
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#A0522D';
+        ctx.font = '20px Arial';
+        ctx.fillText('タップして土をこする', 50, 120);
+    }
+    resizeCanvas();
+
+    function scratch(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        // なぞった部分を「削る（透明にする）」合成モード
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 25, 0, Math.PI * 2, false); // 指の太さ(半径25px)
+        ctx.fill();
+    }
+
+    canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+    canvas.addEventListener('touchmove', (e) => { if (isDrawing) scratch(e); });
+    canvas.addEventListener('touchend', () => { isDrawing = false; });
+
+
+    // ==========================================
+    // ギミック4: 仮想キーボードの乗っ取り（ゴーストタイピング）
+    // iPadのキーボードで何を打っても、勝手にSOSが入力される
+    // ==========================================
+    const ghostName = document.getElementById('ghost-input-name');
+    const ghostMsg = document.getElementById('ghost-input-msg');
+    
+    const secretText = "T A S U K E T E (助けて)";
+    let nameIndex = 0;
+    
+    ghostName.addEventListener('input', (e) => {
+        e.preventDefault(); // 本来の入力をキャンセル
+        if (nameIndex < secretText.length) {
+            ghostName.value = secretText.substring(0, nameIndex + 1);
+            nameIndex++;
+        } else {
+            ghostName.value = secretText;
+        }
+    });
+
+    const secretMsg = "彼らはまだ近くにいる。絶対に一人でこの場所に来るな。私はもう";
+    let msgIndex = 0;
+
+    ghostMsg.addEventListener('input', (e) => {
+        e.preventDefault();
+        if (msgIndex < secretMsg.length) {
+            ghostMsg.value = secretMsg.substring(0, msgIndex + 1);
+            msgIndex++;
+        } else {
+            ghostMsg.value = secretMsg;
+        }
+    });
+
+
+    // ==========================================
+    // ギミック5: マルチタッチ（2本指での同時タップ）
+    // iPadならではの複数指タッチを検知する
+    // ==========================================
+    const overlay = document.getElementById('multi-touch-overlay');
+    
+    document.addEventListener('touchstart', (e) => {
+        // タッチしている指の数が2本以上の場合
+        if (e.touches.length >= 2) {
+            overlay.style.display = 'flex';
+        }
+    });
+
+    document.addEventListener('touchend', (e) => {
+        // 指が離れて1本以下になったら消す
+        if (e.touches.length < 2) {
+            overlay.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
