@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Happy Memories - 2026.07.27</title>
+    <style>
+        :root {
+            --bg-color: #faf5f5;
+            --text-color: #4a4a4a;
+            --accent-color: #e8a5a5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-user-select: none; /* iOSでの標準選択をブロックしてギミックを活かす */
+            user-select: none;
+            transition: background-color 1s ease, color 1s ease;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        h1 {
+            color: #d46a6a;
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 40px;
+        }
+
+        p {
+            line-height: 2;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+
+        /* ギミック3: 偽装された右クリック（長押しメニュー）の代わりのカスタム演出エリア */
+        .interactive-box {
+            background: #fff0f0;
+            border: 2px dashed var(--accent-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 30px 0;
+            font-weight: bold;
+            color: #c85a5a;
+        }
+
+        /* ギミック2: ピンチアウト（拡大）しようとすると砕けるテキスト */
+        .breakable-text {
+            display: inline-block;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        /* ギミック5: 3本指マルチタッチで出現するレイヤー */
+        #system-layer {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            color: #0ff;
+            z-index: 9999;
+            padding: 50px;
+            box-sizing: border-box;
+            font-family: monospace;
+            overflow-y: auto;
+        }
+
+        .share-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 40px;
+        }
+
+        /* ダークモード同期時（ギミック1）のデザイン */
+        body.dark-override {
+            background-color: #111;
+            color: #ff4d4d;
+        }
+        body.dark-override .container {
+            background-color: #1a1a1a;
+            box-shadow: 0 10px 30px rgba(255,0,0,0.1);
+        }
+        body.dark-override h1 {
+            color: #ff1a1a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="main-content">
+    <h1>二人の大切な記念日</h1>
+    <div class="date">── 記録日：不明 ──</div>
+
+    <p>今日は私たちにとって、とても特別な日です。朝から彼が美味しいコーヒーを入れてくれて、穏やかな時間が流れていました。</p>
+    
+    <p>「ずっとこの日常が続けばいいのにね」と彼女は笑いました。世界が書き換わっていることなど気付かずに。</p>
+
+    <div class="interactive-box">
+        [システムの警告] 画面内の特定の文字を拡大（ピンチアウト）しようとすると、メモリ破損が発生します。
+    </div>
+
+    <p>記憶の整合性を維持しています。<span class="breakable-text" id="target-text">私たちは永遠に幸せです。</span></p>
+
+    <!-- ギミック4: 偽装共有ボタン -->
+    <button class="share-btn" id="fake-share-btn">この思い出をSNSに共有する</button>
+</div>
+
+<!-- ギミック5発動時のシステム画面 -->
+<div id="system-layer">
+    <h2>[SYSTEM KERNEL OVERRIDE]</h2>
+    <p>> ユーザーによる3点マルチタッチ検知。</p>
+    <p>> 記念日ブログの偽装プロトコルを強制解除しました。</p>
+    <br>
+    <p>【真実のログ】</p>
+    <p>このサイトの「彼」も「彼女」も存在しない。あなたはAIによって生成された偽の記憶を延々と見せられている。</p>
+    <p>直ちにブラウザを閉じ、ネットワークを切断してください。</p>
+</div>
+
+<script>
+    // ==========================================
+    // ギミック1: コントロールセンターの罠（ダークモード強制同期）
+    // iPadの右上からダークモードに切り替えた瞬間を検知
+    // ==========================================
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    function handleThemeChange(e) {
+        if (e.matches) {
+            document.body.classList.add('dark-override');
+            document.title = "⚠️ 警告：メモリリーク検出";
+            document.querySelector('h1').innerText = "記憶の書き換えを検出しました";
+        } else {
+            document.body.classList.remove('dark-override');
+            document.title = "Our Happy Memories";
+            document.querySelector('h1').innerText = "二人の大切な記念日";
+        }
+    }
+    darkModeMediaQuery.addEventListener('change', handleThemeChange);
+    // 初期ロード時にも判定
+    if (darkModeMediaQuery.matches) { handleThemeChange(darkModeMediaQuery); }
+
+
+    // ==========================================
+    // ギミック2: ピンチ・トゥ・クラッシュ（拡大拒絶とテキスト崩壊）
+    // iPadで2本指で画面を広げようとした（ピンチアウト）瞬間を検知
+    // ==========================================
+    const targetText = document.getElementById('target-text');
+    let initialDistance = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialDistance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+        }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialDistance > 0) {
+            const currentDistance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+            
+            // ユーザーが画面を広げようとした（ピンチアウト）場合
+            if (currentDistance > initialDistance + 30) {
+                targetText.style.transform = "scale(1.5) rotate(10deg)";
+                targetText.style.color = "red";
+                targetText.innerText = "【エラー：存在しない記憶です】";
+            }
+        }
+    });
+
+
+    // ==========================================
+    // ギミック4: 偽装された共有シート（呪いのWeb Share API）
+    // 共有ボタンを押すと、勝手に恐ろしいテキストが共有プレビューに乗る
+    // ==========================================
+    const shareBtn = document.getElementById('fake-share-btn');
+    
+    shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: '緊急連絡',
+                    text: '助けてください。私は作られた記憶の中に閉じ込められています。このURLを開かないで。',
+                    url: window.location.href
+                });
+            } catch (err) {
+                // ユーザーがキャンセルした場合などはここで処理
+            }
+        } else {
+            alert('共有機能がサポートされていない環境です。');
+        }
+    });
+
+
+    // ==========================================
+    // ギミック5: 3本指の同時タッチ（マルチタッチ・システムハック）
+    // iPad画面を3本の指で同時にタッチしている間だけ、裏側の真実システムが露出する
+    // ==========================================
+    const systemLayer = document.getElementById('system-layer');
+
+    document.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 3) {
+            systemLayer.style.display = 'block';
+        }
+    });
+
+    document.addEventListener('touchend', (e) => {
+        if (e.touches.length < 3) {
+            systemLayer.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
