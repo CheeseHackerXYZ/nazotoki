@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>停滞都市のノイズ - TRUE END</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="true-end-bg fullscreen-end">
+
+  <div class="card" style="max-width: 700px; text-align: left; border-top: 6px solid var(--metis-primary);">
+    <h1 style="color: #111827; font-size: 1.8rem; margin-bottom: 8px;">神威内閣 支持率71%の崩壊</h1>
+    <p style="color: var(--metis-subtext); font-size: 0.9rem; margin-bottom: 24px;">首都圏都市OS『Metis』自動最適化ルーチン 緊急遮断完了</p>
+
+    <div style="line-height: 1.8; color: #374151; margin-bottom: 24px;">
+      <p style="margin-bottom: 12px;">
+        画面を覆っていた黄金の「支持率71%」バナーは砂のように消え去り、端末は静かにオフラインへと切り替わった。
+      </p>
+      <p style="margin-bottom: 12px;">
+        東京の街で止まっていた時計の針が動き出す。<br>
+        不揃いな電車のブレーキ音、雨の匂い、そして「うわ、満員電車だるいな」「今日これからどうしようか」という、人々のリアルで不格好な話し声が戻ってくる。
+      </p>
+      <p>
+        反体制グループ「東京再生ギルド」は目的を果たし、いずこかへ姿を消した。<br>
+        手元に残されたのは、完璧で安全な無菌室ではなく、少し面倒で、傷つくこともあり、しかし**未来に向かって自らの足で歩み出す「等身大の現実」**だ。
+      </p>
+    </div>
+
+    <div style="background: #f1f5f9; padding: 16px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.9rem; color: var(--metis-primary); text-align: center; margin-bottom: 24px;">
+      TRUE END : 『成長痛を取り戻した東京』
+    </div>
+
+    <div style="text-align: center;">
+      <button class="btn" onclick="game.resetGame()">アーカイブログを閉じる（リスタート）</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+
+  <!-- クリア時の演出用音効 -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        game.playBeep(440, 'sine', 0.2);
+        setTimeout(() => game.playBeep(554.37, 'sine', 0.2), 200);
+        setTimeout(() => game.playBeep(659.25, 'sine', 0.4), 400);
+      }, 500);
+    });
+  </script>
+</body>
+</html>
