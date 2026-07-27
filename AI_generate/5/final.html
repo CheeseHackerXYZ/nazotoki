@@ -3,30 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>パスワード入力</title>
+    <title>ロックダウン研究所からの脱出 - Game</title>
     <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1a1a1a;
+            --accent-red: #ff3333;
+            --text-main: #ffffff;
+            --text-dim: #888888;
+        }
+
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
             -webkit-user-select: text;
             user-select: text;
         }
 
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--accent-red);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--accent-red);
+            margin-top: 0;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .status-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .status-item {
+            background-color: #080808;
+            border: 1px solid #333;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .status-label {
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .screen-area {
+            background-color: #050505;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
         .glowing-text {
-            color: #ff3333;
-            font-size: 1.5rem;
+            color: var(--accent-red);
+            font-size: 1.1rem;
             font-weight: bold;
             text-align: center;
             text-shadow: 0 0 8px rgba(255, 0, 0, 0.8),
                          0 0 20px rgba(255, 0, 0, 0.5);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .password-target {
@@ -34,68 +98,216 @@
             -webkit-user-select: all;
             user-select: all;
             cursor: pointer;
+            text-decoration: underline;
         }
 
-        .input-box {
-            margin: 10px;
-            padding: 10px 15px;
-            font-size: 1rem;
-            border: 2px solid #ff3333;
-            border-radius: 5px;
+        .action-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        button, .input-submit-box {
             background-color: #1a1a1a;
             color: #ffffff;
+            border: 2px solid var(--accent-red);
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
             outline: none;
-            width: 250px;
-            text-align: center;
+            transition: all 0.2s;
         }
 
-        .input-box:focus {
+        button:hover:not(:disabled), .input-submit-box:hover:not(:disabled) {
+            background-color: var(--accent-red);
+            color: #ffffff;
             box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
 
-        .input-submit-box {
+        button:disabled {
+            border-color: #333;
+            color: var(--text-dim);
+            cursor: not-allowed;
+            background-color: #0d0d0d;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .input-box {
             padding: 10px 15px;
             font-size: 1rem;
-            border: 2px solid #ff3333;
+            border: 2px solid var(--accent-red);
             border-radius: 5px;
             background-color: #1a1a1a;
             color: #ffffff;
             outline: none;
-            width: 100px;
+            width: 200px;
             text-align: center;
         }
 
-        .input-submit-box:focus {
+        .input-box:focus, .input-submit-box:focus {
             box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
-    <div class="glowing-text">
-        コピーした<span id="copyTarget" class="password-target">パスワード</span>を入力してください
+<div class="game-container">
+    <h1>LOCKDOWN LAB : MISSION</h1>
+    
+    <div class="status-panel">
+        <div class="status-item">
+            <span class="status-label">所持アイテム</span>
+            <span id="inv-cable">・LANケーブル: [未入手]</span><br>
+            <span id="inv-hint">・パスワード情報: [未入手]</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">ネットワーク状態</span>
+            <span id="net-status" style="color: var(--accent-red);">Wi-Fi乗っ取り中</span>
+        </div>
     </div>
 
-    <input type="password" id="passwordInput" class="input-box" placeholder="ここに入力">
-    <input type="button" id="passwordSubmit" class="input-submit-box" value="送信">
+    <div class="screen-area" id="log-screen"></div>
 
-    <script>
-        const copyTarget = document.getElementById('copyTarget');
-        const passwordInput = document.getElementById('passwordInput');
-        const passwordSubmit = document.getElementById('passwordSubmit');
-        const password = "HiddenTruth"
+    <div class="action-panel">
+        <!-- 探索＆接続ボタン -->
+        <div class="button-group" id="mainActions">
+            <button onclick="exploreRoom()">室内を探索する</button>
+            <button onclick="toggleWifi()" id="btnWifi">Wi-Fiを切断する</button>
+            <button onclick="connectCable()" id="btnCable" disabled>端末にLANを直結</button>
+        </div>
 
-        copyTarget.addEventListener('copy', (event) => {
-            event.preventDefault();
-            if (event.clipboardData) {
-                event.clipboardData.setData('text/plain', password);
-            }
-        });
+        <!-- パスワード入力フォーム (LAN直結後に表示) -->
+        <div id="passwordFormArea" style="display: none;">
+            <div class="glowing-text">
+                コピーした<span id="copyTarget" class="password-target">パスワード</span>を入力してください
+            </div>
+            <div class="input-group">
+                <input type="password" id="passwordInput" class="input-box" placeholder="ここに入力">
+                <input type="button" id="passwordSubmit" class="input-submit-box" value="送信">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const state = {
+        hasCable: false,
+        hasHint: false,
+        wifiDisconnected: false,
+        cableConnected: false
+    };
+
+    const passwordSecret = "HiddenTruth";
+    const screen = document.getElementById('log-screen');
+
+    function log(message) {
+        screen.textContent += message + "\n";
+        screen.scrollTop = screen.scrollHeight;
+    }
+
+    function initGame() {
+        log("【ミッション開始】");
+        log("室内を探索し、バックドアへアクセスしてロックダウンを解除せよ。");
+        log("----------------------------------------");
+    }
+
+    function exploreRoom() {
+        if (state.hasCable && state.hasHint) {
+            log("これ以上めぼしいものは見当たらない。");
+            return;
+        }
         
-        passwordSubmit.addEventListener('click', (event) => {
-            if (passwordInput.value === password) window.location.href = './ending.html';
-        })
-    </script>
+        log(">> 室内を探索した……");
+        if (!state.hasCable) {
+            state.hasCable = true;
+            document.getElementById('inv-cable').textContent = "・LANケーブル: [入手済み]";
+            log("・机の裏から「LANケーブル」を発見！");
+        }
+        if (!state.hasHint) {
+            state.hasHint = true;
+            document.getElementById('inv-hint').textContent = "・パスワード情報: [入手済み]";
+            log("・同僚の端末画面に『パスワード』という文字を発見。");
+            log("  コピーすればバックドアキーとして利用できそうだ……！");
+        }
+        log("----------------------------------------");
+    }
+
+    function toggleWifi() {
+        if (state.wifiDisconnected) return;
+        state.wifiDisconnected = true;
+        
+        const netStatus = document.getElementById('net-status');
+        netStatus.textContent = "Wi-Fi切断済み（安全）";
+        netStatus.style.color = "#00ffcc";
+        document.getElementById('btnWifi').disabled = true;
+        
+        log(">> Wi-Fiルーターのケーブルを引き抜き、無線通信を強制遮断！");
+        log("犯人からの遠隔妨害を回避した。");
+        
+        if (state.hasCable) {
+            document.getElementById('btnCable').disabled = false;
+        }
+        log("----------------------------------------");
+    }
+
+    function connectCable() {
+        if (!state.wifiDisconnected) {
+            log("エラー: Wi-Fiが有効なままでは犯人に逆探知される！先にWi-Fiを切断しろ。");
+            return;
+        }
+        if (!state.hasCable) {
+            log("エラー: LANケーブルを持っていない。室内を探そう。");
+            return;
+        }
+
+        state.cableConnected = true;
+        
+        log(">> 端末にLANケーブルを直結！ バックドア接続が確立された。");
+        log("提示された認証文字をコピーして入力欄へ送信せよ。");
+        log("----------------------------------------");
+
+        document.getElementById('mainActions').style.display = 'none';
+        document.getElementById('passwordFormArea').style.display = 'block';
+    }
+
+    // クリップボード＆パスワード検証
+    const copyTarget = document.getElementById('copyTarget');
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordSubmit = document.getElementById('passwordSubmit');
+
+    copyTarget.addEventListener('copy', (event) => {
+        event.preventDefault();
+        if (event.clipboardData) {
+            event.clipboardData.setData('text/plain', passwordSecret);
+            log(">> クリップボードにバックドアキーをコピーした！");
+        }
+    });
+    
+    passwordSubmit.addEventListener('click', () => {
+        if (passwordInput.value === passwordSecret) {
+            // パスワード一致でエンディングページへ遷移
+            window.location.href = './ending.html';
+        } else {
+            log(`> 送信キー: "${passwordInput.value}" -> 認証失敗: パスワードが一致しません。`);
+        }
+    });
+
+    initGame();
+</script>
 
 </body>
 </html>
