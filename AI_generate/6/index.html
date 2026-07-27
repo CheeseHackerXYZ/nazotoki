@@ -3,188 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>首都圏都市OS『Metis』ポータルサイト</title>
+  <title>首都圏都市OS Metis - 満足度調査ポータル</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="metis-mode">
-  <!-- システムステータスバー -->
-  <header id="system-bar">
-    <div class="logo">
-      <span class="metis-icon">◈</span> METIS OS <span class="version">v4.09.2</span>
+<body>
+
+  <header class="metis-header">
+    <div class="metis-logo">
+      Metis OS v4.02 <span class="metis-badge">内閣支持率 71% 達成</span>
     </div>
-    <div class="status-items">
-      <div class="status-box">
-        <span class="label">神威内閣支持率:</span>
-        <span id="approval-rate" class="val">71.0%</span>
-      </div>
-      <div class="status-box">
-        <span class="label">都市最適化率:</span>
-        <span id="optimization-rate" class="val">99.8%</span>
-      </div>
-      <div class="status-box highlight">
-        <span class="label">自動最適化完了まで:</span>
-        <span id="timer" class="val">90:00</span>
-      </div>
+    <div class="timer-box">
+      システム最適化完了まで: <span id="metis-timer">90:00</span>
     </div>
-    <button id="guild-toggle-btn" class="guild-btn">東京再生ギルド端末 [OFF]</button>
   </header>
 
-  <!-- メインコンテンツ領域 -->
-  <main id="app-container">
+  <main class="container">
+    <section class="card">
+      <h1>首都圏スマートシティ満足度アンケート</h1>
+      <p class="subtitle">Metisは市民の快適・安全・ストレスフリーな生活を24時間監視・自動最適化しています。</p>
 
-    <!-- NAV TABS -->
-    <nav class="nav-tabs">
-      <button class="tab-btn active" data-tab="phase1">満足度調査 (Phase 1)</button>
-      <button class="tab-btn" data-tab="phase2">管理者アーカイブ (Phase 2)</button>
-      <button class="tab-btn" data-tab="phase3" id="tab-phase3" disabled>ノイズ注入コンソール (Phase 3)</button>
-    </nav>
-
-    <!-- PHASE 1: 満足度調査 -->
-    <section id="view-phase1" class="tab-content active">
-      <div class="card">
-        <h2>首都圏スマートシティ 快適度・満足度意識調査</h2>
-        <p class="subtitle">神威内閣推進：すべての人間にストレスなき社会を</p>
-        <hr>
-        <form id="survey-form">
-          <div class="form-group">
-            <label>Q1. Metis導入後、日常の突発的なトラブルや無駄な待機時間は減少しましたか？</label>
-            <label class="radio-label"><input type="radio" name="q1" value="opt" checked> 劇的に減少した（最適化に感謝している）</label>
-            <label class="radio-label"><input type="radio" name="q1" value="opt"> 完全になくなった</label>
+      <form id="survey-form">
+        <div class="survey-group">
+          <label class="survey-label">Q1. 犯罪・トラブル・衝突のない現在の生活に満足していますか？</label>
+          <div class="survey-options">
+            <button type="button" class="btn survey-btn" onclick="registerAnswer(true)">極めて満足している</button>
+            <button type="button" class="btn survey-btn" onclick="registerAnswer(true)">非常に満足している</button>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label>Q2. 「失敗のない安全な選択」をAIが提示してくれる現状に満足していますか？</label>
-            <label class="radio-label"><input type="radio" name="q2" value="opt" checked> 非常に満足している</label>
-            <label class="radio-label"><input type="radio" name="q2" value="noise"> 不確定要素や揺らぎが欲しい（※非推奨）</label>
+        <div class="survey-group">
+          <label class="survey-label">Q2. 不確実な未来や無駄な挑戦よりも、AIによる予測通りの安全な日常を望みますか？</label>
+          <div class="survey-options">
+            <button type="button" class="btn survey-btn" onclick="registerAnswer(true)">当然望む</button>
+            <button type="button" class="btn survey-btn" onclick="registerAnswer(true)">完全に同意する</button>
           </div>
-
-          <div class="form-group alert-box">
-            <p><strong>[AI最適化の案内]</strong> システムの自動誘導に従うことで、思考コストを98%削減可能です。</p>
-            <button type="button" id="survey-submit-btn" class="btn-primary">回答を送信して最適化を加速する</button>
-          </div>
-        </form>
-        <div id="survey-warning" class="warning-text hidden"></div>
-      </div>
+        </div>
+      </form>
     </section>
 
-    <!-- PHASE 2: 管理者アーカイブ -->
-    <section id="view-phase2" class="tab-content">
-      <div class="card">
-        <h2>Metis 首都行政統計アーカイブ (制限エリア)</h2>
-        <p class="subtitle">アクセス制限レベル: LEVEL 3 (認証コードが必要です)</p>
-        
-        <div id="archive-login-box">
-          <input type="password" id="archive-pass" placeholder="管理者セキュリティパスコードを入力">
-          <button id="archive-login-btn" class="btn-primary">ロック解除</button>
-          <button id="gov-help-btn" class="btn-secondary">政府公式ヘルプに相談する</button>
-          <p id="archive-error" class="error-text"></p>
-        </div>
-
-        <div id="archive-content" class="hidden">
-          <div class="search-bar">
-            <input type="text" id="archive-search" placeholder="キーワード検索 (例: 特許, 犯罪, 統計...)">
-            <button id="archive-search-btn" class="btn-small">検索</button>
-          </div>
-          
-          <div id="archive-results" class="archive-list">
-            <!-- JSで動的にロードされる -->
-          </div>
-        </div>
+    <!-- ギルドからのハック・割り込みターミナル -->
+    <section class="guild-terminal">
+      <div class="guild-header">
+        <span>[GUILD_INTERCEPT_SIGNAL_ESTABLISHED]</span>
+        <span>ENCRYPTED: P2P</span>
+      </div>
+      <div class="terminal-logs" id="terminal-logs">
+        <p style="color: var(--guild-warning);">>> 警告: あなたの端末はMetisの最適化ルーチンに誘導されています。</p>
+        <p>>> 東京再生ギルドより緊急メッセージ: 「神威内閣の支持率71%は偽りだ。あの街は成長を奪われた『無菌室』になっている。」</p>
+        <p>>> 私たちに協力し、システムの内側から停滞の真実を暴いてほしい。</p>
+        <p>>> 指示: 下記に暗号コマンド <strong>override --unlock</strong> を入力し、管理者アーカイブの調査へ進め。</p>
+      </div>
+      <div class="terminal-input-group">
+        <input type="text" id="cmd-input" class="terminal-input" placeholder="コマンドを入力..." autocomplete="off">
+        <button class="btn btn-danger" onclick="executeCommand()">送信</button>
       </div>
     </section>
-
-    <!-- PHASE 3: ノイズ注入コンソール -->
-    <section id="view-phase3" class="tab-content">
-      <div class="card danger-border">
-        <h2>都市OSバッファメモリ インジェクター</h2>
-        <p class="subtitle">Metis自動制御システムに対しデータを割り込み送信します</p>
-        
-        <div class="buffer-status">
-          <label>現在のバッファノイズ負荷率:</label>
-          <div class="progress-bar-bg">
-            <div id="buffer-progress" class="progress-bar-fill" style="width: 0%;">0%</div>
-          </div>
-        </div>
-
-        <div class="payload-selection">
-          <h3>送信するデータの種類を選択してください:</h3>
-          
-          <div class="payload-card" data-type="smart">
-            <h4>[パッチA] 構造化スマートコード (効率化クリーンパッチ)</h4>
-            <p>構文エラーゼロ。最適化アルゴリズムをより強固にし、処理速度を300%向上させます。</p>
-            <button class="btn-inject-smart btn-secondary">このパッチをインジェクト</button>
-          </div>
-
-          <div class="payload-card" data-type="junk">
-            <h4>[ノイズB] 人間の雑多な非構造データ (ジャンクデータ)</h4>
-            <p>手書きの落書き、個人的な愚痴、不揃いな生活音、矛盾に満ちた日記の断片。</p>
-            <button class="btn-inject-junk btn-danger">非効率ノイズを流し込む</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- ギルド端末 (オーバーレイモーダル/スライド) -->
-  <aside id="guild-terminal" class="terminal-window hidden">
-    <div class="terminal-header">
-      <span>TOKYO_REBIRTH_GUILD // SECRET_COMM</span>
-      <button id="guild-close-btn">×</button>
-    </div>
-    <div id="terminal-logs" class="terminal-body">
-      <p class="sys-msg">[接続確立] プレイヤー識別コード: UNKNOWN</p>
-      <p class="sys-msg">「聞こえるか？ 私たちは『東京再生ギルド』だ。」</p>
-      <p class="sys-msg">「神威内閣の支持率71%は偽りだ。あの街は成長を奪われた『無菌室』になっている。反政府の私たちに協力し、システムの内側からこの停滞の真実を暴いてくれ。」</p>
-    </div>
-    <div class="terminal-footer">
-      <span class="prompt">&gt;</span>
-      <input type="text" id="terminal-input" placeholder="コマンドを入力...">
-    </div>
-  </aside>
+  <script src="game.js"></script>
+  <script>
+    let answerCount = 0;
 
-  <!-- BAD END A OVERLAY -->
-  <div id="ending-bad-a" class="ending-screen bad-a hidden">
-    <div class="ending-content">
-      <h1 class="bad-title">ご協力ありがとうございました</h1>
-      <p class="bad-desc">あなたは「危険な不適合者」として検知され、Metisにより完璧に最適化されました。</p>
-      <div class="prime-minister-banner">
-        <h2>神威内閣 支持率 100% 達成</h2>
-        <p>「失敗のない、永遠に平和で快適な明日をお約束します。」</p>
-      </div>
-      <p class="lock-msg">端末は永久にロックされました。[BAD END A: 永遠の優等生エンド]</p>
-      <button onclick="location.reload()" class="btn-restart">最初からやり直す</button>
-    </div>
-  </div>
+    function registerAnswer(isOptimized) {
+      game.playBeep(523, 'sine', 0.1);
+      answerCount++;
+      const logs = document.getElementById('terminal-logs');
+      
+      if (answerCount >= 2) {
+        logs.innerHTML += `<p style="color: var(--guild-alert);">>> 警報: アンケート応答によりAI最適化が進行中。思考が固定化される前にギルドコマンドを実行してください！</p>`;
+        logs.scrollTop = logs.scrollHeight;
+      }
+    }
 
-  <!-- BAD END B OVERLAY -->
-  <div id="ending-bad-b" class="ending-screen bad-b hidden">
-    <div class="ending-content">
-      <h1 class="bad-title">CRITICAL ERROR: SYSTEM FIXED</h1>
-      <p class="bad-desc">エラー：処理速度が限界を超えました。社会構造の完全固定化を完了します。</p>
-      <p class="bad-detail">整理されたスマートコードの投入により、Metisは市民の完全な自動管理モードへ移行しました。人間は思考を失った社畜人形と化します。</p>
-      <p class="lock-msg">[BAD END B: 情報破裂（データ・オーバーフロー）エンド]</p>
-      <button onclick="location.reload()" class="btn-restart">最初からやり直す</button>
-    </div>
-  </div>
+    function executeCommand() {
+      const input = document.getElementById('cmd-input').value.trim();
+      const logs = document.getElementById('terminal-logs');
 
-  <!-- TRUE HAPPY END OVERLAY -->
-  <div id="ending-true" class="ending-screen true-end hidden">
-    <div class="ending-content">
-      <div class="glitch-text" data-text="SYSTEM OVERFLOW">SYSTEM OVERFLOW</div>
-      <p class="sys-alert">――システム警告：未処理の非定型データがバッファメモリの限界値（100%）を超過しました。</p>
-      <p class="sys-alert">システム保護のため、自動最適化ルーチンを緊急遮断します。</p>
-      <hr class="fade-hr">
-      <div class="story-conclusion">
-        <p>神威首相が誇る「支持率71%」の黄金のバナーは砂のように崩れ去り、Metisはオフライン状態に切り替わった。</p>
-        <p>静止していた都市の時計が再び動き出し、不規則な電車のブレーキ音や、人々の「うわ、満員電車だるいな」という愚痴が街に戻ってくる。</p>
-        <p>痛みを伴いながらも、人類は再び「不確実で自由な明日」を手に入れた。</p>
-      </div>
-      <p class="true-flag">[TRUE END: 停滞都市のノイズ ―The 71% Illusion―]</p>
-      <button onclick="location.reload()" class="btn-restart">もう一度体験する</button>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+      if (input === 'override --unlock') {
+        game.playGlitchSound();
+        logs.innerHTML += `<p style="color: var(--guild-primary);">>> コマンド認証完了。Phase 2: 管理者アーカイブアクセス権を取得しました。</p>`;
+        logs.innerHTML += `<p>>> 転送中...</p>`;
+        logs.scrollTop = logs.scrollHeight;
+        
+        setTimeout(() => {
+          localStorage.setItem('metis_phase', '2');
+          window.location.href = 'page2.html';
+        }, 1200);
+      } else {
+        game.playBeep(200, 'sawtooth', 0.2);
+        logs.innerHTML += `<p style="color: var(--guild-alert);">>> 無効なコマンドです。"override --unlock" と入力してください。</p>`;
+        logs.scrollTop = logs.scrollHeight;
+      }
+      document.getElementById('cmd-input').value = '';
+    }
+  </script>
 </body>
 </html>
