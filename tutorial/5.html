@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Animation 完全攻略ガイド</title>
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-code: #090d16;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.7;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #064e3b 100%);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 40px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(to right, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    section {
+      background-color: var(--bg-card);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 32px;
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: var(--accent-cyan);
+      border-left: 5px solid var(--accent-purple);
+      padding-left: 12px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: #38bdf8;
+      margin: 24px 0 12px 0;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #cbd5e1;
+    }
+
+    ul, ol {
+      margin: 0 0 16px 24px;
+      color: #cbd5e1;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #f43f5e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--bg-code);
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: #e2e8f0;
+      padding: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Live Preview Box */
+    .demo-area {
+      background-color: #0b1329;
+      border: 2px dashed #334155;
+      border-radius: 10px;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 160px;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .demo-label {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: #0f172a;
+      color: var(--accent-cyan);
+    }
+
+    /* Column grid for property explanations */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .card-item {
+      background-color: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card-item h4 {
+      color: var(--accent-pink);
+      margin-bottom: 8px;
+    }
+
+    /* ===================================================
+       DEMO ANIMATIONS (CSS)
+       =================================================== */
+
+    /* Demo 1: Transition Button */
+    .btn-transition {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      /* CSS Transition 設定 */
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .btn-transition:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(168, 85, 247, 0.4);
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+    }
+
+    /* Demo 2: Keyframe Pulse */
+    .pulse-badge {
+      width: 80px;
+      height: 80px;
+      background-color: var(--accent-cyan);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #0f172a;
+      font-weight: bold;
+      position: relative;
+      animation: pulse-anim 2s infinite;
+    }
+
+    @keyframes pulse-anim {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 20px rgba(6, 182, 212, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+      }
+    }
+
+    /* Demo 3: Spinner */
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent-pink);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Demo 4: Floating Object */
+    .float-box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    /* Demo 5: 3D Card Flip */
+    .flip-card {
+      width: 140px;
+      height: 180px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .flip-card:hover .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      border: 1px solid var(--border-color);
+    }
+
+    .flip-card-front {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: var(--accent-cyan);
+    }
+
+    .flip-card-back {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    /* Demo 6: Shake error */
+    .shake-btn {
+      padding: 12px 24px;
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .shake-btn:hover {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(10px); }
+    }
+
+    /* Demo 7: Steps Sprite animation (simulated) */
+    .sprite-box {
+      width: 60px;
+      height: 60px;
+      background-color: #f59e0b;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      animation: step-walk 1.2s steps(4) infinite;
+    }
+
+    @keyframes step-walk {
+      0% { transform: translateX(-60px) rotate(0deg); }
+      100% { transform: translateX(60px) rotate(360deg); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>CSS Animation 完全攻略ガイド</h1>
+      <p>「transition」から「@keyframes」「3D変形」「GPU最適化」まで動きの仕組みを完全解説</p>
+    </header>
+
+    <!-- SECTION 0: INTRODUCTION -->
+    <section>
+      <h2>0. なぜCSSでアニメーションを作るのか？</h2>
+      <p>WebサイトやWebゲームで「ボタンを滑らかに凹ませる」「メニューをスッと出す」「キャラクターを揺らす」といった動きを作る時、JavaScriptを使わなくても<strong>CSSだけで超軽量・滑らかに動かすことができます。</strong></p>
+      <ul>
+        <li><strong>JavaScriptより圧倒的に軽くて速い：</strong> ブラウザのGPU（画像処理チップ）に処理を任せられるため、画面がカクつきにくい。</li>
+        <li><strong>コードがシンプル：</strong> 数行のCSSを書くだけで実装できる。</li>
+      </ul>
+      <p>CSSのアニメーションには大きく分けて<strong>「transition（トランジション）」</strong>と<strong>「animation（アニメーション / keyframes）」</strong>の2種類があります。</p>
+    </section>
+
+    <!-- SECTION 1: TRANSITION -->
+    <section>
+      <h2>1. transition（変化を滑らかにする）</h2>
+      <p><code>transition</code> は、ホバー（<code>:hover</code>）やクラスの追加など、<strong>「状態が変わったとき」にAからBへじわっと変化させる仕組み</strong>です。</p>
+
+      <div class="demo-area">
+        <span class="demo-label">LIVE DEMO: Hover me!</span>
+        <button class="btn-transition">Hover me!</button>
+      </div>
+
+      <h3>書き方と4つのプロパティ</h3>
+<pre><code>/* 個別指定の書き方 */
+.button {
+  background-color: #6366f1;
+  transition-property: transform, background-color; /* 変化させるプロパティ */
+  transition-duration: 0.3s;                        /* 変化にかかる時間 */
+  transition-timing-function: ease;                /* 加速・減速のグラデーション */
+  transition-delay: 0s;                            /* 開始までの待ち時間 */
+}
+
+/* 一括指定（Shorthand）の書き方（よく使う！） */
+.button {
+  /* transition: [プロパティ] [時間] [タイミング機能] [遅延]; */
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background-color: #a855f7;
+  transform: translateY(-5px);
+}</code></pre>
+    </section>
+
+    <!-- SECTION 2: KEYFRAMES & ANIMATION -->
+    <section>
+      <h2>2. @keyframes と animation（本格アニメーション）</h2>
+      <p>ユーザーの操作（ホバー等）がなくても、<strong>「ずっとループして動かしたい」「複数のステップで複雑に動かしたい」</strong>時は <code>@keyframes</code> と <code>animation</code> プロパティを使います。</p>
+
+      <h3>ステップ1：@keyframes でコマ割りを作る</h3>
+      <p>アニメーションの「シナリオ（コマ割り）」を定義します。<code>0%</code>（開始）から <code>100%</code>（終了）までの状態を指定します。</p>
+
+<pre><code>/* 「float」という名前のアニメーションシナリオを作成 */
+@keyframes float {
+  0% {
+    transform: translateY(0px); /* 最初は元の位置 */
+  }
+  50% {
+    transform: translateY(-20px); /* 半分で20px上に移動 */
+  }
+  100% {
+    transform: translateY(0px); /* 最後は元の位置に戻る */
+  }
+}</code></pre>
+
+      <h3>ステップ2：要素に animation プロパティを割り当てる</h3>
+
+      <div class="demo-area">
+        <span class="demo-label">LIVE DEMO: Floating Object</span>
+        <div class="float-box">Float</div>
+      </div>
+
+      <h3>animation の 8 大プロパティ</h3>
+      <div class="grid-2">
+        <div class="card-item">
+          <h4>animation-name</h4>
+          <p>適用する <code>@keyframes</code> の名前を指定。（例：<code>float</code>）</p>
+        </div>
+        <div class="card-item">
+          <h4>animation-duration</h4>
+          <p>1回のアニメーションにかかる時間。（例：<code>2s</code>, <code>500ms</code>）</p>
+        </div>
+        <div class="card-item">
+          <h4>animation-timing-function</h4>
+          <p>動きの緩急。（<code>ease</code>, <code>linear</code>, <code>ease-in-out</code> など）</p>
+        </div>
+        <div class="card-item">
+          <h4>animation-iteration-count</h4>
+          <p>再生回数。数字で指定、または無限ループなら <code>infinite</code>。</p>
+        </div>
+        <div class="card-item">
+          <h4>animation-direction</h4>
+          <p>再生方向。<code>normal</code>（通常）、<code>reverse</code>（逆再生）、<code>alternate</code>（行って戻る）。</p>
+        </div>
+        <div class="card-item">
+          <h4>animation-fill-mode</h4>
+          <p>再生前後の状態保持。<code>forwards</code> にするとアニメーション終了時の状態を維持する。</p>
+        </div>
+      </div>
+
+      <p><strong>一括指定（Shorthand）：</strong></p>
+<pre><code>.box {
+  /* 名前 時間 タイミング 繰り返し 方向 */
+  animation: float 3s ease-in-out infinite alternate;
+}</code></pre>
+    </section>
+
+    <!-- SECTION 3: TRANSFORM -->
+    <section>
+      <h2>3. アニメーションの最強の相棒：transform（変形）</h2>
+      <p>CSSアニメーションで最もよく動かすのが <code>transform</code> プロパティです。要素の「位置」「大きさ」「回転」「傾き」を自由自在に変形できます。</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>関数</th>
+            <th>効果</th>
+            <th>コード例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>translate(x, y)</code></td>
+            <td>位置を移動する</td>
+            <td><code>transform: translateX(50px);</code></td>
+          </tr>
+          <tr>
+            <td><code>scale(x, y)</code></td>
+            <td>拡大・縮小する（1.0が標準）</td>
+            <td><code>transform: scale(1.2);</code></td>
+          </tr>
+          <tr>
+            <td><code>rotate(deg)</code></td>
+            <td>回転させる（degは度数）</td>
+            <td><code>transform: rotate(45deg);</code></td>
+          </tr>
+          <tr>
+            <td><code>skew(x, y)</code></td>
+            <td>斜めに傾ける</td>
+            <td><code>transform: skewX(10deg);</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3D変形（立体アニメーション）</h3>
+      <p><code>perspective</code>（遠近感）と <code>rotateY</code> を組み合わせると、3Dカードフリップが作れます。</p>
+
+      <div class="demo-area">
+        <span class="demo-label">LIVE DEMO: 3D Flip (Hover)</span>
+        <div class="flip-card">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">FRONT</div>
+            <div class="flip-card-back">BACK</div>
+          </div>
+        </div>
+      </div>
+
+<pre><code>/* 3Dカードフリップの骨組み */
+.card-container {
+  perspective: 1000px; /* 奥行き（遠近感）を設定 */
+}
+
+.card-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d; /* 3D空間を維持 */
+}
+
+.card-container:hover .card-inner {
+  transform: rotateY(180deg); /* Y軸中心に半回転 */
+}
+
+.card-front, .card-back {
+  backface-visibility: hidden; /* 裏返った時は背面を非表示にする */
+}</code></pre>
+    </section>
+
+    <!-- SECTION 4: TIMING FUNCTIONS -->
+    <section>
+      <h2>4. 動きの質感を変える「Timing Function」</h2>
+      <p>同じ距離を移動するアニメーションでも、加減速（イージング）によって印象が全く変わります。</p>
+
+      <h3>代表的なイージング</h3>
+      <ul>
+        <li><code>linear</code>：等速（一定のスピード）。回転スピナーなどに使う。</li>
+        <li><code>ease</code>（初期値）：ゆっくり始まって一気に加速し、最後は減速。自然な動き。</li>
+        <li><code>ease-in</code>：じわっと動き出し、最後まで加速。</li>
+        <li><code>ease-out</code>：勢いよく動き出し、最後はゆっくり止まる（UIパーツにお勧め！）。</li>
+        <li><code>ease-in-out</code>：ゆっくり動き出し、ゆっくり止まる。</li>
+      </ul>
+
+      <h3>カクカク動かす `steps()`</h3>
+      <p>ドット絵キャラの歩行アニメーションや、タイプライター風テキストアニメーションには <code>steps(コマ数)</code> を使います。</p>
+
+      <div class="demo-area">
+        <span class="demo-label">LIVE DEMO: steps(4) Animation</span>
+        <div class="sprite-box">👾</div>
+      </div>
+
+<pre><code>/* コマ送り風アニメーション */
+.pixel-art {
+  animation: walk 1s steps(4) infinite;
+}</code></pre>
+    </section>
+
+    <!-- SECTION 5: PRACTICAL EXAMPLES -->
+    <section>
+      <h2>5. すぐ使える！実践アニメーションパーツ集</h2>
+
+      <h3>① くるくる回るローディングスピナー</h3>
+      <div class="demo-area">
+        <span class="demo-label">DEMO: Loading Spinner</span>
+        <div class="spinner"></div>
+      </div>
+<pre><code>.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #ec4899; /* 上の枠線だけ色をつける */
+  border-radius: 50%;         /* 円にする */
+  animation: spin 1s linear infinite; /* ずっと等速で回す */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}</code></pre>
+
+      <h3>② 脈動する波紋（パルス）エフェクト</h3>
+      <div class="demo-area">
+        <span class="demo-label">DEMO: Pulse Effect</span>
+        <div class="pulse-badge">NEW</div>
+      </div>
+<pre><code>.pulse-badge {
+  animation: pulse-anim 2s infinite;
+}
+
+@keyframes pulse-anim {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 20px rgba(6, 182, 212, 0); /* 影を大きく外側に広げて透明にする */
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+  }
+}</code></pre>
+
+      <h3>③ エラー時にブルブル震える（シェイク）</h3>
+      <div class="demo-area">
+        <span class="demo-label">DEMO: Hover to Shake</span>
+        <button class="shake-btn">Error Shake!</button>
+      </div>
+<pre><code>.shake-btn:hover {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(10px); }
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6: PERFORMANCE -->
+    <section>
+      <h2>6. 超重要！ヌルヌル動かすための最適化ルール</h2>
+      <p>アニメーションを作った時に「なんか画面がカクつく…」となる最大の原因は、<strong>ブラウザに負荷がかかるプロパティを動かしているから</strong>です。</p>
+
+      <h3>❌ 動かすと重いプロパティ（リフローが発生）</h3>
+      <p><code>top</code>, <code>left</code>, <code>width</code>, <code>height</code>, <code>margin</code>, <code>padding</code></p>
+      <p>これらを動かすと、ブラウザはアニメーションの毎フレームごとに「画面全体のレイアウト計算」をやり直すため、激重になります。</p>
+
+      <h3>⭕ 動かしても激軽なプロパティ（GPU加速）</h3>
+      <p><code>transform</code> (位置・大きさ・回転) と <code>opacity</code> (透明度)</p>
+      <p>この2つだけは、ブラウザが「GPU（グラフィックカード）」に直接計算を放り投げることができるため、どれだけ動かしてもぬるぬる（60fps）で動きます！</p>
+
+      <div style="background-color: #0f172a; padding: 16px; border-left: 4px solid var(--accent-green); border-radius: 4px;">
+        <strong>💡 鉄則まとめ：</strong><br>
+        位置を変えるときは <code>left: 10px;</code> ではなく <code>transform: translateX(10px);</code> を使う！
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
