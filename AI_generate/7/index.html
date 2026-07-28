@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ムネモシュネ・システムズ | 記憶を、永遠に</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg: #f8f9fa;
+        }
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0; padding: 0;
+            -webkit-user-select: none;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.8;
+        }
+        .history-box {
+            background: white;
+            padding: 30px;
+            border-left: 5px solid var(--secondary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+        /* サーバーマップ（パズル部分） */
+        .server-map {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .node {
+            background: #e9ecef;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #6c757d;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .node.active {
+            background: var(--secondary);
+            color: white;
+            border-color: #2980b9;
+        }
+        #system-msg {
+            text-align: center;
+            margin-top: 20px;
+            font-family: monospace;
+            color: #e74c3c;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mnemosyne Systems</h1>
+    <p>あなたのデジタルな記憶を、安全に保管します</p>
+</header>
+
+<div class="container">
+    <h2>会社概要</h2>
+    <div class="history-box">
+        <p>ムネモシュネ・システムズは、世界最高峰のセキュリティを誇るデータ保管ソリューションを提供しています。</p>
+        <p>我々のネットワークは<strong>東京（Tokyo）</strong>の小さなオフィスから始まりました。その後、海を渡り<strong>ニューヨーク（New York）</strong>に第二の拠点を設立。そこから欧州のハブとして<strong>ロンドン（London）</strong>へと展開し、最後に<strong>シドニー（Sydney）</strong>のデータセンターを稼働させたことで、独自のグローバル監視網を完成させました。</p>
+        <p>私たちはお客様の「不要な過去」を消去し、美しい記憶だけを維持するお手伝いをしています。</p>
+    </div>
+
+    <h2>稼働状況ダッシュボード</h2>
+    <p>各拠点のサーバーノード状況を確認できます。（※保守・管理用）</p>
+    
+    <!-- 謎解きUI：正しい順序でタップする必要がある -->
+    <div class="server-map">
+        <div class="node" data-id="london">London Node</div>
+        <div class="node" data-id="tokyo">Tokyo Node</div>
+        <div class="node" data-id="sydney">Sydney Node</div>
+        <div class="node" data-id="ny">New York Node</div>
+    </div>
+    <div id="system-msg"></div>
+</div>
+
+<script>
+    // プレイヤーが入力した順序を保存する配列
+    let inputSequence = [];
+    // 正解の順序（会社概要のテキストから論理的に導き出す）
+    const correctSequence = ['tokyo', 'ny', 'london', 'sydney'];
+
+    const nodes = document.querySelectorAll('.node');
+    const msg = document.getElementById('system-msg');
+
+    nodes.forEach(node => {
+        // iPad向けにtouchstartイベントを使用
+        node.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // デフォルトの挙動を防止
+            const id = node.getAttribute('data-id');
+            
+            // 既に選択済みの場合は無視
+            if (inputSequence.includes(id)) return;
+
+            node.classList.add('active');
+            inputSequence.push(id);
+
+            // 4つ全てタップされたら判定
+            if (inputSequence.length === 4) {
+                checkSequence();
+            }
+        });
+    });
+
+    function checkSequence() {
+        // 配列の中身が完全一致するか確認
+        const isCorrect = inputSequence.every((val, index) => val === correctSequence[index]);
+
+        if (isCorrect) {
+            msg.style.color = "#27ae60";
+            msg.innerText = "認証成功：ローカルストレージにアクセスキーを発行しました。";
+            // 次のページへ進むための「鍵」をブラウザに保存
+            localStorage.setItem('mnemosyne_auth', 'GRANTED');
+            
+            setTimeout(() => {
+                // 隠しページ（社内ポータル）へリダイレクト
+                window.location.href = 'secure.html';
+            }, 1500);
+        } else {
+            msg.style.color = "#e74c3c";
+            msg.innerText = "エラー：シーケンスが不一致です。リセットします。";
+            // 失敗したらリセット
+            setTimeout(() => {
+                inputSequence = [];
+                nodes.forEach(n => n.classList.remove('active'));
+                msg.innerText = "";
+            }, 1000);
+        }
+    }
+</script>
+
+</body>
+</html>
