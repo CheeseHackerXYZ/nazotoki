@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+    background-color: #f8fafc;
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748b;
+    }
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    color: #1e293b;
+    font-size: 10pt;
+    line-height: 1.6;
+  }
+
+  /* Cover Banner */
+  .header-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2563eb 100%);
+    color: #ffffff;
+    padding: 24px 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+  }
+
+  .header-banner h1 {
+    margin: 0 0 6px 0;
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f8fafc;
+  }
+
+  .header-banner p {
+    margin: 0;
+    font-size: 10pt;
+    color: #cbd5e1;
+  }
+
+  /* Section Styling */
+  .section {
+    margin-bottom: 22px;
+  }
+
+  h2 {
+    font-size: 13pt;
+    color: #1e1b4b;
+    border-left: 5px solid #2563eb;
+    padding-left: 10px;
+    margin: 18px 0 10px 0;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 11pt;
+    color: #334155;
+    margin: 14px 0 6px 0;
+    page-break-after: avoid;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+  }
+
+  /* Cards / Boxes */
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  .card-title {
+    font-weight: bold;
+    color: #2563eb;
+    margin-bottom: 6px;
+    font-size: 10.5pt;
+  }
+
+  .callout {
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+
+  .callout-title {
+    font-weight: bold;
+    color: #1d4ed8;
+    margin-bottom: 4px;
+  }
+
+  /* Code Blocks */
+  pre {
+    background-color: #0f172a;
+    color: #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 8.5pt;
+    line-height: 1.45;
+    overflow-x: auto;
+    margin: 8px 0 12px 0;
+    page-break-inside: avoid;
+  }
+
+  code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background-color: #e2e8f0;
+    color: #0f172a;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 9pt;
+  }
+
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+
+  /* Step List */
+  .step-list {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step-item {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    position: relative;
+    page-break-inside: avoid;
+  }
+
+  .step-num {
+    display: inline-block;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    line-height: 22px;
+    font-size: 9pt;
+    margin-right: 8px;
+  }
+
+  .step-title {
+    font-weight: bold;
+    color: #0f172a;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background-color: #1e293b;
+    color: #ffffff;
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .bad-code {
+    color: #ef4444;
+    font-weight: bold;
+  }
+
+  .good-code {
+    color: #10b981;
+    font-weight: bold;
+  }
+
+  ul, ol {
+    margin: 0 0 10px 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <h1>Web開発・チームコラボレーション実践ガイド</h1>
+    <p>コメントアウト文法 / GitHub Webプルリクエスト手順 / JavaScriptのif・return徹底解説</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <h2>第1章：言語別 コメントアウトの書き方一覧</h2>
+    <p>コメントアウトは、プログラムの実行結果に影響を与えずに<strong>「メモを残す」「一時的に処理を無効化する（デバッグ）」</strong>ために使います。言語ごとに書き方（シンタックス）が異なるため、正しく使い分けましょう。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>言語 / ファイル</th>
+          <th>単一行コメント</th>
+          <th>複数行コメント</th>
+          <th>主な用途・特徴</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>HTML</strong></td>
+          <td colspan="2"><code>&lt;!-- コメント --&gt;</code></td>
+          <td>構造の区切り（例：<code>&lt;!-- メイン領域 --&gt;</code>）や要素の一時的非表示。</td>
+        </tr>
+        <tr>
+          <td><strong>CSS</strong></td>
+          <td colspan="2"><code>/* コメント */</code></td>
+          <td>スタイルのセクション分け（例：<code>/* ヘッダー装飾 */</code>）や記述の切り替え。</td>
+        </tr>
+        <tr>
+          <td><strong>JavaScript</strong></td>
+          <td><code>// コメント</code></td>
+          <td><code>/* コメント */</code></td>
+          <td>処理の目的説明、一時的な処理無効化。1行記述は <code>//</code> が主流。</td>
+        </tr>
+        <tr>
+          <td><strong>Markdown</strong></td>
+          <td colspan="2"><code>&lt;!-- コメント --&gt;</code></td>
+          <td>ドキュメントプレビュー時に画面表示させたくない備忘録やメモ。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>具体的なコード例</h3>
+
+    <div class="card">
+      <div class="card-title">1. HTMLのコメント</div>
+<pre><code>&lt;!-- これは画面に表示されないHTMLコメントです --&gt;
+&lt;div class="header"&gt;
+  &lt;!-- &lt;h1&gt;一時的に非表示にしたいタイトル&lt;/h1&gt; --&gt;
+  &lt;p&gt;ようこそ！&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. CSSのコメント</div>
+<pre><code>/* ================================
+   ボタンのスタイル定義
+   ================================ */
+.btn-primary {
+  background-color: #2563eb; /* ブランドカラーの青 */
+  /* color: red;  ← デバッグ用に古い設定を残す */
+  color: #ffffff;
+}</code></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3. JavaScriptのコメント</div>
+<pre><code>// 1行コメント：次の処理の「目的」を書く
+const maxRetryCount = 3; 
+
+/* 
+ * 複数行コメント：
+ * 複雑なアルゴリズムの解説や、仕様の背景を
+ * 詳しく書き残すときに使用します。
+ */
+function calculateTax(price) {
+  return price * 1.1; // 消費税10%を計算
+}</code></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">4. Markdown (.md) のコメント</div>
+<pre><code>&lt;!-- MarkdownでもHTMLと同じ形式でコメントアウトが可能です --&gt;
+# ドキュメントタイトル
+
+&lt;!-- TODO: あとでこの章に図解画像を追加する --&gt;
+ここは本文テキストです。</code></pre>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">⚡️ ショートカットキーで一瞬でコメント化！</div>
+      VS Codeなどの多くのエディタでは、行を選択して <strong><code>Ctrl + /</code></strong>（Macは <strong><code>Cmd + /</code></strong>）を押すだけで、その言語に合わせたコメントアウトが自動適用されます。
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <h2>第2章：GitHub Browser（ブラウザ操作）でのプルリクエスト手順</h2>
+    <p>フォーク（Fork）をせず、チームの共通リポジトリ上で<strong>「ブランチを作成 → 編集 → プルリクエスト（PR）」</strong>を送る手順です。PCのWebブラウザだけで完結するため、最もシンプルで間違いが起きにくい方法です。</p>
+
+    <div class="step-list">
+      <div class="step-item">
+        <span class="step-num">1</span><span class="step-title">作業用の新ブランチ（Branch）を作成する</span>
+        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
+          GitHubのリポジトリトップ画面で、左上にある「<code>main</code>」と書かれたブランチ切り替えボタンをクリックします。入力欄に新しいブランチ名（例: <code>feature/add-button</code> や <code>fix/header-color</code>）を入力し、<strong>「Create branch: ...」</strong>を選択します。
+        </p>
+      </div>
+
+      <div class="step-item">
+        <span class="step-num">2</span><span class="step-title">作成したブランチに切り替わっているか確認する</span>
+        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
+          ボタンの表示が今作ったブランチ名（例: <code>feature/add-button</code>）に変わっていることを確認します。※ <code>main</code> ブランチのまま直接編集しないことが最も重要です！
+        </p>
+      </div>
+
+      <div class="step-item">
+        <span class="step-num">3</span><span class="step-title">ブラウザ上でファイルを編集・保存（Commit）する</span>
+        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
+          変更したいファイルを開き、右上の鉛筆マーク（Edit this file）を押して編集します。編集が終わったら右上の「<strong>Commit changes...</strong>」を押してコミットメッセージを入力し、「Commit changes」を実行します。
+        </p>
+      </div>
+
+      <div class="step-item">
+        <span class="step-num">4</span><span class="step-title">Compare & pull request ボタンを押す</span>
+        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
+          コミット後、リポジトリのトップ画面に戻ると黄色の枠で「<strong>Compare & pull request</strong>」というボタンが表示されます。これをクリックします。
+        </p>
+      </div>
+
+      <div class="step-item">
+        <span class="step-num">5</span><span class="step-title">PRのタイトルと内容を書いて送信する</span>
+        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
+          タイトルに変更内容の概要（例: <code>[機能追加] トップページにジャンプボタンを追加</code>）を書きます。本文に「何を変更したか」「確認してほしい点」を書いて、緑色の「<strong>Create pull request</strong>」ボタンを押せば完了です！
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">💡 なぜ main に直接書かず、ブランチを作るの？</div>
+      <code>main</code> は「完成された動く状態」を保つ場所です。個別ブランチで作業することで、途中でバグっても他の人に影響を与えず、レビューを通して安全に合体（マージ）できるようになります。
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <h2>第3章：JavaScriptの `if` 文における `return` の徹底解説</h2>
+    <p>関数のなかで `return` を使うと、<strong>「呼び出し元に値を返す」</strong>だけでなく、<strong>「その時点で関数の実行を終了して抜け出す」</strong>という役割を果たします。これを利用したのが<strong>「早期リターン（ガード節）」</strong>です。</p>
+
+    <h3>1. `return` の基本的な動き</h3>
+    <p>`return` が実行された瞬間、その下にあるコードは一切実行されずに関数が終わります。</p>
+
+<pre><code>function testReturn() {
+  console.log("① ここは実行される");
+  return; // ここで関数終了！
+  console.log("② ここは絶対に実行されない");
+}</code></pre>
+
+    <h3>2. `if` と `return` を組み合わせる「早期リターン（ガード節）」とは？</h3>
+    <p>不正な条件や例外的なケースを `if` 文と `return` で先にはじき出すテクニックです。</p>
+
+    <div class="card">
+      <div class="card-title">❌ 悪い例：if / else でネスト（入れ子）が深くなっているコード</div>
+      <p>条件が重なると `if` の中に `if` が入って右にどんどんズレていき、どれが何の処理か分からなくなります。</p>
+<pre><code>// プレイヤーが動く処理
+function movePlayer(player) {
+  if (player != null) {
+    if (player.isAlive == true) {
+      if (player.stamina > 0) {
+        // メインの移動処理（ここに行き着くまでが長い！）
+        player.x += 10;
+        player.stamina -= 1;
+      } else {
+        console.log("スタミナ切れ！");
+      }
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⭕️ 良い例：`return` を使った早期リターン（ガード節）</div>
+      <p>ダメな条件（エラーや非対象）を先頭で即座に `return` して追い出すことで、メイン処理が真っ直ぐ見やすくなります。</p>
+<pre><code>// 早期リターンを適用したコード
+function movePlayer(player) {
+  // ① プレイヤーが存在しないなら即終了
+  if (!player) return;
+
+  // ② 死亡しているなら即終了
+  if (!player.isAlive) return;
+
+  // ③ スタミナがないなら警告を出して即終了
+  if (player.stamina &lt;= 0) {
+    console.log("スタミナ切れ！");
+    return;
+  }
+
+  // ★ メインの処理（ネストがなくなり真っ直ぐ読める！）
+  player.x += 10;
+  player.stamina -= 1;
+}</code></pre>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">🎯 ガード節を使う 3 大メリット</div>
+      <ol style="margin: 4px 0 0 0; padding-left: 18px;">
+        <li><strong>ネストが浅くなる：</strong> インデント（字下げ）が減り、コードが横に伸びない。</li>
+        <li><strong>エラーを未然に防ぐ：</strong> `null` や `undefined` の要素を真っ先にはじくため、クラッシュしにくい。</li>
+        <li><strong>読むのが楽：</strong> 「この条件なら何もしない」というルールが関数の冒頭で一目でわかる。</li>
+      </ol>
+    </div>
+  </div>
+
+</body>
+</html>
