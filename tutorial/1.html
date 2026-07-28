@@ -327,30 +327,30 @@ function calculateTax(price) {
 
     <div class="step-list">
       <div class="step-item">
-        <span class="step-num">1</span><span class="step-title">作業用の新ブランチ（Branch）を作成する</span>
+        <span class="step-num">1</span><span class="step-title">ファイルを編集する</span>
         <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          GitHubのリポジトリトップ画面で、左上にある「<code>main</code>」と書かれたブランチ切り替えボタンをクリックします。入力欄に新しいブランチ名（例: <code>feature/add-button</code> や <code>fix/header-color</code>）を入力し、<strong>「Create branch: ...」</strong>を選択します。
+          GitHubのリポジトリファイル画面で、右上にある鉛筆マークから「<code>edit</code>」と書かれたボタンをクリックします。
         </p>
       </div>
 
       <div class="step-item">
-        <span class="step-num">2</span><span class="step-title">作成したブランチに切り替わっているか確認する</span>
+        <span class="step-num">2</span><span class="step-title">保存する</span>
         <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          ボタンの表示が今作ったブランチ名（例: <code>feature/add-button</code>）に変わっていることを確認します。※ <code>main</code> ブランチのまま直接編集しないことが最も重要です！
+          右上の緑色のボタン <code>Commit changes...</code>ボタンを押します。
         </p>
       </div>
 
       <div class="step-item">
-        <span class="step-num">3</span><span class="step-title">ブラウザ上でファイルを編集・保存（Commit）する</span>
+        <span class="step-num">3</span><span class="step-title">branchを作成する</span>
         <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          変更したいファイルを開き、右上の鉛筆マーク（Edit this file）を押して編集します。編集が終わったら右上の「<strong>Commit changes...</strong>」を押してコミットメッセージを入力し、「Commit changes」を実行します。
+          選択肢<strong>Create a new branch for this commit and start a pull request</strong>を選択します。デフォルトでは選択されないので注意！入力欄には適当な名前を入力します。
         </p>
       </div>
 
       <div class="step-item">
-        <span class="step-num">4</span><span class="step-title">Compare & pull request ボタンを押す</span>
+        <span class="step-num">4</span><span class="step-title">編集を実行</span>
         <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          コミット後、リポジトリのトップ画面に戻ると黄色の枠で「<strong>Compare & pull request</strong>」というボタンが表示されます。これをクリックします。
+          緑色の<strong>Commit</strong>」ボタンをクリックします。
         </p>
       </div>
 
@@ -363,7 +363,7 @@ function calculateTax(price) {
     </div>
 
     <div class="callout">
-      <div class="callout-title">💡 なぜ main に直接書かず、ブランチを作るの？</div>
+      <div class="callout-title">💡 なぜ main を直接編集せず、ブランチを作るの？</div>
       <code>main</code> は「完成された動く状態」を保つ場所です。個別ブランチで作業することで、途中でバグっても他の人に影響を与えず、レビューを通して安全に合体（マージ）できるようになります。
     </div>
   </div>
