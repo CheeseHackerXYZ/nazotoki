@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript 完全攻略ロードマップ</title>
+  <style>
+    :root {
+      --bg-color: #0b0c10;
+      --text-main: #e0e2e4;
+      --text-muted: #a0a5aa;
+      --neon-blue: #00f3ff;
+      --neon-purple: #b535ff;
+      --neon-orange: #ff7b00;
+      --surface-color: #15161d;
+      --code-bg: #1e1e28;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(181, 53, 255, 0.05), transparent 25%);
+      color: var(--text-main);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* PDF印刷用設定 */
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .page-break {
+        page-break-after: always;
+        break-after: page;
+      }
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .section-header {
+      border-left: 5px solid var(--neon-blue);
+      padding-left: 15px;
+      margin: 40px 0 25px 0;
+      position: relative;
+    }
+
+    .section-header::after {
+      content: '';
+      position: absolute;
+      left: -5px;
+      bottom: 0;
+      width: 5px;
+      height: 40%;
+      background-color: var(--neon-purple);
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      font-size: 20px;
+      color: var(--neon-blue);
+      margin: 30px 0 15px 0;
+      border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+      padding-bottom: 5px;
+    }
+
+    h3 {
+      font-size: 16px;
+      color: var(--text-main);
+      margin: 20px 0 10px 0;
+    }
+
+    p {
+      margin-bottom: 15px;
+      color: var(--text-muted);
+    }
+
+    ul {
+      margin-bottom: 20px;
+      padding-left: 20px;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    strong {
+      color: var(--neon-blue);
+    }
+
+    /* コードブロックのスタイリング */
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid rgba(181, 53, 255, 0.3);
+      border-radius: 6px;
+      padding: 15px;
+      overflow-x: auto;
+      margin-bottom: 25px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    code {
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 14px;
+      color: #c5c8c6;
+    }
+
+    .c-keyword { color: #b294bb; } /* 紫 */
+    .c-func { color: #81a2be; }    /* 青 */
+    .c-string { color: #b5bd68; }  /* 緑 */
+    .c-comment { color: #969896; font-style: italic; } /* 灰 */
+    .c-number { color: #de935f; }  /* オレンジ */
+
+    /* ジオメトリック装飾 */
+    .decorative-line {
+      height: 1px;
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), transparent);
+      margin: 20px 0;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ==========================================
+         PAGE 1: 実践（Canvas描画）
+    =========================================== -->
+    <div class="page-break">
+      <div class="section-header">
+        <h1>【実践】 Canvas描画 & レンダリング</h1>
+        <p style="color: var(--neon-blue); margin-top: 5px; font-weight: bold;">Standard to Advanced Bridge</p>
+      </div>
+      
+      <p>標準的なDOM操作から一歩踏み出し、ピクセル単位での描画やインタラクティブなアニメーションループを構築するフェーズです。ここで培うレンダリングの知識は、複雑なUIや物理演算の実装に直結します。</p>
+
+      <h2>1. Canvas APIの基礎と初期化</h2>
+      <p>HTMLの<code>&lt;canvas&gt;</code>要素を取得し、2Dコンテキストを呼び出すことで描画の準備が整います。高解像度ディスプレイ（Retina等）に対応するためのスケーリングも重要です。</p>
+<pre><code><span class="c-keyword">const</span> canvas = document.<span class="c-func">querySelector</span>(<span class="c-string">'#gameCanvas'</span>);
+<span class="c-keyword">const</span> ctx = canvas.<span class="c-func">getContext</span>(<span class="c-string">'2d'</span>);
+
+<span class="c-comment">// 画面サイズへの追従</span>
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+<span class="c-comment">// 矩形の描画テスト</span>
+ctx.fillStyle = <span class="c-string">'#00f3ff'</span>;
+ctx.<span class="c-func">fillRect</span>(<span class="c-number">50</span>, <span class="c-number">50</span>, <span class="c-number">100</span>, <span class="c-number">100</span>);</code></pre>
+
+      <h2>2. メインループとアニメーション</h2>
+      <p><code>requestAnimationFrame</code>を使用し、ディスプレイのリフレッシュレートに同期した滑らかなアニメーションループを構築します。</p>
+<pre><code><span class="c-keyword">let</span> x = <span class="c-number">0</span>;
+
+<span class="c-keyword">function</span> <span class="c-func">loop</span>() {
+  <span class="c-comment">// 1. 画面のクリア (残像を消す)</span>
+  ctx.<span class="c-func">clearRect</span>(<span class="c-number">0</span>, <span class="c-number">0</span>, canvas.width, canvas.height);
+  
+  <span class="c-comment">// 2. 状態の更新</span>
+  x += <span class="c-number">2</span>;
+  
+  <span class="c-comment">// 3. 描画</span>
+  ctx.fillStyle = <span class="c-string">'#b535ff'</span>;
+  ctx.<span class="c-func">fillRect</span>(x, <span class="c-number">100</span>, <span class="c-number">50</span>, <span class="c-number">50</span>);
+  
+  <span class="c-comment">// 次のフレームを要求</span>
+  <span class="c-func">requestAnimationFrame</span>(loop);
+}
+<span class="c-func">loop</span>();</code></pre>
+
+      <h2>3. 座標計算と衝突判定 (AABB)</h2>
+      <p>オブジェクト同士の重なりを検知する基本アルゴリズム「AABB（Axis-Aligned Bounding Box）」の概念です。</p>
+      <ul>
+        <li><strong>X軸の重なり：</strong> (Aの左端 &lt; Bの右端) かつ (Aの右端 &gt; Bの左端)</li>
+        <li><strong>Y軸の重なり：</strong> (Aの上端 &lt; Bの下端) かつ (Aの下端 &gt; Bの上端)</li>
+      </ul>
+      <div class="decorative-line"></div>
+    </div>
+
+    <!-- ==========================================
+         PAGE 2: 応用（JS Concepts）
+    =========================================== -->
+    <div class="page-break">
+      <div class="section-header">
+        <h1>【応用】 Advanced JS Concepts & Architecture</h1>
+        <p style="color: var(--neon-purple); margin-top: 5px; font-weight: bold;">Object-Oriented & Performance</p>
+      </div>
+
+      <p>規模の大きなコードベースを破綻させずに管理するための、言語の深い仕様（クラス、thisの挙動、カプセル化）や、パフォーマンス最適化を学ぶフェーズです。</p>
+
+      <h2>1. クラスとオブジェクト指向 (OOP)</h2>
+      <p>設計図となる<code>class</code>を定義し、そこから実体（インスタンス）を生成します。共通のプロパティやメソッドをまとめることで、コードの再利用性が劇的に向上します。</p>
+<pre><code><span class="c-keyword">class</span> Entity {
+  <span class="c-keyword">constructor</span>(x, y) {
+    <span class="c-keyword">this</span>.x = x;
+    <span class="c-keyword">this</span>.y = y;
+  }
+  <span class="c-func">move</span>(vx, vy) {
+    <span class="c-keyword">this</span>.x += vx;
+    <span class="c-keyword">this</span>.y += vy;
+  }
+}
+
+<span class="c-comment">// 継承 (extends) を使って拡張</span>
+<span class="c-keyword">class</span> Player <span class="c-keyword">extends</span> Entity {
+  <span class="c-keyword">constructor</span>(x, y, hp) {
+    <span class="c-keyword">super</span>(x, y); <span class="c-comment">// 親クラスのコンストラクタ呼び出し</span>
+    <span class="c-keyword">this</span>.hp = hp;
+  }
+}</code></pre>
+
+      <h2>2. thisのバインディングとアロー関数</h2>
+      <p>JavaScriptにおいて<code>this</code>は「呼び出し元」によって変化します。コールバック関数内で意図した<code>this</code>を参照するために、アロー関数の性質を理解することが必須です。</p>
+      <ul>
+        <li><strong>通常の関数：</strong> 呼び出された時のコンテキストに依存。</li>
+        <li><strong>アロー関数：</strong> 定義された場所のスコープの<code>this</code>を保持する（レキシカルスコープ）。</li>
+      </ul>
+
+      <h2>3. パフォーマンスとメモリ管理</h2>
+      <p>不要になったイベントリスナーやオブジェクトの参照を残し続けると「メモリリーク」が発生し、動作が重くなります。また、連続発火するイベントの制御も重要です。</p>
+<pre><code><span class="c-comment">// スロットリング (一定間隔でのみ実行を許可する簡易実装)</span>
+<span class="c-keyword">let</span> isThrottled = <span class="c-keyword">false</span>;
+window.<span class="c-func">addEventListener</span>(<span class="c-string">'resize'</span>, () =&gt; {
+  <span class="c-keyword">if</span> (isThrottled) <span class="c-keyword">return</span>;
+  isThrottled = <span class="c-keyword">true</span>;
+  
+  <span class="c-func">setTimeout</span>(() =&gt; {
+    console.<span class="c-func">log</span>(<span class="c-string">'リサイズ処理を実行'</span>);
+    isThrottled = <span class="c-keyword">false</span>;
+  }, <span class="c-number">100</span>);
+});</code></pre>
+      <div class="decorative-line"></div>
+    </div>
+
+    <!-- ==========================================
+         PAGE 3: 中上級（非同期・データ）
+    =========================================== -->
+    <div class="page-break" style="page-break-after: auto;">
+      <div class="section-header">
+        <h1>【中上級】 Async Processing & Persistence</h1>
+        <p style="color: var(--neon-orange); margin-top: 5px; font-weight: bold;">Promises, Fetch & LocalStorage</p>
+      </div>
+
+      <p>サーバーとの通信や、ローカル環境へのデータ保存など「時間の遅れ（非同期）」や「永続化」を扱う、現代のWeb開発において最も重要な領域です。</p>
+
+      <h2>1. 非同期処理と async / await</h2>
+      <p>ネットワーク通信やファイルの読み込みは、完了するまでに時間がかかります。処理をブロックせず、完了を待ってから次の処理を行うための仕組みが<code>Promise</code>と<code>async/await</code>です。</p>
+<pre><code><span class="c-keyword">async function</span> <span class="c-func">fetchConfig</span>() {
+  <span class="c-keyword">try</span> {
+    <span class="c-comment">// 通信の完了を「待つ」</span>
+    <span class="c-keyword">const</span> response = <span class="c-keyword">await</span> <span class="c-func">fetch</span>(<span class="c-string">'/api/config.json'</span>);
+    <span class="c-keyword">if</span> (!response.ok) {
+      <span class="c-keyword">throw new</span> Error(<span class="c-string">'ネットワークエラー'</span>);
+    }
+    <span class="c-keyword">const</span> data = <span class="c-keyword">await</span> response.<span class="c-func">json</span>();
+    console.<span class="c-func">log</span>(data);
+  } <span class="c-keyword">catch</span> (error) {
+    console.<span class="c-func">error</span>(<span class="c-string">'読み込み失敗:'</span>, error);
+  }
+}</code></pre>
+
+      <h2>2. localStorage を用いたデータ永続化</h2>
+      <p>ブラウザ上にデータを保存し、ページをリロードしても消えないようにします。保存できるのは「文字列」のみであるため、オブジェクトを保存する際はJSON形式に変換する必要があります。</p>
+<pre><code><span class="c-comment">// セーブデータの構築</span>
+<span class="c-keyword">const</span> saveData = {
+  level: <span class="c-number">5</span>,
+  inventory: [<span class="c-string">'sword'</span>, <span class="c-string">'potion'</span>],
+  lastPlayed: Date.<span class="c-func">now</span>()
+};
+
+<span class="c-comment">// 文字列に変換して保存 (Serialize)</span>
+localStorage.<span class="c-func">setItem</span>(<span class="c-string">'myApp_save'</span>, JSON.<span class="c-func">stringify</span>(saveData));
+
+<span class="c-comment">// データの読み込みと復元 (Deserialize)</span>
+<span class="c-keyword">const</span> loadedStr = localStorage.<span class="c-func">getItem</span>(<span class="c-string">'myApp_save'</span>);
+<span class="c-keyword">if</span> (loadedStr) {
+  <span class="c-keyword">const</span> restoredData = JSON.<span class="c-func">parse</span>(loadedStr);
+  console.<span class="c-func">log</span>(<span class="c-string">'ロード完了:'</span>, restoredData.level);
+}</code></pre>
+
+      <h2>3. Cookie と Storage の使い分け</h2>
+      <ul>
+        <li><strong>localStorage:</strong> 有効期限がなく、明示的に削除するまで残る。容量が大きい（約5MB）。UIの状態やセーブデータに最適。</li>
+        <li><strong>sessionStorage:</strong> タブやウィンドウを閉じると消える。一時的なフォーム入力の保持などに利用。</li>
+        <li><strong>Cookie:</strong> サーバー側にもリクエストの度に送信される。セッション管理や認証トークンの保持に使用されることが多い。</li>
+      </ul>
+      <div class="decorative-line"></div>
+    </div>
+
+  </div>
+</body>
+</html>
