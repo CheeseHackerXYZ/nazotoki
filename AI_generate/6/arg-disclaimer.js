@@ -102,7 +102,7 @@
         <div class="content">
           <div class="title">FICTION NOTICE / ARG</div>
           <p class="text">
-            このウェブサイトは体験型フィクション（ARG）です。実在の人物・団体・事件・法律等とは一切関係ありません。
+            本作品はARG（代替現実ゲーム）でありフィクションです。実在の人物、団体、法律、事件、地名、ウェブサイトなどとは一切関係ありません。現実の出来事として取り扱わないようご注意ください。
           </p>
         </div>
         <button class="close-btn" id="close-btn" aria-label="閉じる">×</button>
