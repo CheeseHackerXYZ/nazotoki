@@ -1,1 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+    background-color: #f8fafc;
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 8pt;
+      color: #64748b;
+    }
+  }
 
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    color: #1e293b;
+    font-size: 10pt;
+    line-height: 1.6;
+  }
+
+  /* Cover Banner */
+  .header-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #059669 100%);
+    color: #ffffff;
+    padding: 24px 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+  }
+
+  .header-banner h1 {
+    margin: 0 0 6px 0;
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f8fafc;
+  }
+
+  .header-banner p {
+    margin: 0;
+    font-size: 10pt;
+    color: #cbd5e1;
+  }
+
+  /* Section Styling */
+  .section {
+    margin-bottom: 22px;
+  }
+
+  h2 {
+    font-size: 14pt;
+    color: #1e1b4b;
+    border-left: 6px solid #10b981;
+    padding-left: 10px;
+    margin: 24px 0 12px 0;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 11.5pt;
+    color: #334155;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 4px;
+    margin: 16px 0 8px 0;
+    page-break-after: avoid;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+  }
+
+  /* Cards / Boxes */
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  .card-title {
+    font-weight: bold;
+    color: #059669;
+    margin-bottom: 6px;
+    font-size: 10.5pt;
+  }
+
+  .callout {
+    background-color: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+
+  .callout-title {
+    font-weight: bold;
+    color: #15803d;
+    margin-bottom: 4px;
+  }
+
+  /* Code Blocks */
+  pre {
+    background-color: #0f172a;
+    color: #f1f5f9;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin: 8px 0 12px 0;
+    page-break-inside: avoid;
+  }
+
+  code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background-color: #e2e8f0;
+    color: #0f172a;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 9pt;
+  }
+
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background-color: #1e293b;
+    color: #ffffff;
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+  }
+
+  ul, ol {
+    margin: 0 0 10px 0;
+    padding-left: 24px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  .highlight {
+    color: #e11d48;
+    font-weight: bold;
+  }
+
+  .diagram-box {
+    text-align: center;
+    background-color: #f1f5f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    font-weight: bold;
+    page-break-inside: avoid;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <h1>Web開発マスターガイド：HTML・CSS・JSの極意</h1>
+    <p>タグの基礎から、デザイン配置、JavaScriptでの動的アニメーション・画面遷移までを一気に学ぶ完全版</p>
+  </div>
+
+  <!-- ================= SECTION 1: HTML ================= -->
+  <div class="section">
+    <h2>第1章：HTMLの基本構造と主要タグ</h2>
+    <p>HTMLはWebページの「骨組み」です。基本ルールは<strong>「<code>&lt;タグ名&gt;</code> と <code>&lt;/タグ名&gt;</code> で文字や要素を挟む」</strong>だけです。</p>
+
+    <h3>1. 全体の基本構文</h3>
+    <p>どんなWebページも、必ずこの基本形から始まります。</p>
+<pre><code>&lt;!DOCTYPE html&gt; &lt;!-- これはHTML5で書かれていますという宣言 --&gt;
+&lt;html lang="ja"&gt;
+  &lt;head&gt;
+    &lt;!-- 画面には表示されない「裏側の設定」を書く場所 --&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- 実際に画面に表示される「中身」を書く場所 --&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+    <h3>2. &lt;head&gt; 内に書く設定タグ</h3>
+    <ul>
+      <li><code>&lt;meta charset="UTF-8"&gt;</code>：文字化けを防ぐおまじない（必須）。</li>
+      <li><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>：スマホやiPadで見たときに、画面サイズをピタッと合わせる設定。</li>
+      <li><code>&lt;meta name="robots" content="noindex"&gt;</code>：Google検索などの検索結果に「表示させないでね」という指示（テスト公開時などに使う）。</li>
+      <li><code>&lt;style&gt;</code>：この中にCSS（デザイン）を書き込みます。</li>
+    </ul>
+
+    <h3>3. &lt;body&gt; 内の主要な表示タグ</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>タグ名</th>
+          <th>役割</th>
+          <th>具体的な使い方</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>h1</code> 〜 <code>h3</code></td>
+          <td>見出し (Heading)</td>
+          <td><code>&lt;h1&gt;一番デカいタイトル&lt;/h1&gt;</code></td>
+        </tr>
+        <tr>
+          <td><code>p</code></td>
+          <td>段落 (Paragraph)</td>
+          <td><code>&lt;p&gt;普通の文章を書くときはコレで挟みます。&lt;/p&gt;</code></td>
+        </tr>
+        <tr>
+          <td><code>div</code></td>
+          <td>ブロックの箱</td>
+          <td>複数の要素をグループにまとめるための透明な箱。</td>
+        </tr>
+        <tr>
+          <td><code>span</code></td>
+          <td>インラインの箱</td>
+          <td>文章の「一部だけ」色を変えたい時などに使う箱。</td>
+        </tr>
+        <tr>
+          <td><code>button</code></td>
+          <td>ボタン</td>
+          <td><code>&lt;button&gt;押してね&lt;/button&gt;</code></td>
+        </tr>
+        <tr>
+          <td><code>input</code></td>
+          <td>入力欄</td>
+          <td>文字を打ち込む枠。※ <code>&lt;/input&gt;</code> で閉じない単独タグ。</td>
+        </tr>
+        <tr>
+          <td><code>img</code></td>
+          <td>画像表示</td>
+          <td>画像を出す。※ これも閉じない単独タグ。</td>
+        </tr>
+        <tr>
+          <td><code>a</code></td>
+          <td>リンク（移動）</td>
+          <td><code>&lt;a href="URL"&gt;ここを押すと飛ぶよ&lt;/a&gt;</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title">💡 知っておくとカッコいい応用タグ（存在だけ紹介！）</div>
+      <ul>
+        <li><code>&lt;iframe&gt;</code>：自分のページの中に、YouTubeや他のWebサイトの小窓を「埋め込む」ことができます。</li>
+        <li><code>&lt;canvas&gt;</code>：絵を描くための画用紙。JSを組み合わせると、図形を描いたりゲーム画面を作ったりできます。</li>
+      </ul>
+    </div>
+
+    <h3>4. 【重要】&lt;script&gt; タグを書く場所と実行順序</h3>
+    <p>JavaScriptを読み込む <code>&lt;script&gt;</code> は、<strong><code>&lt;body&gt;</code> の一番下（閉じる直前）</strong>に書くのが基本です。</p>
+    <p>理由は、ブラウザがHTMLを「上から下へ順番に」読み込むからです。もし <code>&lt;head&gt;</code> の中にJSを書くと、「まだHTMLの画面が作られていないのにJSが動こうとしてエラーになる」ことがあります。お尻に書けば、画面が完成してからJSが動くので安全です。</p>
+  </div>
+
+  <!-- ================= SECTION 2: Attributes ================= -->
+  <div class="section">
+    <h2>第2章：属性（Attribute）とパス</h2>
+    <p>タグの中に埋め込んで、機能や名前などの「追加情報」を持たせるものを<strong>属性</strong>と呼びます。</p>
+
+    <h3>1. よく使う属性一覧</h3>
+    <ul>
+      <li><strong><code>type</code>：</strong> <code>input</code> に使います。（例：<code>type="text"</code> なら文字、<code>type="password"</code> なら伏せ字、<code>type="number"</code> なら数字専用）</li>
+      <li><strong><code>value</code>：</strong> 入力欄の「初期値」や、ボタンの文字。（例：<code>&lt;input value="最初の文字"&gt;</code>）</li>
+      <li><strong><code>src</code>：</strong> 画像やファイルの「場所」を指定。（例：<code>&lt;img src="pic.jpg"&gt;</code>）</li>
+      <li><strong><code>href</code>：</strong> リンク先のURL。（例：<code>&lt;a href="https://..."&gt;</code>）</li>
+      <li><strong><code>style</code>：</strong> HTMLの中に直接CSSを書く。（例：<code>&lt;p style="color: red;"&gt;</code>）</li>
+      <li><strong><code>onclick</code>：</strong> クリックされた時にJSを動かす。（例：<code>&lt;button onclick="関数名()"&gt;</code>）</li>
+    </ul>
+
+    <h3>2. 【超重要】id と class の決定的な違い</h3>
+    <p>CSSでデザインを当てたり、JSで要素を操作するためには、タグに「名前」をつける必要があります。それが <code>id</code> と <code>class</code> です。</p>
+    <div class="card">
+      <p>🔴 <strong>id (アイディー) = ページに1人だけの「背番号」</strong></p>
+      <p>同じページ内に同じ名前は<strong>1回しか使えません。</strong> JSで「あの要素だけを確実に動かしたい！」という時に使います。（例：<code>id="main-title"</code>）</p>
+      <hr style="border:0; border-top:1px solid #e2e8f0; margin:10px 0;">
+      <p>🔵 <strong>class (クラス) = みんなで共有する「学年・組」</strong></p>
+      <p>同じページに<strong>何回でも使い回せます。</strong> CSSで「このグループは全部赤色にして」とまとめてデザインするときに使います。（例：<code>class="red-button"</code>）</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">📂 【コラム】絶対パス vs 相対パス（リンクや画像の場所の書き方）</div>
+      <p><strong>絶対パス：</strong> <code>https://example.com/img/a.jpg</code> のように、地球上のどこからでも辿り着ける完全なURL。外部サイトに繋ぐ時に使います。</p>
+      <p><strong>相対パス：</strong> <code>./img/a.jpg</code> や <code>../index.html</code> のように、「今のファイルから見て、どこにあるか」を指定する方法。自分のプロジェクト内（フォルダ内）を行き来する時は、必ず相対パスを使います（サーバーにアップした時にリンク切れしないため）。</p>
+    </div>
+  </div>
+
+  <!-- ================= SECTION 3: CSS ================= -->
+  <div class="section">
+    <h2>第3章：CSSでデザインとレイアウトを操る</h2>
+    <p>CSSは「どの要素を」「どうする」というルールで書きます。</p>
+
+<pre><code>/* セレクタ { プロパティ: 値; } */
+p { color: red; }            /* タグ名を指定 */
+.red-button { color: red; }  /* クラス名を指定（先頭にドット . ） */
+#main-title { color: blue; } /* id名を指定（先頭にハッシュ # ） */</code></pre>
+
+    <h3>1. 主なプロパティ</h3>
+    <ul>
+      <li><code>color</code>：文字の色</li>
+      <li><code>background-color</code>：背景の色</li>
+      <li><code>font-family</code>：フォントの種類（ゴシック体、明朝体など）</li>
+      <li><code>font-size</code>：文字の大きさ（pxやremで指定）</li>
+      <li><code>width</code> / <code>height</code>：横幅 / 高さ</li>
+      <li><code>z-index</code>：重なりの順序（数字が大きいほど手前・上にくる）</li>
+    </ul>
+
+    <h3>2. 枠線の「外側」か「内側」か（margin と padding）</h3>
+    <p>初心者が一番迷うポイントです。要素には「目に見えない枠（Border）」があります。</p>
+    <div class="diagram-box">
+      [ ↑ margin (外側のすき間・隣との距離) ]<br>
+      ----------------------------------------- (枠線 Border)<br>
+      [ ↓ padding (内側のゆとり・文字までの距離) ]<br>
+      コンテンツ (文字など)
+    </div>
+    <p>ボタンを例にすると、<code>padding</code> を増やすと「ボタン自体がデカく（ふっくら）」なり、<code>margin</code> を増やすと「隣のボタンとの距離が離れる」ことになります。</p>
+
+    <h3>3. レイアウトの最強呪文「display」</h3>
+    <p>要素の並び方を決定する超重要プロパティです。</p>
+    <table>
+      <tr><td><code>display: block;</code></td><td><strong>ブロック（箱）：</strong> 横幅いっぱいに広がり、前後に改行が入る（<code>h1</code>や<code>div</code>の初期値）。</td></tr>
+      <tr><td><code>display: inline;</code></td><td><strong>インライン（文字の一部）：</strong> 改行されず横に並ぶ。幅(width)や高さは指定できない（<code>span</code>や<code>a</code>の初期値）。</td></tr>
+      <tr><td><code>display: flex;</code></td><td><strong>フレックス：</strong> 中の要素を<strong>自由自在に横並び・中央揃え</strong>にできる現代の最強レイアウト。</td></tr>
+      <tr><td><code>display: none;</code></td><td><strong>非表示：</strong> 画面から完全に消し去る。JSと組み合わせて「クリックで表示/非表示」によく使う。</td></tr>
+    </table>
+  </div>
+
+  <!-- ================= SECTION 4: JS ================= -->
+  <div class="section">
+    <h2>第4章：JavaScriptで動きとロジックを作る</h2>
+    
+    <h3>1. 基本中の基本</h3>
+    <ul>
+      <li><strong>変数（let）と定数（const）：</strong> 値を入れておく箱です。昔は <code>var</code> がありましたが今は使いません。途中で中身が変わるなら <code>let</code>、絶対変わらないなら <code>const</code> を使います。</li>
+      <li><strong>文字列：</strong> 文字は必ず <code>"こんにちは"</code> か <code>'こんにちは'</code> のようにクォーテーションで囲みます。</li>
+      <li><strong>配列：</strong> 複数のデータをひとまとめにします。<code>let arr = [1, 2, 3];</code> のように <code>[ ]</code> を使います。</li>
+    </ul>
+
+    <h3>2. JSからHTMLを操る（DOM操作）</h3>
+    <p>JSで画面を書き換えるには、まず <code>document.getElementById()</code> で要素（idの背番号）を捕まえます。</p>
+<pre><code>// ① HTMLにある <input id="myInput"> の中身を書き換える
+let inputElement = document.getElementById("myInput");
+inputElement.value = "書き換えました！";
+
+// ② HTMLにある <div id="myBox"> のCSS（色と表示）を書き換える
+let boxElement = document.getElementById("myBox");
+boxElement.style.backgroundColor = "blue"; // JSではハイフンを使わず大文字にする（camelCase）
+boxElement.style.display = "none";         // 画面から消す</code></pre>
+
+    <h3>3. 関数（function）とイベント</h3>
+    <p>「〜する処理」をひとまとめにしたものが関数です。<strong>引数（ひきすう）</strong>を渡すと、少しずつ動きを変えて使い回せます。</p>
+<pre><code>// 引数（message）を受け取って表示する関数
+function showMessage(message) {
+    alert(message);
+}</code></pre>
+    <p>これをHTMLの <code>onclick</code> 属性と組み合わせると、ボタンが押された時にJSが走ります。<br>
+    例：<code>&lt;button onclick="showMessage('こんにちは！')"&gt;押す&lt;/button&gt;</code></p>
+
+    <h3>4. 【超便利】丸暗記すべき4つの魔法のコマンド</h3>
+    <div class="card">
+      <p><code>console.log("ログ");</code><br>画面には出ず、開発者ツールの「Console」に表示されます。変数の値がちゃんと取れているか、裏側で確認（デバッグ）する時の最強ツールです。</p>
+      <p><code>alert("文章");</code><br>画面にポップアップ通知を出します。（iPadなどで開発者ツールが見づらい環境では、これがデバッグ代わりになって超便利です！）</p>
+      <p><code>window.location.href = "https://...";</code><br>今の画面を、指定したURLに移動（ページ遷移）させます。</p>
+      <p><code>window.open("https://...");</code><br>新しいタブ（別ウィンドウ）を開いて、指定したURLを表示させます。</p>
+    </div>
+  </div>
+
+  <!-- ================= SECTION 5: SAMPLE ================= -->
+  <div class="section">
+    <h2>第5章：総合まとめ！魔法のステータスカード</h2>
+    <p>ここまで学んだ HTML + CSS + JS を全部組み合わせた1枚のサンプルコードです。</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ja"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;style&gt;
+    /* --- CSSの世界 --- */
+    body {
+      background-color: #f1f5f9;
+      font-family: sans-serif;
+    }
+    
+    /* フレックスボックスで画面のド真ん中に配置 */
+    .container {
+      display: flex;
+      flex-direction: column; 
+      align-items: center;
+      margin-top: 50px;
+    }
+    
+    /* カードのデザイン */
+    #statusBox {
+      background-color: white;
+      padding: 20px;       /* 内側のゆとり */
+      margin-bottom: 20px; /* 外側（下）のすき間 */
+      width: 300px;
+      border: 2px solid #333;
+      text-align: center;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- --- HTMLの世界 --- --&gt;
+  &lt;div class="container"&gt;
+    &lt;h2&gt;ステータス変更パネル&lt;/h2&gt;
+
+    &lt;!-- idはJavaScriptで操作するための背番号 --&gt;
+    &lt;div id="statusBox"&gt;
+      &lt;h3 id="nameText"&gt;名無し&lt;/h3&gt;
+      &lt;p&gt;レベル: &lt;span id="levelText"&gt;1&lt;/span&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 文字入力欄（初期値は空） --&gt;
+    &lt;input type="text" id="nameInput" value="" placeholder="名前を入力"&gt;
+    
+    &lt;!-- onclickでJSの関数を呼び出す --&gt;
+    &lt;button onclick="updateStatus()" style="margin-top: 10px;"&gt;更新する！&lt;/button&gt;
+    
+    &lt;!-- aタグで別ページへのリンク（相対パスの例） --&gt;
+    &lt;a href="./next-page.html" style="margin-top: 20px;"&gt;次のページへ移動&lt;/a&gt;
+  &lt;/div&gt;
+
+  &lt;!-- --- JavaScriptの世界 (HTMLの下に書く) --- --&gt;
+  &lt;script&gt;
+    // 「更新する！」ボタンを押したときに呼ばれる関数
+    function updateStatus() {
+      // 1. input要素を取得して、入力された文字(value)を取り出す
+      const inputElement = document.getElementById("nameInput");
+      const newName = inputElement.value; // letではなくconstで安全に値を取得
+      
+      // もし名前が空っぽなら、アラートを出して終了（ガード節）
+      if (newName === "") {
+        alert("名前を入力してください！");
+        return; 
+      }
+      
+      // 2. 名前の表示(h3)を書き換える
+      const nameTextElement = document.getElementById("nameText");
+      nameTextElement.innerHTML = newName;
+      
+      // 3. statusBoxの背景色をCSS(style)で青色に変える
+      const boxElement = document.getElementById("statusBox");
+      boxElement.style.backgroundColor = "#e0f2fe";
+      
+      // 4. 裏側で確認用のログを出す
+      console.log("名前が " + newName + " に更新されました！");
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+
+</body>
+</html>
