@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Core Syntax & Universal Fundamentals 教科書</title>
+  <style>
+    :root {
+      --primary-color: #3178c6;
+      --secondary-color: #2b7489;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #212529;
+      --code-bg: #1e1e1e;
+      --code-color: #d4d4d4;
+      --border-color: #e9ecef;
+      --accent-color: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2b7489, #3178c6);
+      color: white;
+      padding: 40px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    nav.toc {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border: 1px solid var(--border-color);
+    }
+
+    nav.toc h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+
+    nav.toc ul {
+      list-style-type: none;
+      padding-left: 10px;
+    }
+
+    nav.toc li {
+      margin-bottom: 6px;
+    }
+
+    nav.toc a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav.toc a:hover {
+      text-decoration: underline;
+    }
+
+    section {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      color: var(--secondary-color);
+      margin-top: 25px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--secondary-color);
+      padding-left: 10px;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 12px;
+    }
+
+    ul, ol {
+      margin-bottom: 15px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    code {
+      background-color: #f1f3f5;
+      color: #d63384;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-color);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 15px;
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .callout {
+      background-color: #fffbeeb0;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f1f3f5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>JavaScript Core Syntax & Universal Fundamentals</h1>
+    <p>標準文法からブラウザDOM・イベント制御までを完全マスターする完全完全解説教科書</p>
+  </header>
+
+  <nav class="toc">
+    <h2>目次</h2>
+    <ul>
+      <li><a href="#section1">1. 基本文法 & データ型</a></li>
+      <li><a href="#section2">2. オブジェクトの徹底理解</a></li>
+      <li><a href="#section3">3. 関数の深掘り</a></li>
+      <li><a href="#section4">4. ブラウザ機能 & イベント全網羅（DOM Events）</a></li>
+    </ul>
+  </nav>
+
+  <section id="section1">
+    <h2>1. 基本文法 & データ型</h2>
+    
+    <h3>1.1 変数宣言（const, let）とスコープの仕組み</h3>
+    <p>JavaScriptにおいて変数を宣言するキーワードは主に <code>const</code> と <code>let</code> です。（※ <code>var</code> は再宣言可能かつスコープの挙動が複雑なため現在では非推奨です。）</p>
+
+    <ul>
+      <li><strong>const (定数)</strong>: 再代入が不可能な変数を宣言します。基本的にはすべての変数宣言で <code>const</code> を優先的に使用します。</li>
+      <li><strong>let (変数)</strong>: 値が後から再代入される場合に使用します。</li>
+    </ul>
+
+    <h4>スコープ（有効範囲）の種類</h4>
+    <ul>
+      <li><strong>グローバルスコープ</strong>: プログラム全体から参照可能。</li>
+      <li><strong>関数スコープ</strong>: <code>function</code> 内で有効。</li>
+      <li><strong>ブロックスコープ</strong>: <code>{ ... }</code>（<code>if</code>文や<code>for</code>文など）の中で有効。<code>const</code> と <code>let</code> はブロックスコープに従います。</li>
+    </ul>
+
+<pre><code>// ブロックスコープの例
+{
+  const x = 10;
+  let y = 20;
+}
+// console.log(x); // ReferenceError: x is not defined
+// console.log(y); // ReferenceError: y is not defined
+</code></pre>
+
+    <h3>1.2 基本的なデータ型と型変換</h3>
+    <p>JavaScriptのデータ型は大きく<strong>プリミティブ型</strong>と<strong>オブジェクト型</strong>に分かれます。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>分類</th>
+          <th>データ型</th>
+          <th>説明 / 例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">プリミティブ型<br>(不変・値渡し)</td>
+          <td><code>string</code></td>
+          <td>文字列 ("Hello", 'JS')</td>
+        </tr>
+        <tr>
+          <td><code>number</code></td>
+          <td>数値 (10, 3.14, Infinity, NaN)</td>
+        </tr>
+        <tr>
+          <td><code>boolean</code></td>
+          <td>真偽値 (true / false)</td>
+        </tr>
+        <tr>
+          <td><code>undefined</code></td>
+          <td>未定義（値が設定されていない状態）</td>
+        </tr>
+        <tr>
+          <td><code>null</code></td>
+          <td>空の値（明示的に「何もない」ことを意味する）</td>
+        </tr>
+        <tr>
+          <td><code>symbol</code> / <code>bigint</code></td>
+          <td>一意の値 / 巨大な整数</td>
+        </tr>
+        <tr>
+          <td>オブジェクト型</td>
+          <td><code>Object</code>, <code>Array</code>, <code>Function</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>型変換（Implicit & Explicit Type Conversion）</h4>
+    <p>JavaScriptでは自動的に型が変換される「暗黙の型変換」と、関数を使って意図的に行う「明示的な型変換」があります。</p>
+
+<pre><code>// 暗黙の型変換
+console.log("5" + 3);  // "53" (数値が文字列に結合される)
+console.log("5" - 3);  // 2    (文字列が自動的に数値に変換される)
+
+// 明示的な型変換
+const strNum = "123";
+const num = Number(strNum); // 数値型 123
+const str = String(100);    // 文字列型 "100"
+const bool = Boolean(1);    // true (0は false, 1以上は true)
+</code></pre>
+
+    <h3>1.3 制御構文</h3>
+
+    <h4>条件分岐 (if / switch)</h4>
+<pre><code>// if / else if / else
+const score = 85;
+if (score >= 90) {
+  console.log("A判定");
+} else if (score >= 70) {
+  console.log("B判定");
+} else {
+  console.log("C判定");
+}
+
+// switch
+const role = "admin";
+switch (role) {
+  case "admin":
+    console.log("管理者権限");
+    break;
+  case "user":
+    console.log("一般ユーザー");
+    break;
+  default:
+    console.log("ゲスト");
+}
+</code></pre>
+
+    <h4>ループ (for / while)</h4>
+<pre><code>// for ループ
+for (let i = 0; i &lt; 3; i++) {
+  console.log(`カウント: ${i}`);
+}
+
+// while ループ
+let count = 0;
+while (count &lt; 3) {
+  console.log(`while: ${count}`);
+  count++;
+}
+</code></pre>
+  </section>
+
+  <section id="section2">
+    <h2>2. オブジェクトの徹底理解</h2>
+
+    <h3>2.1 プロパティの取得・追加・削除・階層アクセス</h3>
+    <p>オブジェクトは「キーと値（キー・バリュー）」のペアでデータを保持します。</p>
+
+<pre><code>const user = {
+  name: "Alice",
+  age: 25,
+  address: {
+    city: "Tokyo",
+    zip: "100-0001"
+  }
+};
+
+// 1. プロパティの取得 (ドット記法 & ブラケット記法)
+console.log(user.name);         // "Alice"
+console.log(user["age"]);       // 25
+
+// 2. 追加・更新
+user.job = "Developer";         // 追加
+user.age = 26;                  // 更新
+
+// 3. 削除
+delete user.job;
+
+// 4. 階層アクセス & オプショナルチェイニング (?.)
+// 存在しないプロパティでもエラーを出さず undefined を返す
+console.log(user.address?.city);  // "Tokyo"
+console.log(user.company?.name);  // undefined
+</code></pre>
+
+    <h3>2.2 メソッドの定義と使い方</h3>
+    <p>オブジェクトのプロパティに関数を割り当てたものを「メソッド」と呼びます。</p>
+
+<pre><code>const calculator = {
+  factor: 2,
+  // ES6の省略記法
+  multiply(number) {
+    // this はこのオブジェクト自身を指す
+    return number * this.factor;
+  }
+};
+
+console.log(calculator.multiply(5)); // 10
+</code></pre>
+
+    <h3>2.3 オブジェクトの分割代入・スプレッド構文</h3>
+
+    <h4>分割代入 (Destructuring Assignment)</h4>
+<pre><code>const person = { name: "Bob", age: 30, country: "Japan" };
+
+// オブジェクトから特定のプロパティを抽出
+const { name, age } = person;
+console.log(name, age); // "Bob" 30
+</code></pre>
+
+    <h4>スプレッド構文 (Spread Syntax `...`)</h4>
+<pre><code>const item = { id: 1, title: "Book" };
+const details = { price: 1500, stock: 10 };
+
+// オブジェクトのマージ（結合）
+const product = { ...item, ...details, category: "Goods" };
+console.log(product); // { id: 1, title: "Book", price: 1500, stock: 10, category: "Goods" }
+</code></pre>
+
+    <h3>2.4 値渡しと参照渡しの違い（シャローコピー / ディープコピー）</h3>
+
+    <div class="callout">
+      <strong>重要原則:</strong>
+      <ul>
+        <li><strong>プリミティブ型:</strong> 「値渡し」→ コピー時に値そのものが新しく作成される（お互いに影響しない）。</li>
+        <li><strong>オブジェクト型:</strong> 「参照渡し」→ コピー時にメモリ上の参照先アドレスが共有される（一方の変更が他方に波及する）。</li>
+      </ul>
+    </div>
+
+<pre><code>// 参照渡しの罠
+const objA = { count: 1 };
+const objB = objA; // 参照がコピーされる
+objB.count = 99;
+console.log(objA.count); // 99 (objAの内容も変わってしまう)
+
+// シャローコピー (浅いコピー: 1階層目のみ独立複製)
+const shallowCopy = { ...objA };
+
+// ディープコピー (深いコピー: ネストしたすべての階層を完全独立複製)
+const deepCopy = structuredClone(objA); // モダンJS標準機能
+</code></pre>
+  </section>
+
+  <section id="section3">
+    <h2>3. 関数の深掘り</h2>
+
+    <h3>3.1 関数宣言、関数式、アロー関数の使い分け</h3>
+
+<pre><code>// 1. 関数宣言 (Hoisting: 宣言前に呼び出し可能)
+function sum1(a, b) {
+  return a + b;
+}
+
+// 2. 関数式 (変数に代入。定義前の実行は不可)
+const sum2 = function(a, b) {
+  return a + b;
+};
+
+// 3. アロー関数 (ES6〜 簡潔な記法。自身の this を持たない)
+const sum3 = (a, b) => a + b;
+</code></pre>
+
+    <h3>3.2 引数（デフォルト引数、残余引数 ...args）</h3>
+
+<pre><code>// デフォルト引数 (引数が渡されない・undefinedの時の初期値)
+function greet(name = "ゲスト") {
+  console.log(`こんにちは、${name}さん`);
+}
+greet(); // "こんにちは、ゲストさん"
+
+// 残余引数 (Rest Parameters) : 複数の引数を配列として受け取る
+function calculateTotal(...prices) {
+  return prices.reduce((acc, curr) => acc + curr, 0);
+}
+console.log(calculateTotal(100, 200, 300)); // 600
+</code></pre>
+
+    <h3>3.3 関数の返り値（return）の設計と実際の利用パターン</h3>
+    <p>関数の役割は「入力を受け取り、処理を行い、<code>return</code> で呼び出し元に結果を渡す」ことです。単一責任の原則に従い、処理結果を関数外へ渡す設計を行います。</p>
+
+<pre><code>// 関数の連携パターン
+function validateAge(age) {
+  return age >= 18;
+}
+
+function getAccessMessage(user) {
+  // 別の関数を内部で呼び出して連携
+  const isAdult = validateAge(user.age);
+  if (isAdult) {
+    return `${user.name}さんはアクセス可能です。`;
+  }
+  return `${user.name}さんは未成年です。`;
+}
+
+const userAccount = { name: "Taro", age: 20 };
+const result = getAccessMessage(userAccount);
+console.log(result); // "Taroさんはアクセス可能です。"
+</code></pre>
+  </section>
+
+  <section id="section4">
+    <h2>4. ブラウザ機能 & イベント全網羅（DOM Events）</h2>
+
+    <h3>4.1 DOM取得・変更</h3>
+<pre><code>// 1. DOMの取得
+const titleEl = document.querySelector("#title"); // 単一要素
+const items = document.querySelectorAll(".item");   // 該当する全要素 (NodeList)
+
+// 2. テキスト・HTML内容の変更
+titleEl.textContent = "新しいタイトル"; // セキュアなテキスト挿入
+
+// 3. クラス（スタイル）操作
+titleEl.classList.add("active");      // クラス追加
+titleEl.classList.remove("hidden");   // クラス削除
+titleEl.classList.toggle("highlight");// なければ追加、あれば削除
+console.log(titleEl.classList.contains("active")); // true
+</code></pre>
+
+    <h3>4.2 イベント分類と実践</h3>
+    <p><code>addEventListener('event', callback)</code> を使用して各種イベントを監視します。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>カテゴリー</th>
+          <th>主なイベント名</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>マウス・ポインター系</td>
+          <td><code>click</code>, <code>pointerdown</code>, <code>pointermove</code>, <code>pointerup</code>, <code>contextmenu</code></td>
+          <td>クリック、タッチ/マウスの押し込み、移動、離した時、右クリックメニュー開画時。</td>
+        </tr>
+        <tr>
+          <td>キーボード系</td>
+          <td><code>keydown</code>, <code>keyup</code></td>
+          <td>キーを押した瞬間、離した瞬間。</td>
+        </tr>
+        <tr>
+          <td>フォーム・入力系</td>
+          <td><code>input</code>, <code>change</code>, <code>submit</code>, <code>focus</code>, <code>blur</code></td>
+          <td>入力時のリアルタイム変更、確定時、送信時、フォーカス取得/外れた時。</td>
+        </tr>
+        <tr>
+          <td>ウィンドウ・ビューポート系</td>
+          <td><code>resize</code>, <code>scroll</code>, <code>DOMContentLoaded</code>, <code>load</code></td>
+          <td>画面リサイズ、スクロール、DOM構築完了、画像を含む全リソース読み込み完了。</td>
+        </tr>
+        <tr>
+          <td>タッチ・ドラッグ系</td>
+          <td><code>touchstart</code>, <code>touchmove</code>, <code>dragstart</code>, <code>drop</code></td>
+          <td>スマホ等のタッチ開始/移動、ドラッグ開始/ドロップ処理。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>キーボード判定の実践コード (e.key vs e.code)</h4>
+<pre><code>document.addEventListener("keydown", (e) => {
+  // e.key  : 入力された文字・意味 (例: "a", "Enter", "A")
+  // e.code : 物理的なキー位置 (例: "KeyA", "Enter")
+  if (e.code === "Enter") {
+    console.log("Enterキーが押されました");
+  }
+});
+</code></pre>
+
+    <h3>4.3 イベントオブジェクト（e.preventDefault, e.stopPropagation, イベント委譲）</h3>
+
+    <h4>1. `e.preventDefault()` : デフォルト動作のキャンセル</h4>
+    <p>フォーム送信時のページリロードや、リンク（<code>&lt;a&gt;</code>）の遷移などの標準動作を停止します。</p>
+<pre><code>const form = document.querySelector("#myForm");
+form.addEventListener("submit", (e) => {
+  e.preventDefault(); // 画面リロードを停止
+  console.log("JS側で送信処理を実行します");
+});
+</code></pre>
+
+    <h4>2. `e.stopPropagation()` : イベント伝播（バブリング）の停止</h4>
+    <p>子要素で発生したイベントが親要素に連鎖的に伝わる（バブリングする）のを防ぎます。</p>
+<pre><code>const button = document.querySelector("#childBtn");
+button.addEventListener("click", (e) => {
+  e.stopPropagation(); // 親要素へのイベント伝播を停止
+  console.log("ボタンのみ処理を実行");
+});
+</code></pre>
+
+    <h4>3. イベント委譲（Event Delegation）</h4>
+    <p>親要素に1つだけリスナーを設定し、子要素（または動的に追加された要素）のイベントをまとめて効率的に管理する設計パターンです。</p>
+
+<pre><code>// HTML構造例: &lt;ul id="list"&gt;&lt;li&gt;Item 1&lt;/li&gt;&lt;li&gt;Item 2&lt;/li&gt;&lt;/ul&gt;
+
+const list = document.querySelector("#list");
+
+// 親要素 ul にイベントリスナーを設定
+list.addEventListener("click", (e) => {
+  // クリックされたターゲットが li 要素か判定
+  const targetItem = e.target.closest("li");
+  
+  if (targetItem &amp;&amp; list.contains(targetItem)) {
+    console.log(`クリックされた要素: ${targetItem.textContent}`);
+  }
+});
+</code></pre>
+
+  </section>
+
+  <footer>
+    <p>JavaScript Core Syntax & Universal Fundamentals Complete Handbook</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
