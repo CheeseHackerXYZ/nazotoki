@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>社内ポータル | Mnemosyne</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #0f0;
+            font-family: "Courier New", Courier, monospace;
+            margin: 0; padding: 20px;
+            -webkit-user-select: none;
+            overflow: hidden; /* スクロール禁止 */
+        }
+        #auth-error { display: none; color: red; text-align: center; margin-top: 50px; }
+        #secure-content { display: none; }
+        
+        h1 { border-bottom: 1px solid #0f0; padding-bottom: 10px; }
+        
+        .log-entry { margin-bottom: 20px; }
+        .alert { color: #f39c12; }
+
+        /* データ復元パズルのUI */
+        #puzzle-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 1px dashed #333;
+            margin: 40px auto;
+            background: #111;
+        }
+        
+        /* ターゲット（受け皿）となる模様 */
+        .fragment-target {
+            position: absolute;
+            top: 100px; left: 100px;
+            width: 80px; height: 80px;
+            border: 2px solid #333;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, #222 10px, #222 20px);
+            box-sizing: border-box;
+        }
+        
+        /* プレイヤーが動かすデータ断片 */
+        .fragment-draggable {
+            position: absolute;
+            top: 20px; left: 20px;
+            width: 80px; height: 80px;
+            border: 2px solid #0f0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,255,0,0.2) 10px, rgba(0,255,0,0.2) 20px);
+            box-sizing: border-box;
+            box-shadow: 0 0 10px #0f0;
+            z-index: 10;
+        }
+
+        /* 最終的な真相の表示領域 */
+        #truth-reveal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #8b0000;
+            color: white;
+            padding: 40px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+        .glitch { font-size: 2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="auth-error">
+    <h2>[ ACCESS DENIED ]</h2>
+    <p>有効な認証キーが見つかりません。アクセスは記録されました。</p>
+    <a href="index.html" style="color:#0f0;">トップへ戻る</a>
+</div>
+
+<div id="secure-content">
+    <h1>Mnemosyne 内部データベース</h1>
+    <div class="log-entry">
+        > ユーザー認証確認... [ OK ]<br>
+        > 権限レベル... [ ADMIN ]
+    </div>
+    
+    <div class="log-entry alert">
+        [警告] アーカイブ #8902 に破損を検知しました。<br>
+        [指示] 機密データです。手動オーバーライドによりデータ断片を物理的に結合し、復号化してください。
+    </div>
+
+    <!-- 謎解き（操作パズル）：断片を重ね合わせる -->
+    <div id="puzzle-area">
+        <div class="fragment-target" id="target"></div>
+        <div class="fragment-draggable" id="draggable"></div>
+    </div>
+    <div style="text-align:center; color:#888;">指で緑色の断片をドラッグし、欠落部分（黒い枠）と完全に重ね合わせよ</div>
+</div>
+
+<div id="truth-reveal">
+    <div class="glitch">【極秘ファイル展開】</div>
+    <p>対象者：[閲覧しているあなた]</p>
+    <p>記録：対象者は我々の「記憶改ざんプロジェクト」の真実に気づきつつある。</p>
+    <p>処理指示：対象者のデバイスIPを特定済み。これより遠隔操作にて、対象者の社会記録、通信履歴、および存在証明の完全消去プロセスへ移行する。</p>
+    <p style="margin-top: 50px;">……逃げても無駄です。すでにあなたのデータは消え始めています。</p>
+</div>
+
+<script>
+    // 【ARGの基本】URLの直打ちを防ぐ（権限チェック）
+    const authKey = localStorage.getItem('mnemosyne_auth');
+    if (authKey !== 'GRANTED') {
+        document.getElementById('auth-error').style.display = 'block';
+    } else {
+        document.getElementById('secure-content').style.display = 'block';
+        initPuzzle();
+    }
+
+    function initPuzzle() {
+        const draggable = document.getElementById('draggable');
+        const target = document.getElementById('target');
+        const puzzleArea = document.getElementById('puzzle-area');
+        
+        let isDragging = false;
+        
+        // ターゲットの絶対座標（パズルエリア内）
+        const targetX = 100;
+        const targetY = 100;
+
+        draggable.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+
+        draggable.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            // タッチ座標からエリア内の相対位置を計算
+            const touch = e.touches[0];
+            const areaRect = puzzleArea.getBoundingClientRect();
+            
+            // 指の中心に要素が来るように調整
+            let x = touch.clientX - areaRect.left - 40;
+            let y = touch.clientY - areaRect.top - 40;
+            
+            // 枠外に出ないように制限
+            x = Math.max(0, Math.min(x, puzzleArea.clientWidth - 80));
+            y = Math.max(0, Math.min(y, puzzleArea.clientHeight - 80));
+
+            draggable.style.left = x + 'px';
+            draggable.style.top = y + 'px';
+
+            // 結合判定（誤差5px以内で重なったらクリア）
+            if (Math.abs(x - targetX) < 5 && Math.abs(y - targetY) < 5) {
+                isDragging = false;
+                draggable.style.left = targetX + 'px';
+                draggable.style.top = targetY + 'px';
+                draggable.style.borderColor = "#fff";
+                draggable.style.boxShadow = "0 0 20px #fff";
+                
+                unlockTruth();
+            }
+        });
+
+        draggable.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    }
+
+    function unlockTruth() {
+        // パズルクリア時の演出
+        setTimeout(() => {
+            // ストレージのキーを消去（一度きりの体験にする）
+            localStorage.removeItem('mnemosyne_auth');
+            
+            const secureContent = document.getElementById('secure-content');
+            const truthReveal = document.getElementById('truth-reveal');
+            
+            secureContent.style.display = 'none';
+            truthReveal.style.display = 'block';
+            
+            // バイブレーション（対応デバイスのみ）
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
