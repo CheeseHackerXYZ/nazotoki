@@ -1,10 +1,10 @@
 # CHANGELOG.md
 
 ### 追加
-- 2026-7-28 [@ch] CHANGELOG.mdを作成しました。
+- 2026-7-28 [ちーず] CHANGELOG.mdを作成しました。
 
 
 
 
 
-[@ch]: https://github.com/CheeseHackerXYZ
+[ちーず]: (https://github.com/CheeseHackerXYZ)
