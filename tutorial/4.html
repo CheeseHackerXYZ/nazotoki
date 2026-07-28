@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS完全攻略教科書：モダンWebデザイン全制覇ガイド</title>
+  <style>
+    /* --------------------------------------------------
+       印刷・PDF出力用ページ設定
+    -------------------------------------------------- */
+    @page {
+      size: A4;
+      margin: 15mm 12mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 8pt;
+        color: #64748b;
+      }
+    }
+
+    /* --------------------------------------------------
+       ベーススタイル
+    -------------------------------------------------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      color: #0f172a;
+      background-color: #f8fafc;
+      font-size: 9.5pt;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* --------------------------------------------------
+       ヘッダーバナー
+    -------------------------------------------------- */
+    .header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2563eb 100%);
+      color: #ffffff;
+      padding: 28px 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-banner h1 {
+      margin: 0 0 8px 0;
+      font-size: 22pt;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #f8fafc;
+    }
+
+    .header-banner p {
+      margin: 0;
+      font-size: 10.5pt;
+      color: #cbd5e1;
+    }
+
+    /* --------------------------------------------------
+       見出し・章見出し
+    -------------------------------------------------- */
+    .section {
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: 14pt;
+      color: #1e1b4b;
+      border-left: 6px solid #2563eb;
+      padding-left: 12px;
+      margin: 28px 0 14px 0;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 11pt;
+      color: #334155;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 4px;
+      margin: 18px 0 10px 0;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 8px 0;
+    }
+
+    /* --------------------------------------------------
+       カード・コラム・図解
+    -------------------------------------------------- */
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      color: #1d4ed8;
+      margin-bottom: 4px;
+    }
+
+    .diagram-box {
+      text-align: center;
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 9.5pt;
+      font-weight: bold;
+      line-height: 1.8;
+      page-break-inside: avoid;
+    }
+
+    /* --------------------------------------------------
+       コードブロック・インラインコード
+    -------------------------------------------------- */
+    pre {
+      background-color: #0f172a;
+      color: #f1f5f9;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 8.5pt;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 8px 0 14px 0;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background-color: #e2e8f0;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 8.5pt;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* --------------------------------------------------
+       テーブル
+    -------------------------------------------------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background-color: #1e293b;
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      background-color: #ffffff;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    ul, ol {
+      margin: 0 0 10px 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 7.5pt;
+      font-weight: bold;
+      color: white;
+      background-color: #2563eb;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ヘッダーバナー -->
+  <div class="header-banner">
+    <h1>CSS完全攻略教科書</h1>
+    <p>基礎構文・レスポンシブ単位・現代レイアウト（Flex/Grid）・CSS変数・アニメーションまで完全網羅</p>
+  </div>
+
+  <!-- ================= 第1章 ================= -->
+  <div class="section">
+    <h2>第1章：CSSの基本構造とセレクタ</h2>
+    <p>CSS（Cascading Style Sheets）は、HTMLの要素に対して「どの部分を（セレクタ）」「何を（プロパティ）」「どう変えるか（値）」を指定する言語です。</p>
+
+    <h3>1. 基本構文</h3>
+<pre><code>/* セレクタ { プロパティ: 値; } */
+p {
+  color: #2563eb; /* 文字色を青にする */
+  font-size: 16px; /* 文字サイズを16pxにする */
+}</code></pre>
+
+    <h3>2. セレクタの種類と優先順位</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>セレクタ名</th>
+          <th>書き方</th>
+          <th>対象</th>
+          <th>特徴・使い道</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>全称セレクタ</strong></td>
+          <td><code>*</code></td>
+          <td>すべての要素</td>
+          <td>後述のリセットCSS（余白のゼロ初期化など）で使用。</td>
+        </tr>
+        <tr>
+          <td><strong>要素名セレクタ</strong></td>
+          <td><code>p</code>, <code>div</code></td>
+          <td>指定したHTMLタグ全体</td>
+          <td>全体のデフォルトデザインを設定するときに使用。</td>
+        </tr>
+        <tr>
+          <td><strong>クラスセレクタ</strong></td>
+          <td><code>.btn</code></td>
+          <td><code>class="btn"</code> をもつ要素</td>
+          <td>何回でも使い回せる。デザインの基本はコレ！</td>
+        </tr>
+        <tr>
+          <td><strong>idセレクタ</strong></td>
+          <td><code>#header</code></td>
+          <td><code>id="header"</code> をもつ要素</td>
+          <td>ページに1つだけ。優先度が高いため乱用注意。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title">💡 最強の初期化プロパティ <code>*</code> （全称セレクタ）</div>
+      <p>現代のWeb制作では、1行目に以下のおまじないを書くのが標準となっています。</p>
+<pre><code>* {
+  box-sizing: border-box; /* 枠線と余白を幅に含める */
+  margin: 0;              /* ブラウザ独自の無駄な外余白を消す */
+  padding: 0;             /* ブラウザ独自の無駄な内余白を消す */
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- ================= 第2章 ================= -->
+  <div class="section">
+    <h2>第2章：サイズと単位（Unit）の完全理解</h2>
+    <p>CSSでサイズや距離を指定する単位には、絶対値と相対値が存在します。これらを理解することがレスポンシブWebデザイン（画面幅に合わせた最適化）の鍵です。</p>
+
+    <h3>1. CSSで使う単位一覧</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>分類</th>
+          <th>単位</th>
+          <th>意味・基準</th>
+          <th>主な使い道</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>絶対単位</strong></td>
+          <td><code>px</code></td>
+          <td>ピクセル（固定値）</td>
+          <td>枠線の太さや、小さな固定アイコンなど。</td>
+        </tr>
+        <tr>
+          <td rowspan="6"><strong>相対単位</strong></td>
+          <td><code>%</code></td>
+          <td>親要素のサイズに対する割合</td>
+          <td>コンテナの幅指定やレスポンシブな画像サイズ。</td>
+        </tr>
+        <tr>
+          <td><code>rem</code></td>
+          <td>ルート（<code>&lt;html&gt;</code>）の文字サイズに対する倍率</td>
+          <td>文字サイズや余白の基本指定（1rem = 16px程度）。</td>
+        </tr>
+        <tr>
+          <td><code>em</code></td>
+          <td>親要素（または自身）の文字サイズに対する倍率</td>
+          <td>文字の大きさに連動させたい余白やインデント。</td>
+        </tr>
+        <tr>
+          <td><code>vw</code> / <code>vh</code></td>
+          <td>画面（ビューポート）の幅 / 高さの 1%</td>
+          <td>画面いっぱいのヒーローイメージ（100vw / 100vh）。</td>
+        </tr>
+        <tr>
+          <td><code>svh</code> / <code>dvh</code></td>
+          <td>スマホのツールバー考慮版の高さ単位</td>
+          <td>モバイル端末でスクロール時に高さがズレない設定。</td>
+        </tr>
+        <tr>
+          <td><code>fr</code></td>
+          <td>Gridレイアウト専用の「フリースペースの分配比率」</td>
+          <td><code>grid-template-columns: 1fr 2fr;</code> など。</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><strong>特殊単位</strong></td>
+          <td><code>s</code> / <code>ms</code></td>
+          <td>時間（秒 / ミリ秒）</td>
+          <td>アニメーションの所要時間（<code>0.3s</code> など）。</td>
+        </tr>
+        <tr>
+          <td><code>deg</code></td>
+          <td>角度（Degree：度）</td>
+          <td>要素の回転（<code>rotate(45deg)</code> など）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. ボックスサイズ関連プロパティ</h3>
+    <ul>
+      <li><code>width</code> / <code>height</code>：横幅と高さ。</li>
+      <li><code>min-width</code> / <code>max-width</code>：最小幅・最大幅。（例：<code>max-width: 1200px;</code> と <code>width: 100%;</code> を組み合わせると、PCでは1200px上限、スマホでは画面幅いっぱいに収まるレスポンシブな箱ができる）</li>
+      <li><code>min-height</code> / <code>max-height</code>：最小高さ・最大高さ。</li>
+      <li><code>box-sizing</code>：<code>content-box</code>（標準：サイズにBorderやPaddingが含まれない）か <code>border-box</code>（推奨：指定したwidthの中にBorderもPaddingも全部納める）かを決定。</li>
+      <li><code>aspect-ratio</code>：アスペクト比（縦横比）の固定。例：<code>aspect-ratio: 16 / 9;</code> や <code>aspect-ratio: 1 / 1;</code> (正方形)。</li>
+    </ul>
+  </div>
+
+  <!-- ================= 第3章 ================= -->
+  <div class="section">
+    <h2>第3章：テキストとタイポグラフィ</h2>
+    <p>文字を美しく読みやすく整えるためのスタイルプロパティです。</p>
+
+    <h3>1. フォントと文字のスタイル</h3>
+    <ul>
+      <li><code>color</code>：文字の色（HEX: <code>#ff0000</code>、RGB: <code>rgb(255,0,0)</code>、カラー名: <code>red</code> などで指定）。</li>
+      <li><code>font-family</code>：フォントの種類（例：<code>font-family: 'Helvetica Neue', sans-serif;</code>）。後ろにフォールバックフォントを用意する。</li>
+      <li><code>font-size</code>：文字の大きさ（例：<code>1.2rem</code>, <code>18px</code>）。</li>
+      <li><code>font-weight</code>：文字の太さ（<code>normal</code>, <code>bold</code>、または <code>100</code>〜<code>900</code> の数値）。</li>
+      <li><code>font-style</code>：斜体などの指定（<code>normal</code>, <code>italic</code>）。</li>
+      <li><code>font</code>：上記を一括で書くショートハンド。</li>
+    </ul>
+
+    <h3>2. 文章の組み・配置プロパティ</h3>
+    <ul>
+      <li><code>line-height</code>：行の高さ（行間）。単位なしの数値（<code>1.6</code> や <code>1.75</code>）で指定するのがベスト実践！</li>
+      <li><code>letter-spacing</code>：文字と文字の間隔（例：<code>0.05em</code>）。</li>
+      <li><code>text-align</code>：文字の揃え位置（<code>left</code>, <code>center</code>, <code>right</code>, <code>justify</code>）。</li>
+      <li><code>text-decoration</code>：文字の装飾（<code>none</code> でリンクの線を消す、<code>underline</code> で下線、<code>line-through</code> で打ち消し線）。</li>
+      <li><code>text-transform</code>：英字の大文字/小文字変換（<code>uppercase</code> で全大文字、<code>lowercase</code>、<code>capitalize</code>）。</li>
+      <li><code>text-shadow</code>：文字の影。（例：<code>text-shadow: 2px 2px 4px rgba(0,0,0,0.3);</code>）</li>
+      <li><code>white-space</code>：改行や空白の扱い（<code>nowrap</code> で自動改行を禁止、<code>pre-wrap</code> でコード等そのまま表示）。</li>
+      <li><code>list-style</code>：箇条書き（<code>&lt;ul&gt;</code>, <code>&lt;li&gt;</code>）の黒丸などを消す（<code>list-style: none;</code>）。</li>
+    </ul>
+  </div>
+
+  <!-- ================= 第4章 ================= -->
+  <div class="section">
+    <h2>第4章：ボックスモデルと余白（margin / padding）</h2>
+    <p>すべてのHTML要素は「四角い箱（ボックス）」として作られます。枠線の内外にある余白を正しくコントロールすることがデザインの基礎です。</p>
+
+    <div class="diagram-box">
+      [ margin (枠線の外側のすき間) ]<br>
+      ----------------------------------------- (border 枠線)<br>
+      | [ padding (枠線の内側のゆとり) ]       |<br>
+      |   コンテンツ (文字や画像などの本体)    |<br>
+      -----------------------------------------
+    </div>
+
+    <h3>1. margin（外側余白）と padding（内側余白）</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>プロパティ</th>
+          <th>対象</th>
+          <th>個別指定のプロパティ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>margin</code></td>
+          <td>枠線の<strong>外側</strong>の余白（隣の要素との距離）</td>
+          <td><code>margin-top</code>, <code>margin-right</code>, <code>margin-bottom</code>, <code>margin-left</code></td>
+        </tr>
+        <tr>
+          <td><code>padding</code></td>
+          <td>枠線の<strong>内側</strong>の余白（コンテンツと枠線の間のゆとり）</td>
+          <td><code>padding-top</code>, <code>padding-right</code>, <code>padding-bottom</code>, <code>padding-left</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. 一括指定（ショートハンド）の書き方パターン</h3>
+<pre><code>/* 1つ指定：上下左右すべて */
+margin: 20px;
+
+/* 2つ指定：[上下] [左右] */
+margin: 10px 20px; /* 上下10px, 左右20px */
+
+/* 3つ指定：[上] [左右] [下] */
+margin: 10px 20px 30px;
+
+/* 4つ指定：[上] [右] [下] [左] (時計回り) */
+margin: 10px 20px 30px 40px;
+
+/* 中央揃えの超定番テクニック */
+margin: 0 auto; /* 上下0、左右自動（中央に寄る） */</code></pre>
+  </div>
+
+  <!-- ================= 第5章 ================= -->
+  <div class="section">
+    <h2>第5章：背景・枠線・影の質感装飾</h2>
+
+    <h3>1. 背景（Background）</h3>
+    <ul>
+      <li><code>background-color</code>：背景色（例：<code>#f1f5f9</code>）。</li>
+      <li><code>background-image</code>：背景画像（例：<code>url('bg.jpg')</code>）。</li>
+      <li><code>background-size</code>：背景画像のサイズ調整。
+        <ul>
+          <li><code>cover</code>：アスペクト比を維持し、領域全体をスキマなく覆う（一番よく使う！）。</li>
+          <li><code>contain</code>：画像全体が収まるように自動縮小。</li>
+        </ul>
+      </li>
+      <li><code>background-position</code>：画像の配置位置（例：<code>center</code>, <code>top right</code>）。</li>
+      <li><code>background-repeat</code>：画像の繰り返し（<code>no-repeat</code> で1回だけ表示）。</li>
+      <li><code>background</code>：上記を一括指定するショートハンド。</li>
+    </ul>
+
+    <h3>2. 枠線（Border）と輪郭（Outline）</h3>
+    <ul>
+      <li><code>border</code>：枠線の一括指定（例：<code>border: 2px solid #2563eb;</code>）。</li>
+      <li><code>border-width</code> / <code>border-style</code> / <code>border-color</code>：個別に太さ・種類（<code>solid</code>, <code>dashed</code>, <code>dotted</code>）・色を指定。</li>
+      <li><code>border-radius</code>：角を丸くする。（例：<code>border-radius: 8px;</code>、<code>50%</code> で完全な正円）</li>
+      <li><code>outline</code>：Borderのさらに外側に引かれる輪郭線。レイアウトの幅に影響を与えないため、入力フォームのフォーカス強調などで使われます。</li>
+    </ul>
+
+    <h3>3. ドロップシャドウ（box-shadow）</h3>
+    <p>要素に立体的な影を落とします。</p>
+<pre><code>/* box-shadow: [横ずらし] [縦ずらし] [ぼかし具合] [広がり] [色]; */
+box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.15);</code></pre>
+  </div>
+
+  <!-- ================= 第6章 ================= -->
+  <div class="section">
+    <h2>第6章：レイアウトと位置指定（Position・Display）</h2>
+
+    <h3>1. display（要素の表示形式）</h3>
+    <ul>
+      <li><code>block</code>：横幅いっぱいに広がり、前後に改行が入る箱（<code>div</code>, <code>p</code>, <code>h1</code> など）。</li>
+      <li><code>inline</code>：文章の一部として横に並ぶ（<code>span</code>, <code>a</code> など）。幅や高さの指定は効かない。</li>
+      <li><code>inline-block</code>：横に並びつつ、<code>width</code> や <code>height</code>、<code>margin</code> も指定できる万能な箱。</li>
+      <li><code>none</code>：画面から完全に消失させる（DOM上には存在するが画面に描画されない）。</li>
+    </ul>
+
+    <h3>2. position（配置の基準）と位置指定</h3>
+    <p><code>position</code> プロパティを指定することで、<code>top</code> / <code>right</code> / <code>bottom</code> / <code>left</code> を使って自由な位置に要素を配置できます。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>値</th>
+          <th>特徴・基準</th>
+          <th>主な使い道</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>static</code></td>
+          <td>デフォルト。通常の要素の並び順に従う（top/leftは効かない）。</td>
+          <td>位置指定の解除。</td>
+        </tr>
+        <tr>
+          <td><code>relative</code></td>
+          <td><strong>「本来自分があるはずだった場所」</strong>を基準にして移動。</td>
+          <td>子要素に <code>absolute</code> を使う際の親の基準点として設置。</td>
+        </tr>
+        <tr>
+          <td><code>absolute</code></td>
+          <td><code>position: relative;</code> がついた<strong>一番近い親要素</strong>を基準に絶対配置。</td>
+          <td>カード画像の右上に「NEW」バッジを重ねて貼るなど。</td>
+        </tr>
+        <tr>
+          <td><code>fixed</code></td>
+          <td><strong>「ブラウザの画面全体（ビューポート）」</strong>を基準に固定。</td>
+          <td>画面下部に常駐するナビボタンや固定ヘッダー。</td>
+        </tr>
+        <tr>
+          <td><code>sticky</code></td>
+          <td>通常通りスクロールし、指定位置に来たら固定される。</td>
+          <td>見出しやサイドバーの追従表示。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 重なり順とあふれた中身の処理</h3>
+    <ul>
+      <li><code>z-index</code>：要素の重なり順を数値で指定（例：<code>z-index: 100;</code>）。数値が大きいほど手前に表示されます。※ <code>position</code>（static以外）がついている要素で動作します。</li>
+      <li><code>overflow</code> / <code>overflow-x</code> / <code>overflow-y</code>：親の箱から中身がはみ出た時の挙動。
+        <ul>
+          <li><code>visible</code>：はみ出たまま表示（デフォルト）。</li>
+          <li><code>hidden</code>：はみ出た部分を切り落として隠す。</li>
+          <li><code>scroll</code>：常にスクロールバーを表示する。</li>
+          <li><code>auto</code>：はみ出た時だけ自動でスクロールバーを出す。</li>
+        </ul>
+      </li>
+      <li><code>visibility</code>：<code>hidden</code> にすると要素が見えなくなるが、<code>display: none</code> と違って<strong>「領域のスペースは残ったまま」</strong>になる。</li>
+      <li><code>opacity</code>：透明度（0.0完全透明 〜 1.0完全不透明）。</li>
+    </ul>
+  </div>
+
+  <!-- ================= 第7章 ================= -->
+  <div class="section">
+    <h2>第7章：Flexbox ＆ CSS Grid（現代レイアウト）</h2>
+
+    <h3>1. Flexbox（1次元レイアウト：横並び・縦並び）</h3>
+    <p>親要素に <code>display: flex;</code> を指定するだけで、子要素を自在に並べることができます。</p>
+    <ul>
+      <li><code>flex-direction</code>：並べる方向。<code>row</code>（横並び：デフォルト）、<code>column</code>（縦並び）。</li>
+      <li><code>flex-wrap</code>：折り返し設定。<code>nowrap</code>（折り返さない）、<code>wrap</code>（端まで行ったら折り返す）。</li>
+      <li><code>justify-content</code>：<strong>メイン軸（並ぶ方向）の揃え</strong>。
+        <ul>
+          <li><code>flex-start</code>（左揃え）、<code>center</code>（中央揃え）、<code>flex-end</code>（右揃え）</li>
+          <li><code>space-between</code>（両端に寄せて均行配置）、<code>space-around</code>（均等な余白をつける）</li>
+        </ul>
+      </li>
+      <li><code>align-items</code>：<strong>クロス軸（直交する方向）の揃え</strong>。<code>center</code>（上下中央）、<code>stretch</code>（高さを揃える）。</li>
+      <li><code>gap</code>：要素同士のすき間を一発で指定（例：<code>gap: 16px;</code>）。<code>margin</code> 不要になる神プロパティ！</li>
+      <li><code>flex</code>：子要素側につけ、比率で伸縮させる（例：<code>flex: 1;</code>）。</li>
+      <li><code>align-self</code>：特定の1つの子要素だけ、個別に上下揃えを上書きする。</li>
+    </ul>
+
+    <h3>2. CSS Grid（2次元レイアウト：行と列の格子状配置）</h3>
+    <p>縦と横の「マス目」を作って要素をはめ込む強力なレイアウト機構です。</p>
+<pre><code>.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3列均等に並べる */
+  gap: 20px;                             /* マス目間の余白 */
+  place-items: center;                   /* 上下左右の中央揃えが一発で完了！ */
+}
+
+.grid-item-wide {
+  grid-column: 1 / 3; /* 1列目から3列目の手前まで（2マス分）を連結 */
+  grid-row: 1 / 2;    /* 1行目 */
+}</code></pre>
+  </div>
+
+  <!-- ================= 第8章 ================= -->
+  <div class="section">
+    <h2>第8章：CSSの便利機能（関数・変数）</h2>
+
+    <h3>1. CSS変数（カスタムプロパティ）</h3>
+    <p>サイト内で使う色やサイズを定数として保存し、使い回すことができます。テーマカラーの一括変更などに超強力です。</p>
+<pre><code>/* 1. :root (全体で使える場所) に変数を定義 */
+:root {
+  --main-color: #2563eb;
+  --bgcolor-red: #ef4444;
+  --card-padding: 20px;
+}
+
+/* 2. var() 関数で呼び出して使用 */
+.button {
+  background-color: var(--main-color);
+  padding: var(--card-padding);
+}
+
+.alert-box {
+  background-color: var(--bgcolor-red);
+}</code></pre>
+
+    <h3>2. CSSの計算関数 <code>calc()</code> とレスポンシブ関数</h3>
+    <ul>
+      <li><code>calc()</code>：異なる単位同士で計算ができる関数。
+<pre><code>/* 画面横幅100%から、サイドバーの250px分を引き算したサイズにする */
+width: calc(100% - 250px);</code></pre>
+      </li>
+      <li><code>clamp(最小値, 推奨値, 最大値)</code>：画面幅に合わせて自動で伸縮しつつ、最小・最大サイズでピタッと止まるレスポンシブ関数。
+<pre><code>/* 文字サイズ：最小16px、通常は画面幅の5vw、最大32px */
+font-size: clamp(16px, 5vw, 32px);</code></pre>
+      </li>
+      <li><code>min()</code> / <code>max()</code>：渡された値の中から「最も小さい値 / 最も大きい値」を選択する。</li>
+    </ul>
+  </div>
+
+  <!-- ================= 第9章 ================= -->
+  <div class="section">
+    <h2>第9章：アニメーション・視覚効果・操作性</h2>
+
+    <h3>1. 画像のフィットと特殊フィルター</h3>
+    <ul>
+      <li><code>object-fit</code>：<code>&lt;img&gt;</code> タグの画像を、親枠に合わせてどうトリミングするか（<code>cover</code> で枠全体を埋める、<code>contain</code> で全体を見せる）。</li>
+      <li><code>object-position</code>：トリミング時の中心位置（例：<code>center top</code>）。</li>
+      <li><code>filter</code>：画像や要素に視覚効果を与える。（例：<code>filter: blur(5px);</code> でぼかし、<code>grayscale(100%)</code> で白黒）</li>
+      <li><code>clip-path</code>：要素をポリゴンや円など好きな形に切り抜く（例：<code>clip-path: circle(50%);</code>）。</li>
+    </ul>
+
+    <h3>2. トランジションとトランスフォーム（変形・滑らかな変化）</h3>
+    <ul>
+      <li><code>transition</code>：状態が変わる時の滑らかな変化アニメーション。
+<pre><code>/* プロパティ 時間 タイミング関数 */
+transition: all 0.3s ease;</code></pre>
+      </li>
+      <li><code>transition-duration</code>：変化にかかる時間（例：<code>0.5s</code>）。</li>
+      <li><code>transition-timing-function</code>：変化の加速・減速パターン（<code>ease</code>, <code>linear</code>, <code>ease-in-out</code>）。</li>
+      <li><code>transform</code>：要素の移動・回転・拡大縮小。
+<pre><code>transform: rotate(45deg);       /* 45度回転 */
+transform: scale(1.2);          /* 1.2倍に拡大 */
+transform: translate(10px, 20px);/* 横10px, 縦20px移動 */</code></pre>
+      </li>
+      <li><code>transform-origin</code>：変形の基準点（例：<code>top left</code>）。</li>
+    </ul>
+
+    <h3>3. 本格キーフレームアニメーション</h3>
+    <p><code>@keyframes</code> でアニメーションのコマ割りを定義し、<code>animation</code> で呼び出します。</p>
+<pre><code>@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.badge {
+  /* アニメーション名 時間 繰り返し */
+  animation: pulse 2s infinite;
+}</code></pre>
+
+    <h3>4. ユーザー操作（UI）と擬似要素</h3>
+    <ul>
+      <li><code>cursor</code>：マウスカーソルの形状（<code>pointer</code> で手持ちマーク、<code>not-allowed</code> で禁止マーク）。</li>
+      <li><code>pointer-events</code>：クリック等の操作を透過させるか（<code>none</code> でクリックに反応しなくなる）。</li>
+      <li><code>user-select</code>：テキスト選択（ドラッグして青く反転させる操作）を許可するか（<code>none</code> で選択不可）。</li>
+      <li><code>touch-action</code>：スマホ/iPadでのピンチズームやスワイプ操作の制限。</li>
+      <li><code>content</code>：擬似要素（<code>::before</code>, <code>::after</code>）でHTMLを使わずに文字や装飾パーツを注入するプロパティ。（例：<code>content: "★";</code>）</li>
+    </ul>
+  </div>
+
+  <!-- ================= 第10章 ================= -->
+  <div class="section">
+    <h2>第10章：アットルール（@）とレスポンシブデザイン</h2>
+    <p>ブラウザに対して特殊な命令を与える構文を<strong>アットルール（At-Rules）</strong>と呼びます。</p>
+
+    <h3>主なアットルール一覧</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>構文</th>
+          <th>役割</th>
+          <th>具体例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>@media</code></td>
+          <td>画面サイズ等の条件によってCSSを切り替える（メディアクエリ）</td>
+          <td>スマホ対応（レスポンシブデザイン）に必須。</td>
+        </tr>
+        <tr>
+          <td><code>@keyframes</code></td>
+          <td>アニメーションのコマ割り（途中経過）を定義する</td>
+          <td>0% 〜 100% の間の変化を指定。</td>
+        </tr>
+        <tr>
+          <td><code>@font-face</code></td>
+          <td>外部のWebフォントファイルを読み込んで定義する</td>
+          <td>Google Fonts などの自前読み込み。</td>
+        </tr>
+        <tr>
+          <td><code>@import</code></td>
+          <td>他のCSSファイルを外部からインポートして読み込む</td>
+          <td>ファイル分割管理時に使用。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>【実践】レスポンシブWebデザイン（@media）の書く順序</h3>
+    <p>スマホファースト（画面が小さい順）で記述するのが現代の標準です。</p>
+<pre><code>/* 1. デフォルトスタイル（スマホ用） */
+.card {
+  width: 100%; /* スマホでは縦並び・幅100% */
+}
+
+/* 2. タブレット以上（画面幅 768px 以上）で適用 */
+@media (min-width: 768px) {
+  .card {
+    width: 50%; /* 横並び2列にする */
+  }
+}
+
+/* 3. PC以上（画面幅 1024px 以上）で適用 */
+@media (min-width: 1024px) {
+  .card {
+    width: 33.333%; /* 横並び3列にする */
+  }
+}</code></pre>
+  </div>
+
+</div>
+
+</body>
+</html>
