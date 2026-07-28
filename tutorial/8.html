@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript Core Syntax & Universal Fundamentals 完全解説教科書</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    @page {
+      size: A4;
+      margin: 16mm 14mm 18mm 14mm;
+      background-color: #f8fafc;
+      @bottom-center {
+        content: "JavaScript Core Syntax & Universal Fundamentals — " counter(page) " / " counter(pages);
+        font-size: 8pt;
+        color: #64748b;
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.6;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+    }
+
+    /* Cover / Header Block */
+    .header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f766e 100%);
+      color: #ffffff;
+      padding: 24px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .header-banner h1 {
+      font-size: 20pt;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      border: none;
+      padding: 0;
+    }
+
+    .header-banner .subtitle {
+      font-size: 11pt;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .header-banner .meta {
+      font-size: 8.5pt;
+      color: #cbd5e1;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    /* Table of Contents Box */
+    .toc-box {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0f766e;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+    }
+
+    .toc-box h2 {
+      font-size: 11pt;
+      color: #0f766e;
+      margin: 0 0 10px 0;
+      padding: 0;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toc-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .toc-table td {
+      padding: 4px 8px;
+      font-size: 9pt;
+      vertical-align: top;
+      border: none;
+    }
+
+    .toc-table td.chapter-num {
+      font-weight: bold;
+      color: #0f766e;
+      width: 70px;
+    }
+
+    /* Section & Headings */
+    .chapter {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    h2.chapter-title {
+      font-size: 14pt;
+      color: #0f172a;
+      border-bottom: 2px solid #0f766e;
+      padding-bottom: 6px;
+      margin: 0 0 16px 0;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      color: #0f766e;
+      margin: 18px 0 8px 0;
+      padding-left: 8px;
+      border-left: 3px solid #0f766e;
+      page-break-after: avoid;
+    }
+
+    h4 {
+      font-size: 10pt;
+      color: #334155;
+      margin: 12px 0 6px 0;
+      font-weight: 700;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      text-align: justify;
+    }
+
+    ul, ol {
+      margin: 0 0 12px 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Code & Formatting */
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlis, Monaco, monospace;
+      font-size: 8.5pt;
+      background-color: #f1f5f9;
+      color: #0f766e;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+    }
+
+    pre {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
+      font-size: 8pt;
+      line-height: 1.45;
+      padding: 12px 14px;
+      border-radius: 6px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 10px 0 14px 0;
+      page-break-inside: avoid;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: #f8fafc;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+
+    /* Code Syntax Highlighting colors simulation */
+    .token-keyword { color: #f43f5e; font-weight: bold; }
+    .token-string { color: #38bdf8; }
+    .token-comment { color: #64748b; font-style: italic; }
+    .token-function { color: #fbbf24; }
+    .token-number { color: #a78bfa; }
+    .token-operator { color: #f43f5e; }
+
+    /* Callout & Note Boxes */
+    .callout {
+      background-color: #f0fdf4;
+      border-left: 4px solid #16a34a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      color: #15803d;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    .warning-box {
+      background-color: #fff1f2;
+      border-left: 4px solid #e11d48;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .warning-title {
+      font-weight: bold;
+      color: #be123c;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    .info-box {
+      background-color: #eff6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .info-title {
+      font-weight: bold;
+      color: #1d4ed8;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    /* Two Column Layout using Table Display */
+    .two-col-table {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      margin: 10px 0;
+    }
+
+    .col-cell {
+      display: table-cell;
+      vertical-align: top;
+      padding-right: 10px;
+    }
+
+    .col-cell:last-child {
+      padding-right: 0;
+      padding-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title / Cover Banner -->
+  <div class="header-banner">
+    <h1>JavaScript Core Syntax & Universal Fundamentals</h1>
+    <div class="subtitle">言語文法・メモリ構造・関数設計・DOM / ブラウザイベント徹底解説書</div>
+    <div class="meta">
+      対象範囲: JS基本文法 / データ型 & 型変換 / 制御構文 / オブジェクト & メモリモデル / 関数の深掘り & クロージャ / DOM操作 & 全イベント網羅
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc-box">
+    <h2>体系的目次 (Table of Contents)</h2>
+    <table class="toc-table">
+      <tr>
+        <td class="chapter-num">第1章</td>
+        <td><strong>基本文法 & データ型</strong> — 変数宣言 (const/let/var)・スコープ・TDZ・型体系・型変換・制御構文</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第2章</td>
+        <td><strong>オブジェクトの徹底理解</strong> — 階層アクセス・動的プロパティ・`this`とメソッド・分割代入・参照渡しと深浅コピー</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第3章</td>
+        <td><strong>関数の深掘り</strong> — 宣言 vs アロー関数・ホイスティング・引数設計・純粋関数・クロージャと高階関数</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第4章</td>
+        <td><strong>ブラウザ機能 & DOM操作</strong> — 要素取得・コンテンツ更新・classList・セキュリティ・DOM動的生成</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第5章</td>
+        <td><strong>DOM イベント全網羅</strong> — イベントフェーズ（伝播）・全カテゴリ別イベント解説・イベント委譲パターン</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- CHAPTER 1 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第1章：基本文法 & データ型（Core Mechanics）</h2>
+    
+    <h3>1.1 変数宣言（const / let / var）とスコープの完全解説</h3>
+    <p>
+      JavaScriptにおける変数宣言には <code>const</code>, <code>let</code>, および歴史的に使われてきた <code>var</code> の3種類が存在します。現代のJavaScript開発（ES6以降）では <code>const</code> を基本とし、再代入が必要な場合のみ <code>let</code> を選択するのが鉄則です。
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>キーワード</th>
+          <th>スコープ (Scope)</th>
+          <th>再代入</th>
+          <th>再宣言</th>
+          <th>ホイスティング (巻き上げ) 挙動</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>const</code></td>
+          <td>ブロックスコープ <code>{ }</code></td>
+          <td>不可</td>
+          <td>不可</td>
+          <td>宣言のみ巻き上げ（TDZによりアクセス不可）</td>
+        </tr>
+        <tr>
+          <td><code>let</code></td>
+          <td>ブロックスコープ <code>{ }</code></td>
+          <td>可能</td>
+          <td>不可</td>
+          <td>宣言のみ巻き上げ（TDZによりアクセス不可）</td>
+        </tr>
+        <tr>
+          <td><code>var</code> (非推奨)</td>
+          <td>関数スコープ / グローバル</td>
+          <td>可能</td>
+          <td>可能</td>
+          <td>宣言が巻き上げられ <code>undefined</code> で初期化される</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>一時的死域（Temporal Dead Zone: TDZ）とは？</h4>
+    <p>
+      <code>let</code> や <code>const</code> で宣言された変数は、コードの実行前にスコープの先頭に巻き上げられますが、実際の宣言行に達するまで「初期化」されません。このスコープ先頭から宣言行までのアクセスが禁止されている区間を<strong>TDZ（Temporal Dead Zone）</strong>と呼びます。未初期化の変数にアクセスしようとすると <code>ReferenceError</code> が発生します。
+    </p>
+
+<pre><code><span class="token-comment">// TDZの概念を示すコード例</span>
+<span class="token-keyword">function</span> <span class="token-function">example</span>() {
+  <span class="token-comment">// --- 変数 value の TDZ 開始 ---</span>
+  <span class="token-keyword">console</span>.<span class="token-function">log</span>(value); <span class="token-comment">// Uncaught ReferenceError: Cannot access 'value' before initialization</span>
+  
+  <span class="token-keyword">const</span> value = <span class="token-string">"Hello JavaScript"</span>; <span class="token-comment">// --- TDZ 終了 ---</span>
+  <span class="token-keyword">console</span>.<span class="token-function">log</span>(value); <span class="token-comment">// "Hello JavaScript"</span>
+}
+</code></pre>
+
+    <h3>1.2 基本的なデータ型と型変換（Type System & Coercion）</h3>
+    <p>
+      JavaScriptは動的型付け言語であり、値は<strong>7つのプリミティブ型</strong>と<strong>オブジェクト型</strong>に大別されます。
+    </p>
+
+    <ul>
+      <li><strong>Primitive Types（不変・値渡し）:</strong> <code>String</code>, <code>Number</code>, <code>BigInt</code>, <code>Boolean</code>, <code>Undefined</code>, <code>Null</code>, <code>Symbol</code></li>
+      <li><strong>Object Type（可変・参照渡し）:</strong> <code>Object</code>, <code>Array</code>, <code>Function</code>, <code>Date</code>, <code>RegExp</code> など</li>
+    </ul>
+
+    <div class="warning-box">
+      <div class="warning-title">⚠️ `typeof` 演算子の歴史的罠と `NaN` の特殊性</div>
+      <ul>
+        <li><code>typeof null === "object"</code> : JS最初の実装時のバグが後方互換性のために残された有名な挙動です。<code>null</code> かどうかの判定は <code>val === null</code> を使用します。</li>
+        <li><code>typeof NaN === "number"</code> : `NaN` (Not a Number) は数値型として定義されています。自分自身と等しくない唯一の値（<code>NaN === NaN</code> は <code>false</code>）であるため、判定には <code>Number.isNaN(val)</code> を使います。</li>
+      </ul>
+    </div>
+
+    <h4>明示的型変換 と 暗黙の型変換（Type Coercion）</h4>
+    <p>
+      JavaScriptでは演算子の種類や文脈によって暗黙の型変換が自動発生します。バグの原因になりやすいため、明示的型変換を徹底します。
+    </p>
+
+<pre><code><span class="token-comment">// --- 暗黙の型変換 (Implicit Coercion) の例 ---</span>
+<span class="token-string">"5"</span> + <span class="token-number">2</span>      <span class="token-comment">// "52"  (数値2が文字列に変換され連結)</span>
+<span class="token-string">"5"</span> - <span class="token-number">2</span>      <span class="token-comment">// 3     (文字列"5"が数値5に変換され減算)</span>
+<span class="token-keyword">if</span> (<span class="token-string">"hello"</span>) {} <span class="token-comment">// 真偽値文脈により Truthy と判定される</span>
+
+<span class="token-comment">// --- 明示的型変換 (Explicit Coercion) ---</span>
+<span class="token-keyword">const</span> num = <span class="token-function">Number</span>(<span class="token-string">"123"</span>);      <span class="token-comment">// 123 (数値変換)</span>
+<span class="token-keyword">const</span> str = <span class="token-function">String</span>(<span class="token-number">456</span>);        <span class="token-comment">// "456" (文字列変換)</span>
+<span class="token-keyword">const</span> bool = <span class="token-function">Boolean</span>(<span class="token-number">1</span>);        <span class="token-comment">// true (Boolean変換)</span>
+<span class="token-keyword">const</span> parsed = <span class="token-function">parseInt</span>(<span class="token-string">"10px"</span>, <span class="token-number">10</span>); <span class="token-comment">// 10 (基数を明示した整数解析)</span>
+</code></pre>
+
+    <h4>Truthy と Falsy の一覧</h4>
+    <p>
+      条件文で <code>false</code> と評価される <strong>Falsy な値</strong> は以下の8種類のみです。これら以外はすべて <strong>Truthy（true と評価）</strong> です。
+    </p>
+    <div class="info-box">
+      <div class="info-title">Falsy な値（全8種）</div>
+      <code>false</code>, <code>0</code>, <code>-0</code>, <code>0n</code> (BigIntのゼロ), <code>""</code> (空文字), <code>null</code>, <code>undefined</code>, <code>NaN</code>
+    </div>
+
+    <h3>1.3 制御構文（Control Structure）</h3>
+
+    <h4>条件分岐（if / else / switch / 三項演算子）</h4>
+<pre><code><span class="token-comment">// 三項演算子 (簡潔な条件付き代入)</span>
+<span class="token-keyword">const</span> userRole = <span class="token-string">"admin"</span>;
+<span class="token-keyword">const</span> accessLevel = userRole === <span class="token-string">"admin"</span> ? <span class="token-number">10</span> : <span class="token-number">1</span>;
+
+<span class="token-comment">// switch文 (厳密等価比較 === が行われる)</span>
+<span class="token-keyword">switch</span> (userRole) {
+  <span class="token-keyword">case</span> <span class="token-string">"admin"</span>:
+    <span class="token-function">setupAdminPortal</span>();
+    <span class="token-keyword">break</span>; <span class="token-comment">// breakが無いとフォールスルー発生</span>
+  <span class="token-keyword">case</span> <span class="token-string">"editor"</span>:
+    <span class="token-function">setupEditorPortal</span>();
+    <span class="token-keyword">break</span>;
+  <span class="token-keyword">default</span>:
+    <span class="token-function">setupUserPortal</span>();
+}
+</code></pre>
+
+    <h4>ループ構文の使い分け（for, for...of, for...in）</h4>
+    <ul>
+      <li><code>for (let i = 0; i &lt; N; i++)</code>: インデックスによる精密なループ制御。</li>
+      <li><code>for...of</code>: 配列や文字列など<strong>イテラブル（反復可能）オブジェクト要素の走査</strong>（最も推奨）。</li>
+      <li><code>for...in</code>: オブジェクトの<strong>列挙可能プロパティ（キー）の走査</strong>（※配列には非推奨）。</li>
+    </ul>
+
+<pre><code><span class="token-keyword">const</span> fruits = [<span class="token-string">"Apple"</span>, <span class="token-string">"Banana"</span>, <span class="token-string">"Orange"</span>];
+
+<span class="token-comment">// for...of (値の取得)</span>
+<span class="token-keyword">for</span> (<span class="token-keyword">const</span> fruit <span class="token-keyword">of</span> fruits) {
+  <span class="token-keyword">console</span>.<span class="token-function">log</span>(fruit); <span class="token-comment">// "Apple", "Banana", "Orange"</span>
+}
+
+<span class="token-comment">// オブジェクトに対する for...in (キーの取得)</span>
+<span class="token-keyword">const</span> config = { theme: <span class="token-string">"dark"</span>, lang: <span class="token-string">"ja"</span> };
+<span class="token-keyword">for</span> (<span class="token-keyword">const</span> key <span class="token-keyword">in</span> config) {
+  <span class="token-keyword">console</span>.<span class="token-function">log</span>(<span class="token-string">`${key}: ${config[key]}`</span>);
+}
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 2 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第2章：オブジェクトの徹底理解（Objects & Memory Architecture）</h2>
+
+    <h3>2.1 プロパティの取得・追加・削除・階層アクセス</h3>
+    <p>
+      JavaScriptのオブジェクトはキー（文字列またはSymbol）と値のコレクションです。
+    </p>
+
+<pre><code><span class="token-keyword">const</span> userProfile = {
+  id: <span class="token-number">101</span>,
+  <span class="token-string">"user-name"</span>: <span class="token-string">"Taro Tanaka"</span>, <span class="token-comment">// 特殊文字を含むキー</span>
+  settings: {
+    notifications: { email: <span class="token-keyword">true</span> }
+  }
+};
+
+<span class="token-comment">// 1. ブラケット記法 (動的キーや特殊文字列キーに必須)</span>
+<span class="token-keyword">const</span> keyName = <span class="token-string">"id"</span>;
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(userProfile[keyName]); <span class="token-comment">// 101</span>
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(userProfile[<span class="token-string">"user-name"</span>]); <span class="token-comment">// "Taro Tanaka"</span>
+
+<span class="token-comment">// 2. プロパティの削除</span>
+<span class="token-keyword">delete</span> userProfile.id;
+
+<span class="token-comment">// 3. オプショナルチェイニング (?.) と Null合体演算子 (??)</span>
+<span class="token-comment">// 存在しないプロパティアクセスで TypeError を防ぐ</span>
+<span class="token-keyword">const</span> smsEnabled = userProfile.settings?.notifications?.sms ?? <span class="token-keyword">false</span>;
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(smsEnabled); <span class="token-comment">// false (undefined のため右辺のデフォルト値が評価される)</span>
+</code></pre>
+
+    <h3>2.2 メソッド定義と `this` の挙動原理</h3>
+    <p>
+      オブジェクト内の関数を「メソッド」と呼びます。メソッド内で使われる <code>this</code> の参照先は、<strong>呼び出し方（実行時の文脈）によって動的に決定</strong>されます。
+    </p>
+
+<pre><code><span class="token-keyword">const</span> counter = {
+  count: <span class="token-number">0</span>,
+  <span class="token-comment">// 通常のメソッド定義 (this は counter を指す)</span>
+  increment() {
+    <span class="token-keyword">this</span>.count++;
+    <span class="token-keyword">console</span>.<span class="token-function">log</span>(<span class="token-keyword">this</span>.count);
+  },
+  <span class="token-comment">// アロー関数メソッド (自身の this を持たないため親スコープを指す)</span>
+  badIncrement: () =&gt; {
+    <span class="token-comment">// ここでの this はグローバル (window / undefined) を指してしまう！</span>
+    <span class="token-keyword">console</span>.<span class="token-function">log</span>(<span class="token-keyword">this</span>.count); <span class="token-comment">// undefined</span>
+  }
+};
+
+counter.<span class="token-function">increment</span>(); <span class="token-comment">// 1 (正常)</span>
+</code></pre>
+
+    <h3>2.3 オブジェクトの分割代入・スプレッド構文 (`...`)</h3>
+
+<pre><code><span class="token-keyword">const</span> employee = {
+  empId: <span class="token-string">"E-99"</span>,
+  fullName: <span class="token-string">"Hanako Sato"</span>,
+  department: <span class="token-string">"Engineering"</span>,
+  salary: <span class="token-number">500000</span>
+};
+
+<span class="token-comment">// 1. 分割代入 (エイリアス設定 & デフォルト値)</span>
+<span class="token-keyword">const</span> { fullName: name, department, role = <span class="token-string">"Staff"</span> } = employee;
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(name, department, role); <span class="token-comment">// "Hanako Sato", "Engineering", "Staff"</span>
+
+<span class="token-comment">// 2. スプレッド構文によるイミュータブルな更新 (残りのプロパティ収集も併用)</span>
+<span class="token-keyword">const</span> { salary, ...publicInfo } = employee; <span class="token-comment">// salary を除外した新オブジェクト</span>
+<span class="token-keyword">const</span> updatedEmployee = {
+  ...publicInfo,
+  department: <span class="token-string">"R&D"</span>, <span class="token-comment">// 特定フィールドの上書き</span>
+  updatedAt: <span class="token-keyword">new</span> <span class="token-function">Date</span>()
+};
+</code></pre>
+
+    <h3>2.4 値渡し vs 参照渡し & メモリ構造（Shallow vs Deep Copy）</h3>
+    <p>
+      JavaScriptにおいて、プリミティブ型は<strong>スタックメモリ</strong>上にデータそのものが格納されます（値渡し）。一方、オブジェクト型は<strong>ヒープメモリ</strong>上に実体が配置され、変数にはそのメモリ領域を示す「参照アドレス」が割り当てられます（参照渡し）。
+    </p>
+
+    <div class="callout">
+      <div class="callout-title">💡 シャローコピー（浅いコピー）とディープコピー（深いコピー）の差</div>
+      <ul>
+        <li><strong>シャローコピー (<code>Object.assign()</code> / <code>{ ...obj }</code>):</strong> 1階層目のプロパティのみを複製。2階層目以降のオブジェクトの参照アドレスは共有されたままになります。</li>
+        <li><strong>ディープコピー (<code>structuredClone()</code>):</strong> すべての階層のオブジェクトを再帰的に完全独立複製します。</li>
+      </ul>
+    </div>
+
+<pre><code><span class="token-keyword">const</span> original = {
+  title: <span class="token-string">"JS Textbook"</span>,
+  author: { name: "Alice" }
+};
+
+<span class="token-comment">// --- シャローコピー ---</span>
+<span class="token-keyword">const</span> shallow = { ...original };
+shallow.title = <span class="token-string">"Python Textbook"</span>; <span class="token-comment">// original.title は変化しない</span>
+shallow.author.name = <span class="token-string">"Bob"</span>;          <span class="token-comment">// ⚠️ original.author.name も "Bob" に書き換わる！</span>
+
+<span class="token-comment">// --- ディープコピー (モダン標準) ---</span>
+<span class="token-keyword">const</span> deep = <span class="token-function">structuredClone</span>(original);
+deep.author.name = <span class="token-string">"Charlie"</span>;       <span class="token-comment">// original.author.name は "Bob" のまま保持される</span>
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 3 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第3章：関数の深掘り（Advanced Functions & Scope）</h2>
+
+    <h3>3.1 関数宣言 / 関数式 / アロー関数の比較と使い分け</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>種類</th>
+          <th>構文</th>
+          <th>巻き上げ (Hoisting)</th>
+          <th>`this` の束縛</th>
+          <th>`arguments`</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>関数宣言</strong></td>
+          <td><code>function fn() {}</code></td>
+          <td>あり (呼び出しが上でも機能)</td>
+          <td>呼び出し元に動的決定</td>
+          <td>あり</td>
+        </tr>
+        <tr>
+          <td><strong>関数式</strong></td>
+          <td><code>const fn = function() {}</code></td>
+          <td>なし (変数宣言のみ巻き上げ)</td>
+          <td>呼び出し元に動的決定</td>
+          <td>あり</td>
+        </tr>
+        <tr>
+          <td><strong>アロー関数</strong></td>
+          <td><code>const fn = () => {}</code></td>
+          <td>なし</td>
+          <td>静的（定義時の外側スコープを継承）</td>
+          <td>なし</td>
+        </tr>
+      </tbody>
+    </table>
+
+<pre><code><span class="token-comment">// アロー関数における this のレキシカルスコーピング</span>
+<span class="token-keyword">class</span> <span class="token-function">Timer</span> {
+  <span class="token-function">constructor</span>() {
+    <span class="token-keyword">this</span>.seconds = <span class="token-number">0</span>;
+  }
+  <span class="token-function">start</span>() {
+    <span class="token-comment">// アロー関数を使用することで this が Timer インスタンスに固定される</span>
+    <span class="token-function">setInterval</span>(() =&gt; {
+      <span class="token-keyword">this</span>.seconds++;
+      <span class="token-keyword">console</span>.<span class="token-function">log</span>(<span class="token-keyword">this</span>.seconds);
+    }, <span class="token-number">1000</span>);
+  }
+}
+</code></pre>
+
+    <h3>3.2 引数設計（デフォルト引数・残余引数 ...args）</h3>
+
+<pre><code><span class="token-comment">// デフォルト引数と残余引数の組み合せ</span>
+<span class="token-keyword">function</span> <span class="token-function">createReport</span>(title = <span class="token-string">"無題レポート"</span>, category = <span class="token-string">"General"</span>, ...dataPoints) {
+  <span class="token-keyword">return</span> {
+    title,
+    category,
+    data: dataPoints,
+    totalCount: dataPoints.length
+  };
+}
+
+<span class="token-keyword">const</span> report = <span class="token-function">createReport</span>(<span class="token-string">"月次売上"</span>, <span class="token-string">"Finance"</span>, <span class="token-number">100</span>, <span class="token-number">250</span>, <span class="token-number">400</span>);
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(report.totalCount); <span class="token-comment">// 3</span>
+</code></pre>
+
+    <h3>3.3 返り値設計パターン・クロージャ（Closure）・高階関数</h3>
+
+    <h4>アーリーリターン（Early Return）パターン</h4>
+    <p>
+      ネスト（深さ）を浅く保ち、コードの可読性と保守性を高めるために、条件を満たさない場合は早い段階で <code>return</code> して処理を抜ける設計技法です。
+    </p>
+
+<pre><code><span class="token-comment">// アーリーリターンによる可読性向上</span>
+<span class="token-keyword">function</span> <span class="token-function">processOrder</span>(order) {
+  <span class="token-keyword">if</span> (!order) <span class="token-keyword">return</span> { success: <span class="token-keyword">false</span>, reason: <span class="token-string">"No order data"</span> };
+  <span class="token-keyword">if</span> (!order.paymentReceived) <span class="token-keyword">return</span> { success: <span class="token-keyword">false</span>, reason: <span class="token-string">"Unpaid"</span> };
+  <span class="token-keyword">if</span> (order.items.length === <span class="token-number">0</span>) <span class="token-keyword">return</span> { success: <span class="token-keyword">false</span>, reason: <span class="token-string">"Empty cart"</span> };
+
+  <span class="token-comment">// 正常系のメイン処理</span>
+  <span class="token-keyword">return</span> { success: <span class="token-keyword">true</span>, orderId: order.id };
+}
+</code></pre>
+
+    <h4>クロージャ（Closure）の実用パターン</h4>
+    <p>
+      クロージャとは、関数とその関数が宣言されたレキシカル環境（外側の変数スコープ）の組み合わせです。外側の関数が実行を終えた後でも、内部関数からその外側変数を保持・参照し続けることができます。これにより「データの隠蔽（カプセル化）」を実現できます。
+    </p>
+
+<pre><code><span class="token-comment">// カウンターを作成するクロージャファクトリ関数</span>
+<span class="token-keyword">function</span> <span class="token-function">createCounter</span>(initialValue = <span class="token-number">0</span>) {
+  <span class="token-keyword">let</span> count = initialValue; <span class="token-comment">// 外部から直接アクセス不能なプライベート変数</span>
+
+  <span class="token-keyword">return</span> {
+    increment() {
+      count++;
+      <span class="token-keyword">return</span> count;
+    },
+    decrement() {
+      count--;
+      <span class="token-keyword">return</span> count;
+    },
+    getValue() {
+      <span class="token-keyword">return</span> count;
+    }
+  };
+}
+
+<span class="token-keyword">const</span> myCounter = <span class="token-function">createCounter</span>(<span class="token-number">10</span>);
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(myCounter.<span class="token-function">increment</span>()); <span class="token-comment">// 11</span>
+<span class="token-keyword">console</span>.<span class="token-function">log</span>(myCounter.count);       <span class="token-comment">// undefined (直接改ざん不可能)</span>
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 4 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第4章：ブラウザ機能 & DOM操作（DOM API Deep Dive）</h2>
+
+    <h3>4.1 DOMの選択・変更・スタイル操作</h3>
+    <p>
+      ブラウザはHTML文書を解析し、JavaScriptからアクセス可能なノードツリー（DOM: Document Object Model）を構築します。
+    </p>
+
+<pre><code><span class="token-comment">// 1. 要素取得 (querySelector を推奨)</span>
+<span class="token-keyword">const</span> header = document.<span class="token-function">querySelector</span>(<span class="token-string">"#main-header"</span>);
+<span class="token-keyword">const</span> cards = document.<span class="token-function">querySelectorAll</span>(<span class="token-string">".card"</span>); <span class="token-comment">// NodeList (配列風オブジェクト)</span>
+
+<span class="token-comment">// 2. テキスト更新: textContent vs innerHTML セキュリティ</span>
+<span class="token-comment">// ユーザー入力を描画する際は XSS 対策のため必ず textContent を使用する</span>
+header.textContent = <span class="token-string">"安全なテキスト挿入"</span>;
+
+<span class="token-comment">// 3. classList API による安全な CSS クラス操作</span>
+header.classList.<span class="token-function">add</span>(<span class="token-string">"sticky"</span>, <span class="token-string">"shadow"</span>);
+header.classList.<span class="token-function">remove</span>(<span class="token-string">"hidden"</span>);
+header.classList.<span class="token-function">toggle</span>(<span class="token-string">"dark-theme"</span>);
+<span class="token-keyword">const</span> isActive = header.classList.<span class="token-function">contains</span>(<span class="token-string">"active"</span>);
+</code></pre>
+
+    <h3>4.2 DOMの動的生成・挿入・パフォーマンス最適化</h3>
+    <p>
+      DOM変更操作はブラウザの「再計算（Reflow）」「再描画（Repaint）」を引き起こすため、頻繁なDOM操作はパフォーマンス低下の原因になります。<code>DocumentFragment</code> を使うことで、一括挿入が可能です。
+    </p>
+
+<pre><code><span class="token-keyword">const</span> container = document.<span class="token-function">querySelector</span>(<span class="token-string">"#item-list"</span>);
+<span class="token-keyword">const</span> fragment = document.<span class="token-function">createDocumentFragment</span>(); <span class="token-comment">// メモリ上の仮想コンテナ</span>
+
+<span class="token-keyword">const</span> itemsData = [<span class="token-string">"Item A"</span>, <span class="token-string">"Item B"</span>, <span class="token-string">"Item C"</span>];
+
+itemsData.<span class="token-function">forEach</span>(text =&gt; {
+  <span class="token-keyword">const</span> li = document.<span class="token-function">createElement</span>(<span class="token-string">"li"</span>);
+  li.className = <span class="token-string">"list-item"</span>;
+  li.textContent = text;
+  fragment.<span class="token-function">appendChild</span>(li); <span class="token-comment">// フラグメントに追加 (まだ画面は描画されない)</span>
+});
+
+<span class="token-comment">// 最後に1回だけ実際の DOM に追加 (リフローは1回のみ)</span>
+container.<span class="token-function">appendChild</span>(fragment);
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 5 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第5章：ブラウザイベント全網羅（DOM Events Mastery）</h2>
+
+    <h3>5.1 イベント伝播モデル（キャプチャリング & バブリング）</h3>
+    <p>
+      DOMイベントが発生すると、イベントオブジェクトは3つのフェーズを通って伝播します。
+    </p>
+    <ol>
+      <li><strong>キャプチャリングフェーズ（Capturing Phase）:</strong> <code>window</code> からターゲット要素に向かって下降。</li>
+      <li><strong>ターゲットフェーズ（Target Phase）:</strong> 実際にイベントが発生した要素に到達。</li>
+      <li><strong>バブリングフェーズ（Bubbling Phase）:</strong> ターゲット要素から <code>window</code> に向かって上昇（標準のイベントリスナーはこのフェーズで発火）。</li>
+    </ol>
+
+    <h3>5.2 カテゴリ別・全イベント完全リファレンス</h3>
+
+    <h4>1. マウス & ポインター系イベント (Mouse & Pointer)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>イベント名</th>
+          <th>発火タイミング</th>
+          <th>主要プロパティ / 活用例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>click</code> / <code>dblclick</code></td>
+          <td>クリック / ダブルクリック時</td>
+          <td><code>e.clientX</code>, <code>e.clientY</code> (画面座標)</td>
+        </tr>
+        <tr>
+          <td><code>pointerdown</code> / <code>pointerup</code></td>
+          <td>ポインター（マウス/ペン/タッチ）の押し込み/解放</td>
+          <td>マウス・タッチを統合処理するモダンAPI</td>
+        </tr>
+        <tr>
+          <td><code>pointermove</code></td>
+          <td>ポインターの移動時</td>
+          <td>ドラッグ＆ドロップ、キャンバス描画</td>
+        </tr>
+        <tr>
+          <td><code>contextmenu</code></td>
+          <td>右クリックまたは長押し時</td>
+          <td><code>e.preventDefault()</code> で独自メニュー表示</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>2. キーボード系イベント (Keyboard)</h4>
+    <p>
+      <code>e.key</code> は入力された「文字内容」（言語環境に依存）、<code>e.code</code> はキーボード上の「物理キー位置」（QWERTY配列依存）を取得します。ゲームの操作キーなどには <code>e.code</code> を用いるのが一般的です。
+    </p>
+
+<pre><code>document.<span class="token-function">addEventListener</span>(<span class="token-string">"keydown"</span>, (e) =&gt; {
+  <span class="token-keyword">if</span> (e.code === <span class="token-string">"KeyW"</span> || e.code === <span class="token-string">"ArrowUp"</span>) {
+    <span class="token-function">movePlayerForward</span>();
+  }
+  <span class="token-keyword">if</span> (e.key === <span class="token-string">"Enter"</span> &amp;&amp; e.ctrlKey) {
+    <span class="token-function">submitFormViaShortcut</span>(); <span class="token-comment">// Ctrl + Enter ショートカット</span>
+  }
+});
+</code></pre>
+
+    <h4>3. フォーム & 入力系イベント (Form & Input)</h4>
+    <ul>
+      <li><code>input</code>: <code>&lt;input&gt;</code> や <code>&lt;textarea&gt;</code> の値が変更されるたびにリアルタイム発火。</li>
+      <li><code>change</code>: フォーカスが外れるか選択値が確定したタイミングで発火。</li>
+      <li><code>submit</code>: <code>&lt;form&gt;</code> 送信時に発火（通常は <code>e.preventDefault()</code> を呼び出しSPA化）。</li>
+      <li><code>focus` / `blur</code>: 要素がフォーカスを得た/失った時（バブリングしない）。</li>
+    </ul>
+
+<pre><code><span class="token-keyword">const</span> searchInput = document.<span class="token-function">querySelector</span>(<span class="token-string">"#search-input"</span>);
+searchInput.<span class="token-function">addEventListener</span>(<span class="token-string">"input"</span>, (e) =&gt; {
+  <span class="token-keyword">console</span>.<span class="token-function">log</span>(<span class="token-string">"リアルタイム入力値:"</span>, e.target.value);
+});
+</code></pre>
+
+    <h4>4. ウィンドウ & ビューポート系イベント (Window & Viewport)</h4>
+    <ul>
+      <li><code>DOMContentLoaded</code>: HTMLの解析が完了しDOMツリーが完成した時点で発火（画像等のロード待ちなし）。</li>
+      <li><code>load</code>: HTML、画像、CSS、外部JSなど全ての全リソースが読み込み完了した時点で発火。</li>
+      <li><code>resize</code> / <code>scroll</code>: ウィンドウサイズ変更時やスクロール時（発火頻度が高いためデバウンス/スロットル必須）。</li>
+    </ul>
+
+    <h4>5. タッチ & ドラッグ系イベント (Touch & Drag)</h4>
+    <ul>
+      <li><strong>Touch Events:</strong> <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code> (マルチタッチ対応 <code>e.touches</code>)。</li>
+      <li><strong>HTML Drag and Drop API:</strong> <code>dragstart</code>, <code>dragover</code>, <code>drop</code></li>
+    </ul>
+
+<pre><code><span class="token-keyword">const</span> dropZone = document.<span class="token-function">querySelector</span>(<span class="token-string">"#drop-zone"</span>);
+
+dropZone.<span class="token-function">addEventListener</span>(<span class="token-string">"dragover"</span>, (e) =&gt; {
+  e.<span class="token-function">preventDefault</span>(); <span class="token-comment">// drop イベントを許可するために必須！</span>
+});
+
+dropZone.<span class="token-function">addEventListener</span>(<span class="token-string">"drop"</span>, (e) =&gt; {
+  e.<span class="token-function">preventDefault</span>();
+  <span class="token-keyword">const</span> files = e.dataTransfer.files; <span class="token-comment">// ドロップされたファイル群を取得</span>
+  <span class="token-function">handleFileUpload</span>(files);
+});
+</code></pre>
+
+    <h3>5.3 イベント委譲（Event Delegation）の実践パターン</h3>
+    <p>
+      大量の動的要素に個別にイベントリスナーを登録するのではなく、親要素に1つだけリスナーを登録し、バブリングされたイベントを <code>e.target</code> / <code>closest()</code> で判定・処理するデザインパターンです。メモリ節約および動的要素への自動対応に絶大な効果を発揮します。
+    </p>
+
+<pre><code><span class="token-comment">// テーブル内の削除ボタンクリックをイベント委譲で一元管理</span>
+<span class="token-keyword">const</span> table = document.<span class="token-function">querySelector</span>(<span class="token-string">"#data-table"</span>);
+
+table.<span class="token-function">addEventListener</span>(<span class="token-string">"click"</span>, (e) =&gt; {
+  <span class="token-comment">// クリックされた要素から最も近い [data-action="delete"] 要素を検索</span>
+  <span class="token-keyword">const</span> deleteBtn = e.target.<span class="token-function">closest</span>(<span class="token-string">'[data-action="delete"]'</span>);
+  
+  <span class="token-keyword">if</span> (deleteBtn &amp;&amp; table.<span class="token-function">contains</span>(deleteBtn)) {
+    <span class="token-keyword">const</span> row = deleteBtn.<span class="token-function">closest</span>(<span class="token-string">"tr"</span>);
+    <span class="token-keyword">const</span> id = row.dataset.id;
+    <span class="token-function">deleteRowById</span>(id);
+    row.<span class="token-function">remove</span>();
+  }
+});
+</code></pre>
+
+  </div>
+
+</body>
+</html>
