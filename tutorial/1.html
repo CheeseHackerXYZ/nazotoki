@@ -30,11 +30,11 @@
 
   /* Cover Banner */
   .header-banner {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2563eb 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
     color: #ffffff;
     padding: 24px 20px;
     border-radius: 10px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
   }
 
   .header-banner h1 {
@@ -59,7 +59,7 @@
   h2 {
     font-size: 13pt;
     color: #1e1b4b;
-    border-left: 5px solid #2563eb;
+    border-left: 5px solid #4f46e5;
     padding-left: 10px;
     margin: 18px 0 10px 0;
     page-break-after: avoid;
@@ -88,7 +88,7 @@
 
   .card-title {
     font-weight: bold;
-    color: #2563eb;
+    color: #4f46e5;
     margin-bottom: 6px;
     font-size: 10.5pt;
   }
@@ -138,42 +138,6 @@
     padding: 0;
   }
 
-  /* Step List */
-  .step-list {
-    margin: 10px 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .step-item {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    position: relative;
-    page-break-inside: avoid;
-  }
-
-  .step-num {
-    display: inline-block;
-    background-color: #2563eb;
-    color: #ffffff;
-    font-weight: bold;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    text-align: center;
-    line-height: 22px;
-    font-size: 9pt;
-    margin-right: 8px;
-  }
-
-  .step-title {
-    font-weight: bold;
-    color: #0f172a;
-  }
-
   /* Tables */
   table {
     width: 100%;
@@ -219,221 +183,204 @@
   li {
     margin-bottom: 4px;
   }
+
+  .prompt-box {
+    background-color: #f1f5f9;
+    border: 1px dashed #64748b;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'Hiragino Sans', sans-serif;
+    font-size: 9pt;
+    margin: 8px 0 12px 0;
+    page-break-inside: avoid;
+  }
+
+  .prompt-header {
+    font-weight: bold;
+    color: #0f172a;
+    margin-bottom: 4px;
+    display: block;
+  }
 </style>
 </head>
 <body>
 
   <div class="header-banner">
-    <h1>Web開発・チームコラボレーション実践ガイド</h1>
-    <p>コメントアウト文法 / GitHub Webプルリクエスト手順 / JavaScriptのif・return徹底解説</p>
+    <h1>チーム開発と綺麗コードの教科書</h1>
+    <p>AIを活用しながら、読みやすく保守しやすいコードを共同執筆するための実践ガイド</p>
   </div>
 
   <!-- SECTION 1 -->
   <div class="section">
-    <h2>第1章：言語別 コメントアウトの書き方一覧</h2>
-    <p>コメントアウトは、プログラムの実行結果に影響を与えずに<strong>「メモを残す」「一時的に処理を無効化する（デバッグ）」</strong>ために使います。言語ごとに書き方（シンタックス）が異なるため、正しく使い分けましょう。</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>言語 / ファイル</th>
-          <th>単一行コメント</th>
-          <th>複数行コメント</th>
-          <th>主な用途・特徴</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>HTML</strong></td>
-          <td colspan="2"><code>&lt;!-- コメント --&gt;</code></td>
-          <td>構造の区切り（例：<code>&lt;!-- メイン領域 --&gt;</code>）や要素の一時的非表示。</td>
-        </tr>
-        <tr>
-          <td><strong>CSS</strong></td>
-          <td colspan="2"><code>/* コメント */</code></td>
-          <td>スタイルのセクション分け（例：<code>/* ヘッダー装飾 */</code>）や記述の切り替え。</td>
-        </tr>
-        <tr>
-          <td><strong>JavaScript</strong></td>
-          <td><code>// コメント</code></td>
-          <td><code>/* コメント */</code></td>
-          <td>処理の目的説明、一時的な処理無効化。1行記述は <code>//</code> が主流。</td>
-        </tr>
-        <tr>
-          <td><strong>Markdown</strong></td>
-          <td colspan="2"><code>&lt;!-- コメント --&gt;</code></td>
-          <td>ドキュメントプレビュー時に画面表示させたくない備忘録やメモ。</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>具体的なコード例</h3>
+    <h2>第1章：綺麗なコードを書く5つの原則</h2>
+    <p>「動くコード」と「綺麗なコード」の違いは、<strong>「未来の自分や開発パートナーが読んだ瞬間に意味が理解できるか」</strong>です。チーム開発でコードが崩壊しないための5つの基本ルールをマスターしましょう。</p>
 
     <div class="card">
-      <div class="card-title">1. HTMLのコメント</div>
-<pre><code>&lt;!-- これは画面に表示されないHTMLコメントです --&gt;
-&lt;div class="header"&gt;
-  &lt;!-- &lt;h1&gt;一時的に非表示にしたいタイトル&lt;/h1&gt; --&gt;
-  &lt;p&gt;ようこそ！&lt;/p&gt;
-&lt;/div&gt;</code></pre>
-    </div>
+      <div class="card-title">原則 1：1つの関数（function）には1つの仕事だけさせる</div>
+      <p>関数が何百行にも及ぶと、どこで何をしているか追えなくなります。「〜して、〜して、さらに〜する」関数は分割のサインです。</p>
 
-    <div class="card">
-      <div class="card-title">2. CSSのコメント</div>
-<pre><code>/* ================================
-   ボタンのスタイル定義
-   ================================ */
-.btn-primary {
-  background-color: #2563eb; /* ブランドカラーの青 */
-  /* color: red;  ← デバッグ用に古い設定を残す */
-  color: #ffffff;
+<pre><code>// ❌ 悪い例：1つの関数で全部処理している
+function handleButtonClick() {
+    // プレイヤーの位置を更新
+    player.x += 10;
+    // スコア計算
+    score += 100;
+    document.getElementById('score').innerText = score;
+    // 敵の生成
+    let enemy = document.createElement('div');
+    // ...あと50行続く
+}
+
+// ⭕️ 良い例：役割ごとに関数を分ける
+function handleButtonClick() {
+    movePlayer(10);
+    addScore(100);
+    spawnEnemy();
 }</code></pre>
     </div>
 
     <div class="card">
-      <div class="card-title">3. JavaScriptのコメント</div>
-<pre><code>// 1行コメント：次の処理の「目的」を書く
-const maxRetryCount = 3; 
+      <div class="card-title">原則 2：マジックナンバー（謎の生数字）を排除する</div>
+      <p>コード内に直接 `800` や `0.05` などの数字を書くと、後から「何の数字だっけ？」となります。ファイル先頭で意味のある名前をつけて定数化します。</p>
 
-/* 
- * 複数行コメント：
- * 複雑なアルゴリズムの解説や、仕様の背景を
- * 詳しく書き残すときに使用します。
- */
-function calculateTax(price) {
-  return price * 1.1; // 消費税10%を計算
+<pre><code>// ❌ 悪い例
+if (player.x > 800) { ... } // 800って何？画面幅？制限区域？
+
+// ⭕️ 良い例
+const MAX_SCREEN_WIDTH = 800;
+if (player.x > MAX_SCREEN_WIDTH) { ... }</code></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">原則 3：早期リターン（ガード節）でネストを浅くする</div>
+      <p>`if` の中に `if` が何重にも入る（ネストが深い）コードは読みにくさの原因です。条件に合わない場合は先に関数を抜ける（returnする）ように書きます。</p>
+
+<pre><code>// ❌ 悪い例（ネストが深い）
+function processGame(isAlive) {
+    if (isAlive) {
+        if (!isPaused) {
+            // メイン処理...
+        }
+    }
+}
+
+// ⭕️ 良い例（ガード節でスッキリ）
+function processGame(isAlive) {
+    if (!isAlive || isPaused) return;
+    // メイン処理...
 }</code></pre>
     </div>
 
     <div class="card">
-      <div class="card-title">4. Markdown (.md) のコメント</div>
-<pre><code>&lt;!-- MarkdownでもHTMLと同じ形式でコメントアウトが可能です --&gt;
-# ドキュメントタイトル
-
-&lt;!-- TODO: あとでこの章に図解画像を追加する --&gt;
-ここは本文テキストです。</code></pre>
+      <div class="card-title">原則 4：HTML / CSS / JavaScript を混ぜない</div>
+      <p>JavaScriptの中に長大なHTML文字列を直書きしたり、JSからstyleを直接書き換えすぎたりしないようにします。見た目はCSS、構造はHTML、動的処理はJSと役割をきっちり分けましょう。</p>
     </div>
 
-    <div class="callout">
-      <div class="callout-title">⚡️ ショートカットキーで一瞬でコメント化！</div>
-      VS Codeなどの多くのエディタでは、行を選択して <strong><code>Ctrl + /</code></strong>（Macは <strong><code>Cmd + /</code></strong>）を押すだけで、その言語に合わせたコメントアウトが自動適用されます。
+    <div class="card">
+      <div class="card-title">原則 5：コメントは「何をしているか」ではなく「なぜそうしたか」を書く</div>
+      <p>コードを見ればわかること（例：`x += 10 // xに10を足す`）はコメント不要です。なぜその特別な数値を使ったのか、なぜその実装方法を選んだのかの理由（Why）を残します。</p>
     </div>
   </div>
 
   <!-- SECTION 2 -->
   <div class="section">
-    <h2>第2章：GitHub Browser（ブラウザ操作）でのプルリクエスト手順</h2>
-    <p>フォーク（Fork）をせず、チームの共通リポジトリ上で<strong>「ブランチを作成 → 編集 → プルリクエスト（PR）」</strong>を送る手順です。PCのWebブラウザだけで完結するため、最もシンプルで間違いが起きにくい方法です。</p>
+    <h2>第2章：わかりやすい変数名・関数名の付け方</h2>
+    <p>変数名や関数名は、コードにおける「看板」です。名前を見るだけで何が入っているか、何をするのかが推測できるように命名します。</p>
 
-    <div class="step-list">
-      <div class="step-item">
-        <span class="step-num">1</span><span class="step-title">ファイルを編集する</span>
-        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          GitHubのリポジトリファイル画面で、右上にある鉛筆マークから「<strong>edit</strong>」と書かれたボタンをクリックします。
-        </p>
-      </div>
+    <h3>1. 基本となる命名ルール</h3>
+    <ul>
+      <li><strong>camelCase（キャメルケース）を使う：</strong> 小文字で始め、単語の繋ぎ目を大文字にします（例：`playerScore`, `isGameActive`）。</li>
+      <li><strong>具体的な英語を使う：</strong> `data`, `item`, `temp`, `a` などの抽象的な名前は避け、具体名にします。</li>
+    </ul>
 
-      <div class="step-item">
-        <span class="step-num">2</span><span class="step-title">保存する</span>
-        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          右上の緑色のボタン「<strong>Commit changes...</strong>」ボタンを押します。
-        </p>
-      </div>
-
-      <div class="step-item">
-        <span class="step-num">3</span><span class="step-title">branchを作成する</span>
-        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          選択肢「<strong>Create a new branch for this commit and start a pull request</strong>」を選択します。デフォルトでは選択されないので注意！入力欄には適当な名前を入力します。
-        </p>
-      </div>
-
-      <div class="step-item">
-        <span class="step-num">4</span><span class="step-title">編集を実行</span>
-        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          緑色の「<strong>Commit</strong>」ボタンをクリックします。
-        </p>
-      </div>
-
-      <div class="step-item">
-        <span class="step-num">5</span><span class="step-title">PRのタイトルと内容を書いて送信する</span>
-        <p style="margin: 4px 0 0 30px; font-size: 9pt; color: #475569;">
-          タイトルに変更内容の概要（例: <code>[機能追加] トップページにジャンプボタンを追加</code>）を書きます。本文に「何を変更したか」「確認してほしい点」を書いて、緑色の「<strong>Create pull request</strong>」ボタンを押せば完了です！
-        </p>
-      </div>
-    </div>
+    <h3>2. 変数・関数の命名パターン表</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>種類</th>
+          <th>命名ルール / 接頭辞</th>
+          <th>❌ 悪い例</th>
+          <th>⭕️ 良い例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>真偽値 (Boolean)</strong></td>
+          <td>`is`, `has`, `can`, `should` + 状態</td>
+          <td><span class="bad-code">flag, check</span></td>
+          <td><span class="good-code">isGameOver, hasKey</span></td>
+        </tr>
+        <tr>
+          <td><strong>配列 / リスト</strong></td>
+          <td>複数形 `s` や `List` をつける</td>
+          <td><span class="bad-code">enemy, user</span></td>
+          <td><span class="good-code">enemies, userList</span></td>
+        </tr>
+        <tr>
+          <td><strong>関数 (Function)</strong></td>
+          <td>`動詞` + `対象（名詞）`</td>
+          <td><span class="bad-code">score(), update()</span></td>
+          <td><span class="good-code">addScore(), updatePlayerPosition()</span></td>
+        </tr>
+        <tr>
+          <td><strong>イベントハンドラ</strong></td>
+          <td>`handle` + イベント名</td>
+          <td><span class="bad-code">clickBtn()</span></td>
+          <td><span class="good-code">handleJumpButtonClick()</span></td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="callout">
-      <div class="callout-title">💡 なぜ main を直接編集せず、ブランチを作るの？</div>
-      <code>main</code> は「完成された動く状態」を保つ場所です。個別ブランチで作業することで、途中でバグっても他の人に影響を与えず、レビューを通して安全に合体（マージ）できるようになります。
+      <div class="callout-title">💡 命名に迷ったときの特効薬</div>
+      「AIに『〜する関数の名前を英語のcamelCaseで5つ提案して』と聞く」のが最も速く確実です！無理に自分で怪しい英語を作る必要はありません。
     </div>
   </div>
 
   <!-- SECTION 3 -->
   <div class="section">
-    <h2>第3章：JavaScriptの `if` 文における `return` の徹底解説</h2>
-    <p>関数のなかで `return` を使うと、<strong>「呼び出し元に値を返す」</strong>だけでなく、<strong>「その時点で関数の実行を終了して抜け出す」</strong>という役割を果たします。これを利用したのが<strong>「早期リターン（ガード節）」</strong>です。</p>
+    <h2>第3章：共同編集で困らないAI（Gemini）へのプロンプト技術</h2>
+    <p>AI（Gemini Pro等）に「コード書いて」と大雑把に頼むと、1ファイルに全部詰まった保守不能なコードを出力しがちです。AIを「優秀なコーダー」にするためのプロンプトのコツを伝授します。</p>
 
-    <h3>1. `return` の基本的な動き</h3>
-    <p>`return` が実行された瞬間、その下にあるコードは一切実行されずに関数が終わります。</p>
+    <h3>1. Geminiに最初に読み込ませる「スタイル指定プロンプト」</h3>
+    <p>新しい機能を作る際、チャットの最初に以下の指示を与えておくと、出力されるコードの品質が劇的に上がります。</p>
 
-<pre><code>function testReturn() {
-  console.log("① ここは実行される");
-  return; // ここで関数終了！
-  console.log("② ここは絶対に実行されない");
-}</code></pre>
+    <div class="prompt-box">
+      <span class="prompt-header">📋 【AI初期設定用プロンプト】</span>
+      あなたはチーム開発に熟練したWebプログラマーです。これから作成するコードは以下の設計ルールを厳格に守ってください。<br><br>
+      【設計ルール】<br>
+      1. HTML, CSS, JavaScript は完全に別ファイルに分けること。<br>
+      2. JavaScriptは単一責任の原則に従い、1つの関数には1つの役割のみを持たせること。<br>
+      3. マジックナンバーは排除し、ファイル冒頭で const 定数として宣言すること。<br>
+      4. 変数・関数名は省略せず、具体的で分かりやすい英語（camelCase）にすること。<br>
+      5. 条件分岐のネストは避け、ガード節（早期リターン）を使用すること。
+    </div>
 
-    <h3>2. `if` と `return` を組み合わせる「早期リターン（ガード節）」とは？</h3>
-    <p>不正な条件や例外的なケースを `if` 文と `return` で先にはじき出すテクニックです。</p>
+    <h3>2. 共同開発で使える！場面別プロンプト集</h3>
 
     <div class="card">
-      <div class="card-title">❌ 悪い例：if / else でネスト（入れ子）が深くなっているコード</div>
-      <p>条件が重なると `if` の中に `if` が入って右にどんどんズレていき、どれが何の処理か分からなくなります。</p>
-<pre><code>// プレイヤーが動く処理
-function movePlayer(player) {
-  if (player != null) {
-    if (player.isAlive == true) {
-      if (player.stamina > 0) {
-        // メインの移動処理（ここに行き着くまでが長い！）
-        player.x += 10;
-        player.stamina -= 1;
-      } else {
-        console.log("スタミナ切れ！");
-      }
-    }
-  }
-}</code></pre>
+      <div class="card-title">① コード美化（リファクタリング）をお願いするとき</div>
+      <div class="prompt-box">
+        以下のコードを共同開発しやすく綺麗なコードに修正してください。<br>
+        ・巨大な関数があれば、小さな関数に分割してください。<br>
+        ・命名が分かりにくい部分があれば改善してください。<br>
+        ・変更点とその理由を簡潔に解説してください。<br>
+        [ここに自分のコードを貼る]
+      </div>
     </div>
 
     <div class="card">
-      <div class="card-title">⭕️ 良い例：`return` を使った早期リターン（ガード節）</div>
-      <p>ダメな条件（エラーや非対象）を先頭で即座に `return` して追い出すことで、メイン処理が真っ直ぐ見やすくなります。</p>
-<pre><code>// 早期リターンを適用したコード
-function movePlayer(player) {
-  // ① プレイヤーが存在しないなら即終了
-  if (!player) return;
-
-  // ② 死亡しているなら即終了
-  if (!player.isAlive) return;
-
-  // ③ スタミナがないなら警告を出して即終了
-  if (player.stamina &lt;= 0) {
-    console.log("スタミナ切れ！");
-    return;
-  }
-
-  // ★ メインの処理（ネストがなくなり真っ直ぐ読める！）
-  player.x += 10;
-  player.stamina -= 1;
-}</code></pre>
+      <div class="card-title">② プルリクエストを出す前の「セルフチェック」依頼</div>
+      <div class="prompt-box">
+        仲間と共同開発中のコードです。プルリクエストを提出する前にコードレビューをお願いします。<br>
+        ・可読性が低い部分や、バグになりそうな潜在的リスクはありますか？<br>
+        ・より洗練された書き方があれば提案してください。
+      </div>
     </div>
 
     <div class="callout">
-      <div class="callout-title">🎯 ガード節を使う 3 大メリット</div>
-      <ol style="margin: 4px 0 0 0; padding-left: 18px;">
-        <li><strong>ネストが浅くなる：</strong> インデント（字下げ）が減り、コードが横に伸びない。</li>
-        <li><strong>エラーを未然に防ぐ：</strong> `null` や `undefined` の要素を真っ先にはじくため、クラッシュしにくい。</li>
-        <li><strong>読むのが楽：</strong> 「この条件なら何もしない」というルールが関数の冒頭で一目でわかる。</li>
-      </ol>
+      <div class="callout-title">🚀 チーム開発成功のGolden Rule</div>
+      AIが生成したコードは**「そのまま貼る前に一度自分で読んで、関数名と変数の役割が言えるか」**を試そう。言えたらPRを出してOK！
     </div>
   </div>
 
