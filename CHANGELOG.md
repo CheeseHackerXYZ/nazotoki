@@ -7,4 +7,4 @@
 
 
 
-[ちーず]: (https://github.com/CheeseHackerXYZ)
+[ちーず]: https://github.com/CheeseHackerXYZ
