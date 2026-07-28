@@ -2,313 +2,680 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JavaScript 完全攻略ロードマップ</title>
+  <title>Canvas 描画 & レンダリング 完全入門・実践教科書</title>
   <style>
-    :root {
-      --bg-color: #0b0c10;
-      --text-main: #e0e2e4;
-      --text-muted: #a0a5aa;
-      --neon-blue: #00f3ff;
-      --neon-purple: #b535ff;
-      --neon-orange: #ff7b00;
-      --surface-color: #15161d;
-      --code-bg: #1e1e28;
+    *, *::before, *::after {
+      box-sizing: border-box;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    @page {
+      size: A4;
+      margin: 16mm 14mm 18mm 14mm;
+      background-color: #f8fafc;
+      @bottom-center {
+        content: "Canvas Graphics & Rendering Guide — " counter(page) " / " counter(pages);
+        font-size: 8pt;
+        color: #64748b;
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      }
     }
 
     body {
-      font-family: "Helvetica Neue", "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-      background-color: var(--bg-color);
-      background-image: 
-        radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(181, 53, 255, 0.05), transparent 25%);
-      color: var(--text-main);
-      line-height: 1.7;
-      font-size: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.6;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
     }
 
-    /* PDF印刷用設定 */
-    @media print {
-      body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .page-break {
-        page-break-after: always;
-        break-after: page;
-      }
-      @page {
-        size: A4;
-        margin: 15mm;
-      }
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .section-header {
-      border-left: 5px solid var(--neon-blue);
-      padding-left: 15px;
-      margin: 40px 0 25px 0;
-      position: relative;
-    }
-
-    .section-header::after {
-      content: '';
-      position: absolute;
-      left: -5px;
-      bottom: 0;
-      width: 5px;
-      height: 40%;
-      background-color: var(--neon-purple);
-    }
-
-    h1 {
-      font-size: 28px;
+    /* Cover / Header Block */
+    .header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4338ca 100%);
       color: #ffffff;
-      letter-spacing: 1px;
+      padding: 24px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
     }
 
-    h2 {
-      font-size: 20px;
-      color: var(--neon-blue);
-      margin: 30px 0 15px 0;
-      border-bottom: 1px solid rgba(0, 243, 255, 0.2);
-      padding-bottom: 5px;
+    .header-banner h1 {
+      font-size: 19pt;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      border: none;
+      padding: 0;
+    }
+
+    .header-banner .subtitle {
+      font-size: 11pt;
+      color: #c7d2fe;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .header-banner .meta {
+      font-size: 8.5pt;
+      color: #e0e7ff;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    /* Table of Contents Box */
+    .toc-box {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #4338ca;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+    }
+
+    .toc-box h2 {
+      font-size: 11pt;
+      color: #4338ca;
+      margin: 0 0 10px 0;
+      padding: 0;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toc-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .toc-table td {
+      padding: 4px 8px;
+      font-size: 9pt;
+      vertical-align: top;
+      border: none;
+    }
+
+    .toc-table td.chapter-num {
+      font-weight: bold;
+      color: #4338ca;
+      width: 70px;
+    }
+
+    /* Section & Headings */
+    .chapter {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    h2.chapter-title {
+      font-size: 13.5pt;
+      color: #0f172a;
+      border-bottom: 2px solid #4338ca;
+      padding-bottom: 6px;
+      margin: 0 0 16px 0;
+      page-break-after: avoid;
     }
 
     h3 {
-      font-size: 16px;
-      color: var(--text-main);
-      margin: 20px 0 10px 0;
+      font-size: 11pt;
+      color: #3730a3;
+      margin: 18px 0 8px 0;
+      padding-left: 8px;
+      border-left: 3px solid #4338ca;
+      page-break-after: avoid;
+    }
+
+    h4 {
+      font-size: 9.5pt;
+      color: #334155;
+      margin: 12px 0 6px 0;
+      font-weight: 700;
+      page-break-after: avoid;
     }
 
     p {
-      margin-bottom: 15px;
-      color: var(--text-muted);
+      margin: 0 0 10px 0;
+      text-align: justify;
     }
 
-    ul {
-      margin-bottom: 20px;
+    ul, ol {
+      margin: 0 0 12px 0;
       padding-left: 20px;
-      color: var(--text-muted);
     }
 
     li {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
-    strong {
-      color: var(--neon-blue);
-    }
-
-    /* コードブロックのスタイリング */
-    pre {
-      background-color: var(--code-bg);
-      border: 1px solid rgba(181, 53, 255, 0.3);
-      border-radius: 6px;
-      padding: 15px;
-      overflow-x: auto;
-      margin-bottom: 25px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    }
-
+    /* Code & Formatting */
     code {
-      font-family: "Consolas", "Monaco", monospace;
-      font-size: 14px;
-      color: #c5c8c6;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
+      font-size: 8.5pt;
+      background-color: #f1f5f9;
+      color: #4338ca;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
     }
 
-    .c-keyword { color: #b294bb; } /* 紫 */
-    .c-func { color: #81a2be; }    /* 青 */
-    .c-string { color: #b5bd68; }  /* 緑 */
-    .c-comment { color: #969896; font-style: italic; } /* 灰 */
-    .c-number { color: #de935f; }  /* オレンジ */
+    pre {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, monospace;
+      font-size: 8pt;
+      line-height: 1.45;
+      padding: 12px 14px;
+      border-radius: 6px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 10px 0 14px 0;
+      page-break-inside: avoid;
+    }
 
-    /* ジオメトリック装飾 */
-    .decorative-line {
-      height: 1px;
-      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), transparent);
-      margin: 20px 0;
-      opacity: 0.5;
+    pre code {
+      background-color: transparent;
+      color: #f8fafc;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+
+    /* Syntax Highlighting */
+    .token-keyword { color: #f43f5e; font-weight: bold; }
+    .token-string { color: #38bdf8; }
+    .token-comment { color: #64748b; font-style: italic; }
+    .token-function { color: #fbbf24; }
+    .token-number { color: #a78bfa; }
+    .token-operator { color: #f43f5e; }
+
+    /* Callout & Note Boxes */
+    .callout {
+      background-color: #f0fdf4;
+      border-left: 4px solid #16a34a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      color: #15803d;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    .warning-box {
+      background-color: #fff1f2;
+      border-left: 4px solid #e11d48;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .warning-title {
+      font-weight: bold;
+      color: #be123c;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    .info-box {
+      background-color: #eff6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+
+    .info-title {
+      font-weight: bold;
+      color: #1d4ed8;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+    }
+
+    /* Concept Visual Diagram Box */
+    .diagram-box {
+      background-color: #f8fafc;
+      border: 1px dashed #6366f1;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      line-height: 1.5;
+    }
+
+    .diagram-title {
+      font-weight: bold;
+      color: #4338ca;
+      margin-bottom: 6px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
     }
   </style>
 </head>
 <body>
-  <div class="container">
 
-    <!-- ==========================================
-         PAGE 1: 実践（Canvas描画）
-    =========================================== -->
-    <div class="page-break">
-      <div class="section-header">
-        <h1>【実践】 Canvas描画 & レンダリング</h1>
-        <p style="color: var(--neon-blue); margin-top: 5px; font-weight: bold;">Standard to Advanced Bridge</p>
-      </div>
-      
-      <p>標準的なDOM操作から一歩踏み出し、ピクセル単位での描画やインタラクティブなアニメーションループを構築するフェーズです。ここで培うレンダリングの知識は、複雑なUIや物理演算の実装に直結します。</p>
-
-      <h2>1. Canvas APIの基礎と初期化</h2>
-      <p>HTMLの<code>&lt;canvas&gt;</code>要素を取得し、2Dコンテキストを呼び出すことで描画の準備が整います。高解像度ディスプレイ（Retina等）に対応するためのスケーリングも重要です。</p>
-<pre><code><span class="c-keyword">const</span> canvas = document.<span class="c-func">querySelector</span>(<span class="c-string">'#gameCanvas'</span>);
-<span class="c-keyword">const</span> ctx = canvas.<span class="c-func">getContext</span>(<span class="c-string">'2d'</span>);
-
-<span class="c-comment">// 画面サイズへの追従</span>
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-<span class="c-comment">// 矩形の描画テスト</span>
-ctx.fillStyle = <span class="c-string">'#00f3ff'</span>;
-ctx.<span class="c-func">fillRect</span>(<span class="c-number">50</span>, <span class="c-number">50</span>, <span class="c-number">100</span>, <span class="c-number">100</span>);</code></pre>
-
-      <h2>2. メインループとアニメーション</h2>
-      <p><code>requestAnimationFrame</code>を使用し、ディスプレイのリフレッシュレートに同期した滑らかなアニメーションループを構築します。</p>
-<pre><code><span class="c-keyword">let</span> x = <span class="c-number">0</span>;
-
-<span class="c-keyword">function</span> <span class="c-func">loop</span>() {
-  <span class="c-comment">// 1. 画面のクリア (残像を消す)</span>
-  ctx.<span class="c-func">clearRect</span>(<span class="c-number">0</span>, <span class="c-number">0</span>, canvas.width, canvas.height);
-  
-  <span class="c-comment">// 2. 状態の更新</span>
-  x += <span class="c-number">2</span>;
-  
-  <span class="c-comment">// 3. 描画</span>
-  ctx.fillStyle = <span class="c-string">'#b535ff'</span>;
-  ctx.<span class="c-func">fillRect</span>(x, <span class="c-number">100</span>, <span class="c-number">50</span>, <span class="c-number">50</span>);
-  
-  <span class="c-comment">// 次のフレームを要求</span>
-  <span class="c-func">requestAnimationFrame</span>(loop);
-}
-<span class="c-func">loop</span>();</code></pre>
-
-      <h2>3. 座標計算と衝突判定 (AABB)</h2>
-      <p>オブジェクト同士の重なりを検知する基本アルゴリズム「AABB（Axis-Aligned Bounding Box）」の概念です。</p>
-      <ul>
-        <li><strong>X軸の重なり：</strong> (Aの左端 &lt; Bの右端) かつ (Aの右端 &gt; Bの左端)</li>
-        <li><strong>Y軸の重なり：</strong> (Aの上端 &lt; Bの下端) かつ (Aの下端 &gt; Bの上端)</li>
-      </ul>
-      <div class="decorative-line"></div>
+  <!-- Header / Title -->
+  <div class="header-banner">
+    <h1>Canvas 描画 & レンダリング（Canvas 2D API）</h1>
+    <div class="subtitle">ゼロから学ぶ 2Dグラフィック・アニメーション・衝突判定・高速レンダリング教科書</div>
+    <div class="meta">
+      対象範囲: Canvas 2D Contextの基本構造 / DPI高解像度対応 / ベジェ曲線・グラデーション / 画像スプライトアニメ / ゲームループ / 数学的な衝突判定（AABB・円判定）
     </div>
-
-    <!-- ==========================================
-         PAGE 2: 応用（JS Concepts）
-    =========================================== -->
-    <div class="page-break">
-      <div class="section-header">
-        <h1>【応用】 Advanced JS Concepts & Architecture</h1>
-        <p style="color: var(--neon-purple); margin-top: 5px; font-weight: bold;">Object-Oriented & Performance</p>
-      </div>
-
-      <p>規模の大きなコードベースを破綻させずに管理するための、言語の深い仕様（クラス、thisの挙動、カプセル化）や、パフォーマンス最適化を学ぶフェーズです。</p>
-
-      <h2>1. クラスとオブジェクト指向 (OOP)</h2>
-      <p>設計図となる<code>class</code>を定義し、そこから実体（インスタンス）を生成します。共通のプロパティやメソッドをまとめることで、コードの再利用性が劇的に向上します。</p>
-<pre><code><span class="c-keyword">class</span> Entity {
-  <span class="c-keyword">constructor</span>(x, y) {
-    <span class="c-keyword">this</span>.x = x;
-    <span class="c-keyword">this</span>.y = y;
-  }
-  <span class="c-func">move</span>(vx, vy) {
-    <span class="c-keyword">this</span>.x += vx;
-    <span class="c-keyword">this</span>.y += vy;
-  }
-}
-
-<span class="c-comment">// 継承 (extends) を使って拡張</span>
-<span class="c-keyword">class</span> Player <span class="c-keyword">extends</span> Entity {
-  <span class="c-keyword">constructor</span>(x, y, hp) {
-    <span class="c-keyword">super</span>(x, y); <span class="c-comment">// 親クラスのコンストラクタ呼び出し</span>
-    <span class="c-keyword">this</span>.hp = hp;
-  }
-}</code></pre>
-
-      <h2>2. thisのバインディングとアロー関数</h2>
-      <p>JavaScriptにおいて<code>this</code>は「呼び出し元」によって変化します。コールバック関数内で意図した<code>this</code>を参照するために、アロー関数の性質を理解することが必須です。</p>
-      <ul>
-        <li><strong>通常の関数：</strong> 呼び出された時のコンテキストに依存。</li>
-        <li><strong>アロー関数：</strong> 定義された場所のスコープの<code>this</code>を保持する（レキシカルスコープ）。</li>
-      </ul>
-
-      <h2>3. パフォーマンスとメモリ管理</h2>
-      <p>不要になったイベントリスナーやオブジェクトの参照を残し続けると「メモリリーク」が発生し、動作が重くなります。また、連続発火するイベントの制御も重要です。</p>
-<pre><code><span class="c-comment">// スロットリング (一定間隔でのみ実行を許可する簡易実装)</span>
-<span class="c-keyword">let</span> isThrottled = <span class="c-keyword">false</span>;
-window.<span class="c-func">addEventListener</span>(<span class="c-string">'resize'</span>, () =&gt; {
-  <span class="c-keyword">if</span> (isThrottled) <span class="c-keyword">return</span>;
-  isThrottled = <span class="c-keyword">true</span>;
-  
-  <span class="c-func">setTimeout</span>(() =&gt; {
-    console.<span class="c-func">log</span>(<span class="c-string">'リサイズ処理を実行'</span>);
-    isThrottled = <span class="c-keyword">false</span>;
-  }, <span class="c-number">100</span>);
-});</code></pre>
-      <div class="decorative-line"></div>
-    </div>
-
-    <!-- ==========================================
-         PAGE 3: 中上級（非同期・データ）
-    =========================================== -->
-    <div class="page-break" style="page-break-after: auto;">
-      <div class="section-header">
-        <h1>【中上級】 Async Processing & Persistence</h1>
-        <p style="color: var(--neon-orange); margin-top: 5px; font-weight: bold;">Promises, Fetch & LocalStorage</p>
-      </div>
-
-      <p>サーバーとの通信や、ローカル環境へのデータ保存など「時間の遅れ（非同期）」や「永続化」を扱う、現代のWeb開発において最も重要な領域です。</p>
-
-      <h2>1. 非同期処理と async / await</h2>
-      <p>ネットワーク通信やファイルの読み込みは、完了するまでに時間がかかります。処理をブロックせず、完了を待ってから次の処理を行うための仕組みが<code>Promise</code>と<code>async/await</code>です。</p>
-<pre><code><span class="c-keyword">async function</span> <span class="c-func">fetchConfig</span>() {
-  <span class="c-keyword">try</span> {
-    <span class="c-comment">// 通信の完了を「待つ」</span>
-    <span class="c-keyword">const</span> response = <span class="c-keyword">await</span> <span class="c-func">fetch</span>(<span class="c-string">'/api/config.json'</span>);
-    <span class="c-keyword">if</span> (!response.ok) {
-      <span class="c-keyword">throw new</span> Error(<span class="c-string">'ネットワークエラー'</span>);
-    }
-    <span class="c-keyword">const</span> data = <span class="c-keyword">await</span> response.<span class="c-func">json</span>();
-    console.<span class="c-func">log</span>(data);
-  } <span class="c-keyword">catch</span> (error) {
-    console.<span class="c-func">error</span>(<span class="c-string">'読み込み失敗:'</span>, error);
-  }
-}</code></pre>
-
-      <h2>2. localStorage を用いたデータ永続化</h2>
-      <p>ブラウザ上にデータを保存し、ページをリロードしても消えないようにします。保存できるのは「文字列」のみであるため、オブジェクトを保存する際はJSON形式に変換する必要があります。</p>
-<pre><code><span class="c-comment">// セーブデータの構築</span>
-<span class="c-keyword">const</span> saveData = {
-  level: <span class="c-number">5</span>,
-  inventory: [<span class="c-string">'sword'</span>, <span class="c-string">'potion'</span>],
-  lastPlayed: Date.<span class="c-func">now</span>()
-};
-
-<span class="c-comment">// 文字列に変換して保存 (Serialize)</span>
-localStorage.<span class="c-func">setItem</span>(<span class="c-string">'myApp_save'</span>, JSON.<span class="c-func">stringify</span>(saveData));
-
-<span class="c-comment">// データの読み込みと復元 (Deserialize)</span>
-<span class="c-keyword">const</span> loadedStr = localStorage.<span class="c-func">getItem</span>(<span class="c-string">'myApp_save'</span>);
-<span class="c-keyword">if</span> (loadedStr) {
-  <span class="c-keyword">const</span> restoredData = JSON.<span class="c-func">parse</span>(loadedStr);
-  console.<span class="c-func">log</span>(<span class="c-string">'ロード完了:'</span>, restoredData.level);
-}</code></pre>
-
-      <h2>3. Cookie と Storage の使い分け</h2>
-      <ul>
-        <li><strong>localStorage:</strong> 有効期限がなく、明示的に削除するまで残る。容量が大きい（約5MB）。UIの状態やセーブデータに最適。</li>
-        <li><strong>sessionStorage:</strong> タブやウィンドウを閉じると消える。一時的なフォーム入力の保持などに利用。</li>
-        <li><strong>Cookie:</strong> サーバー側にもリクエストの度に送信される。セッション管理や認証トークンの保持に使用されることが多い。</li>
-      </ul>
-      <div class="decorative-line"></div>
-    </div>
-
   </div>
+
+  <!-- Table of Contents -->
+  <div class="toc-box">
+    <h2>体系的目次 (Table of Contents)</h2>
+    <table class="toc-table">
+      <tr>
+        <td class="chapter-num">第1章</td>
+        <td><strong>Canvas 2D Context の基礎</strong> — 「画用紙」と「筆」の概念、コンテキスト初期化、Retina/DPIぼやけ対策、解像度とリサイズ</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第2章</td>
+        <td><strong>描画ロジック & グラフィック表現</strong> — 座標系、基本図形（矩形・円）、パス描画、ベジェ曲線、グラデーション、画像描画とスプライト切り出し</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第3章</td>
+        <td><strong>アニメーション & レンダーサイクル</strong> — `requestAnimationFrame` ゲームループ、画面クリアと残像エフェクト、物理運動のシミュレーション</td>
+      </tr>
+      <tr>
+        <td class="chapter-num">第4章</td>
+        <td><strong>衝突判定 & インタラクション</strong> — マウス・タッチ座標変換（`getBoundingClientRect`）、矩形（AABB）判定、円同士の判定、実践ミニアプリ</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- CHAPTER 1 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第1章：Canvas 2D Context の基礎（Fundamental Concepts）</h2>
+
+    <h3>1.1 Canvasの直感的イメージ：「画用紙」と「筆」</h3>
+    <p>
+      HTML5の <code>&lt;canvas&gt;</code> 要素は、Webブラウザ上に直接JavaScriptからグラフィックを描画するための特別な領域を提供します。初心者の方が理解しやすいように比喩を使うと以下のようになります。
+    </p>
+
+    <ul>
+      <li><strong><code>&lt;canvas&gt;</code> タグ:</strong> 画面上に置かれた「白い画用紙（額縁）」です。HTMLタグ自体は単なる描画スペースです。</li>
+      <li><strong>2D コンテキスト（<code>ctx</code>）:</strong> 画用紙に描くための「筆や絵の具などの文房具セット」です。色を変えたり、線を引いたりする命令はすべてこのコンテキストに対して実行します。</li>
+    </ul>
+
+<pre><code><span class="token-comment">&lt;!-- HTML側に画用紙を設置 --&gt;</span>
+&lt;canvas id=<span class="token-string">"myCanvas"</span> width=<span class="token-number">800</span> height=<span class="token-number">600</span>&gt;&lt;/canvas&gt;
+
+&lt;script&gt;
+  <span class="token-comment">// 1. 画用紙 (canvas要素) を取得</span>
+  <span class="token-keyword">const</span> canvas = document.<span class="token-function">getElementById</span>(<span class="token-string">"myCanvas"</span>);
+
+  <span class="token-comment">// 2. 筆 (2Dレンダリングコンテキスト) を取り出す</span>
+  <span class="token-keyword">const</span> ctx = canvas.<span class="token-function">getContext</span>(<span class="token-string">"2d"</span>);
+&lt;/script&gt;
+</code></pre>
+
+    <h3>1.2 CSSのサイズ指定と内部解像度（属性）の決定的な違い</h3>
+    <p>
+      Canvasを扱う上で最も頻繁に陥る罠が、<strong>「HTML属性のwidth/height」</strong>と<strong>「CSSのwidth/height」</strong>の混同です。
+    </p>
+
+    <div class="diagram-box">
+      <div class="diagram-title">🎨 Canvasの「内部ピクセル数」と「見た目の拡大縮小」</div>
+      ・<strong>HTML属性 (`canvas.width = 800`):</strong> 画用紙に存在する実際のドット数（ピクセル解像度）。<br>
+      ・<strong>CSSスタイル (`style="width: 400px;"`):</strong> 描画された画用紙を虫眼鏡や拡大鏡でどれくらい拡大/縮小して表示するか。<br>
+      ※ CSSだけで指定すると、デフォルトの <code>300×150</code> ピクセルの画用紙がびよーんと引き伸ばされ、グラフィックが極めて荒くぼやけてしまいます！
+    </div>
+
+    <h3>1.3 高解像度ディスプレイ（Retina / DPI）対応とリサイズ処理</h3>
+    <p>
+      スマートフォンやMacなどの高精細ディスプレイ（Retinaディスプレイ）では、1表示ピクセル（CSSピクセル）に対して物理的に2倍や3倍のドットが存在します。これに対応するには、<code>window.devicePixelRatio</code> を考慮して解像度を調整します。
+    </p>
+
+<pre><code><span class="token-keyword">function</span> <span class="token-function">setupCanvasResolution</span>(canvas) {
+  <span class="token-keyword">const</span> ctx = canvas.<span class="token-function">getContext</span>(<span class="token-string">"2d"</span>);
+  
+  <span class="token-comment">// ディバイスピクセル比を取得 (通常画面は1、Retinaなら2または3)</span>
+  <span class="token-keyword">const</span> dpr = window.devicePixelRatio || <span class="token-number">1</span>;
+
+  <span class="token-comment">// 画面上の表示サイズ (CSSサイズ)</span>
+  <span class="token-keyword">const</span> displayWidth = <span class="token-number">600</span>;
+  <span class="token-keyword">const</span> displayHeight = <span class="token-number">400</span>;
+
+  <span class="token-comment">// 1. Canvasの内部解像度を高画質用に倍増させる</span>
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+
+  <span class="token-comment">// 2. CSS表示サイズは固定する</span>
+  canvas.style.width = <span class="token-string">`${displayWidth}px`</span>;
+  canvas.style.height = <span class="token-string">`${displayHeight}px`</span>;
+
+  <span class="token-comment">// 3. 描画コンテキストのスケールを合わせる (1px描画命令をdpr倍に自動拡大)</span>
+  ctx.<span class="token-function">scale</span>(dpr, dpr);
+}
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 2 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第2章：描画ロジック & グラフィック表現（Graphics Engine）</h2>
+
+    <h3>2.1 Canvasの座標系と基本図形の描画</h3>
+    <p>
+      Canvasの座標系は、画面の<strong>「左上角」が原点 <code>(x:0, y:0)</code></strong> です。右に行くほど <code>X</code> が増加し、<strong>下に行くほど <code>Y</code> が増加</strong>します（数学のグラフとY軸が逆向きになる点に注意してください）。
+    </p>
+
+    <h4>矩形（長方形）の描画</h4>
+<pre><code><span class="token-comment">// 色の指定 (CSSと同じ形式が使用可能: "#ff0000", "rgb(0,255,0)", "rgba(0,0,0,0.5)")</span>
+ctx.fillStyle = <span class="token-string">"#4338ca"</span>;
+ctx.<span class="token-function">fillRect</span>(<span class="token-number">50</span>, <span class="token-number">50</span>, <span class="token-number">200</span>, <span class="token-number">100</span>); <span class="token-comment">// x:50, y:50 の位置に 幅200, 高さ100 の塗りつぶし四角形</span>
+
+ctx.strokeStyle = <span class="token-string">"#e11d48"</span>;
+ctx.lineWidth = <span class="token-number">4</span>;
+ctx.<span class="token-function">strokeRect</span>(<span class="token-number">300</span>, <span class="token-number">50</span>, <span class="token-number">200</span>, <span class="token-number">100</span>); <span class="token-comment">// 枠線のみの四角形</span>
+</code></pre>
+
+    <h3>2.2 パス（Path）を使ったフリー図形とベジェ曲線</h3>
+    <p>
+      パス描画は「紙の上に鉛筆を落とし、線を滑らせてから、最後に色を塗る/枠線を引く」という手順を踏みます。
+    </p>
+
+    <div class="info-box">
+      <div class="info-title">パス命令の黄金順序</div>
+      1. <code>ctx.beginPath()</code> : 「新しい図形を描き始めます」宣言（過去のパスをリセット）。<br>
+      2. <code>ctx.moveTo(x, y)</code> : 筆を持ち上げて、指定した開始点に移動。<br>
+      3. <code>ctx.lineTo(x, y)</code> : 現在地から指定座標へ直線を引く。<br>
+      4. <code>ctx.arc(x, y, radius, startAngle, endAngle)</code> : 円弧・円を描く。<br>
+      5. <code>ctx.stroke()</code> または <code>ctx.fill()</code> : 最後に線を描画するか、内側を塗りつぶして着色！
+    </div>
+
+<pre><code><span class="token-comment">// --- 綺麗な円を描く例 ---</span>
+ctx.<span class="token-function">beginPath</span>();
+<span class="token-comment">// arc(中心x, 中心y, 半径r, 開始ラジアン, 終了ラジアン)</span>
+<span class="token-comment">// ※ 360度(1周) は 2 * Math.PI ラジアンです</span>
+ctx.<span class="token-function">arc</span>(<span class="token-number">150</span>, <span class="token-number">250</span>, <span class="token-number">40</span>, <span class="token-number">0</span>, Math.PI * <span class="token-number">2</span>);
+ctx.fillStyle = <span class="token-string">"#10b981"</span>;
+ctx.<span class="token-function">fill</span>(); <span class="token-comment">// 塗りつぶしを実行</span>
+ctx.lineWidth = <span class="token-number">3</span>;
+ctx.strokeStyle = <span class="token-string">"#064e3b"</span>;
+ctx.<span class="token-function">stroke</span>(); <span class="token-comment">// 輪郭線を描画</span>
+
+<span class="token-comment">// --- ベジェ曲線 (Bezier Curve) による滑らかな曲線 ---</span>
+ctx.<span class="token-function">beginPath</span>();
+ctx.<span class="token-function">moveTo</span>(<span class="token-number">50</span>, <span class="token-number">400</span>); <span class="token-comment">// 始点</span>
+<span class="token-comment">// quadraticCurveTo(制御点X, 制御点Y, 終点X, 終点Y)</span>
+ctx.<span class="token-function">quadraticCurveTo</span>(<span class="token-number">200</span>, <span class="token-number">300</span>, <span class="token-number">350</span>, <span class="token-number">400</span>);
+ctx.strokeStyle = <span class="token-string">"#f59e0b"</span>;
+ctx.lineWidth = <span class="token-number">5</span>;
+ctx.<span class="token-function">stroke</span>();
+</code></pre>
+
+    <h3>2.3 グラデーションの作成</h3>
+
+<pre><code><span class="token-comment">// 線形グラデーション (始点x,y から 終点x,y へ)</span>
+<span class="token-keyword">const</span> gradient = ctx.<span class="token-function">createLinearGradient</span>(<span class="token-number">0</span>, <span class="token-number">0</span>, <span class="token-number">400</span>, <span class="token-number">0</span>);
+gradient.<span class="token-function">addColorStop</span>(<span class="token-number">0</span>, <span class="token-string">"#4338ca"</span>);  <span class="token-comment">// 0%地点の色</span>
+gradient.<span class="token-function">addColorStop</span>(<span class="token-number">0.5</span>, <span class="token-string">"#a855f7"</span>); <span class="token-comment">// 50%地点の色</span>
+gradient.<span class="token-function">addColorStop</span>(<span class="token-number">1</span>, <span class="token-string">"#ec4899"</span>);  <span class="token-comment">// 100%地点の色</span>
+
+ctx.fillStyle = gradient;
+ctx.<span class="token-function">fillRect</span>(<span class="token-number">0</span>, <span class="token-number">0</span>, <span class="token-number">400</span>, <span class="token-number">50</span>);
+</code></pre>
+
+    <h3>2.4 画像の読み込み・描画とスプライト（Sprite）切り出し</h3>
+    <p>
+      <code>drawImage</code> メソッドは、引数の数によって3種類のモードに切り替わる非常に強力な機能です。
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>モード</th>
+          <th>引数の数</th>
+          <th>構文と役割</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>基本描画</td>
+          <td>3つ</td>
+          <td><code>ctx.drawImage(img, x, y)</code> — 画像を等倍で配置</td>
+        </tr>
+        <tr>
+          <td>拡大縮小</td>
+          <td>5つ</td>
+          <td><code>ctx.drawImage(img, x, y, width, height)</code> — 指定サイズにリサイズして配置</td>
+        </tr>
+        <tr>
+          <td>スプライト切り出し</td>
+          <td>9つ</td>
+          <td><code>ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)</code> — 画像の一部をトリミングして描画</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title">💡 9つの引数（スプライト切り出し）の覚え方</div>
+      ・<code>sx, sy, sw, sh</code> : ソース画像（Source）の切り出し開始位置 <code>(sx, sy)</code> と 幅/高さ <code>(sw, sh)</code><br>
+      ・<code>dx, dy, dw, dh</code> : 転送先Canvas（Destination）の配置位置 <code>(dx, dy)</code> と 表示幅/高さ <code>(dw, dh)</code>
+    </div>
+
+<pre><code><span class="token-keyword">const</span> spriteImage = <span class="token-keyword">new</span> <span class="token-function">Image</span>();
+spriteImage.src = <span class="token-string">"hero_character.png"</span>;
+
+<span class="token-comment">// 画像の読み込み完了を待ってから描画する必要がある</span>
+spriteImage.onload = () =&gt; {
+  <span class="token-comment">// キャラクター画像（スプライトシート）から 32x32px の1コマを切り出して 64x64px で描画</span>
+  ctx.<span class="token-function">drawImage</span>(
+    spriteImage,
+    <span class="token-number">0</span>, <span class="token-number">0</span>, <span class="token-number">32</span>, <span class="token-number">32</span>,    <span class="token-comment">// ソース領域 (sx, sy, sw, sh)</span>
+    <span class="token-number">100</span>, <span class="token-number">100</span>, <span class="token-number">64</span>, <span class="token-number">64</span>  <span class="token-comment">// 描画先キャンバス領域 (dx, dy, dw, dh)</span>
+  );
+};
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 3 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第3章：アニメーション & レンダーサイクル（Animation Loop）</h2>
+
+    <h3>3.1 パラパラマンガの原理と `requestAnimationFrame`</h3>
+    <p>
+      Canvas上のアニメーションは、本質的には「パラパラマンガ」と同じです。毎秒約60回（60FPS）、画面を一度全部消して、少しだけ動かした図形を再描画することで動いているように見せます。
+    </p>
+
+    <div class="warning-box">
+      <div class="warning-title">⚠️ なぜ `setInterval` や `setTimeout` を使ってはいけないのか？</div>
+      <code>setInterval</code> はディスプレイの更新タイミング（リフレッシュレート）と同期しないため、画面のカクつき（ティアリング）が発生します。また、タブがバックグラウンドに隠れても動作し続けるため、バッテリーとCPUを激しく消費します。<br>
+      <strong><code>requestAnimationFrame</code></strong> を使えば、ブラウザの描画タイミングと完全に同期し、非表示タブの時は自動で休止されるため滑らかで省電力になります。
+    </div>
+
+    <h3>3.2 メインループ（ゲームループ）の基本構造</h3>
+
+<pre><code><span class="token-keyword">let</span> posX = <span class="token-number">50</span>;
+<span class="token-keyword">let</span> vx = <span class="token-number">2</span>; <span class="token-comment">// X方向の移動速度 (Velocity)</span>
+
+<span class="token-keyword">function</span> <span class="token-function">gameLoop</span>() {
+  <span class="token-comment">// 1. 画面のクリア (前フレームの描画をリセット)</span>
+  ctx.<span class="token-function">clearRect</span>(<span class="token-number">0</span>, <span class="token-number">0</span>, canvas.width, canvas.height);
+
+  <span class="token-comment">// 2. 状態の更新 (Update)</span>
+  posX += vx;
+  <span class="token-keyword">if</span> (posX &gt; <span class="token-number">500</span> || posX &lt; <span class="token-number">50</span>) {
+    vx *= -<span class="token-number">1</span>; <span class="token-comment">// 壁に当たったら反射</span>
+  }
+
+  <span class="token-comment">// 3. 描画 (Render)</span>
+  ctx.<span class="token-function">beginPath</span>();
+  ctx.<span class="token-function">arc</span>(posX, <span class="token-number">150</span>, <span class="token-number">20</span>, <span class="token-number">0</span>, Math.PI * <span class="token-number">2</span>);
+  ctx.fillStyle = <span class="token-string">"#f43f5e"</span>;
+  ctx.<span class="token-function">fill</span>();
+
+  <span class="token-comment">// 4. 次のフレームの呼び出しを予約</span>
+  <span class="token-function">requestAnimationFrame</span>(gameLoop);
+}
+
+<span class="token-comment">// アニメーション開始</span>
+<span class="token-function">requestAnimationFrame</span>(gameLoop);
+</code></pre>
+
+    <h4>残像エフェクト（スピード感）の演出技法</h4>
+    <p>
+      <code>clearRect</code> の代わりに、<strong>「半透明の黒背景」で上書き塗りつぶし</strong>を行うと、過去の描画が段階的に薄くなり、美しい光の残像軌跡を作ることができます。
+    </p>
+
+<pre><code><span class="token-comment">// clearRect の代わりに使用</span>
+ctx.fillStyle = <span class="token-string">"rgba(15, 23, 42, 0.2)"</span>; <span class="token-comment">// 不透明度20%の濃紺</span>
+ctx.<span class="token-function">fillRect</span>(<span class="token-number">0</span>, <span class="token-number">0</span>, canvas.width, canvas.height);
+</code></pre>
+  </div>
+
+  <!-- CHAPTER 4 -->
+  <div class="chapter">
+    <h2 class="chapter-title">第4章：衝突判定 & インタラクション（Interactivity & Physics）</h2>
+
+    <h3>4.1 Canvas上の正確なマウス/タッチ座標の計算</h3>
+    <p>
+      Canvas上でマウスイベント（<code>mousemove</code> や <code>click</code>）を受け取ると、得られる <code>e.clientX / e.clientY</code> は「画面全体（ウィンドウ）」基準の座標です。Canvasの左上からの相対座標を得るには、<code>getBoundingClientRect()</code> でキャンバスの位置を引く必要があります。
+    </p>
+
+<pre><code><span class="token-keyword">const</span> mouse = { x: <span class="token-number">0</span>, y: <span class="token-number">0</span> };
+
+canvas.<span class="token-function">addEventListener</span>(<span class="token-string">"mousemove"</span>, (e) =&gt; {
+  <span class="token-keyword">const</span> rect = canvas.<span class="token-function">getBoundingClientRect</span>();
+  
+  <span class="token-comment">// Canvas上の正確なピクセル座標に補正</span>
+  mouse.x = e.clientX - rect.left;
+  mouse.y = e.clientY - rect.top;
+});
+</code></pre>
+
+    <h3>4.2 衝突判定のアルゴリズム（Physics Collision）</h3>
+
+    <h4>1. 矩形同士の判定（AABB: Axis-Aligned Bounding Box）</h4>
+    <p>
+      回転していない四角形同士が重なっているかを判定する、最も軽量で基本的な計算手法です。4つの端点（左・右・上・下）が重なっているかをブール条件で確認します。
+    </p>
+
+<pre><code><span class="token-comment">// 矩形 A と 矩形 B の AABB 衝突判定</span>
+<span class="token-keyword">function</span> <span class="token-function">isAABBIntersecting</span>(rectA, rectB) {
+  <span class="token-keyword">return</span> (
+    rectA.x &lt; rectB.x + rectB.width &amp;&amp;  <span class="token-comment">// Aの左端 &lt; Bの右端</span>
+    rectA.x + rectA.width &gt; rectB.x &amp;&amp;  <span class="token-comment">// Aの右端 &gt; Bの左端</span>
+    rectA.y &lt; rectB.y + rectB.height &amp;&amp; <span class="token-comment">// Aの上端 &lt; Bの下端</span>
+    rectA.y + rectA.height &gt; rectB.y    <span class="token-comment">// Aの下端 &gt; Bの上端</span>
+  );
+}
+</code></pre>
+
+    <h4>2. 円同士の判定（ピタゴラスの定理）</h4>
+    <p>
+      2つの円の中心点間の距離 <code>d</code> が、両方の「半径の和（<code>r1 + r2</code>）」より小さければ衝突しています。ルート計算（<code>Math.sqrt</code>）は重いため、両辺を2乗して判定するのがプロのパフォーマンス最適化テクニックです。
+    </p>
+
+<pre><code><span class="token-keyword">function</span> <span class="token-function">isCircleIntersecting</span>(c1, c2) {
+  <span class="token-keyword">const</span> dx = c1.x - c2.x;
+  <span class="token-keyword">const</span> dy = c1.y - c2.y;
+  <span class="token-comment">// 距離の2乗 (dx^2 + dy^2)</span>
+  <span class="token-keyword">const</span> distanceSquared = dx * dx + dy * dy;
+  <span class="token-keyword">const</span> radiusSum = c1.radius + c2.radius;
+
+  <span class="token-comment">// ルートを計算せず、半径の和の2乗と比較することで超高速化</span>
+  <span class="token-keyword">return</span> distanceSquared &lt;= radiusSum * radiusSum;
+}
+</code></pre>
+
+    <h3>4.3 実践ミニプログラム：マウス追従 & 衝突反応インタラクション</h3>
+    <p>
+      これまでに学んだすべての要素（初期化・ゲームループ・描画・マウス座標・円の衝突判定）を組み上げた完全動作品です。
+    </p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+  &lt;canvas id=<span class="token-string">"gameCanvas"</span> width=<span class="token-number">600</span> height=<span class="token-number">400</span> style=<span class="token-string">"background:#0f172a;"</span>&gt;&lt;/canvas&gt;
+
+  &lt;script&gt;
+    <span class="token-keyword">const</span> canvas = document.<span class="token-function">getElementById</span>(<span class="token-string">"gameCanvas"</span>);
+    <span class="token-keyword">const</span> ctx = canvas.<span class="token-function">getContext</span>(<span class="token-string">"2d"</span>);
+
+    <span class="token-comment">// マウス位置の円 (プレイヤー)</span>
+    <span class="token-keyword">const</span> player = { x: <span class="token-number">0</span>, y: <span class="token-number">0</span>, radius: <span class="token-number">25</span> };
+
+    <span class="token-comment">// 障害物の円 (ターゲット)</span>
+    <span class="token-keyword">const</span> target = { x: <span class="token-number">300</span>, y: <span class="token-number">200</span>, radius: <span class="token-number">40</span> };
+
+    <span class="token-comment">// マウス座標の監視</span>
+    canvas.<span class="token-function">addEventListener</span>(<span class="token-string">"mousemove"</span>, (e) =&gt; {
+      <span class="token-keyword">const</span> rect = canvas.<span class="token-function">getBoundingClientRect</span>();
+      player.x = e.clientX - rect.left;
+      player.y = e.clientY - rect.top;
+    });
+
+    <span class="token-comment">// メインループ</span>
+    <span class="token-keyword">function</span> <span class="token-function">loop</span>() {
+      <span class="token-comment">// 1. 画面消去</span>
+      ctx.<span class="token-function">clearRect</span>(<span class="token-number">0</span>, <span class="token-number">0</span>, canvas.width, canvas.height);
+
+      <span class="token-comment">// 2. 衝突判定</span>
+      <span class="token-keyword">const</span> dx = player.x - target.x;
+      <span class="token-keyword">const</span> dy = player.y - target.y;
+      <span class="token-keyword">const</span> isHit = (dx * dx + dy * dy) &lt;= Math.<span class="token-function">pow</span>(player.radius + target.radius, <span class="token-number">2</span>);
+
+      <span class="token-comment">// 3. ターゲット描画 (衝突時は赤、通常時は青)</span>
+      ctx.<span class="token-function">beginPath</span>();
+      ctx.<span class="token-function">arc</span>(target.x, target.y, target.radius, <span class="token-number">0</span>, Math.PI * <span class="token-number">2</span>);
+      ctx.fillStyle = isHit ? <span class="token-string">"#ef4444"</span> : <span class="token-string">"#3b82f6"</span>;
+      ctx.<span class="token-function">fill</span>();
+
+      <span class="token-comment">// 4. プレイヤー描画</span>
+      ctx.<span class="token-function">beginPath</span>();
+      ctx.<span class="token-function">arc</span>(player.x, player.y, player.radius, <span class="token-number">0</span>, Math.PI * <span class="token-number">2</span>);
+      ctx.fillStyle = <span class="token-string">"rgba(255, 255, 255, 0.8)"</span>;
+      ctx.<span class="token-function">fill</span>();
+
+      <span class="token-function">requestAnimationFrame</span>(loop);
+    }
+
+    <span class="token-function">requestAnimationFrame</span>(loop);
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+  </div>
+
 </body>
 </html>
