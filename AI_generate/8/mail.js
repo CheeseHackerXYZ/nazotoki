@@ -119,6 +119,19 @@ function escapeHTML(str) {
 }
 
 // 読み込み時に初期描画
+
 document.addEventListener("DOMContentLoaded", () => {
-    renderMails(mailData);
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("status") === "cleared") {
+        const isAlreadyAdded = mailData.some(m => m.subject === "調査完了 / 真相解明");
+        if (!isAlreadyAdded) {
+            addMail(
+                "Unknown",
+                "調査完了 / 真相解明",
+                "お見事だ。すべてが繋がった。",
+                "隠しログの解読、お疲れ様でした。\nあなたのおかげで偽装されたデータと真実を突き止めることができました。\n\n【 ARGサンプル - 調査完了 】"
+            );
+        }
+    }
+        renderMails(mailData);
 });
