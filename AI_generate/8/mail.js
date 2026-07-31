@@ -17,25 +17,16 @@ let mailData = [
 あなたに調べてほしいブログがある。最近妙な噂が絶えないんだ。
 
 公式ブログURL：
-<a href="blog.html" target="_blank">http://example.com/blog/</a>
+<a href="blog.html" target="_blank">http://本番は別ドメイン/blog</a>
 
 軽く目を通すだけでいい。ただ、調査自体は「裏掲示板」で有志が進めているらしい。掲示板のURLも貼っておく。
 
 裏掲示板URL：
-<a href="bbs.html" target="_blank">http://example.com/bbs/</a>
+<a href="bbs.html" target="_blank">http://本番は別ドメイン/bbs</a>
 
 何か分かったら教えてほしい。頼んだ。`,
         date: "7/31",
         unread: true
-    },
-    {
-        id: 2,
-        sender: "system",
-        subject: "認証コード",
-        preview: "631945",
-        content: "あなたの認証コードは 631945 です。\nこのコードの有効期限は30分です。",
-        date: "7/31",
-        unread: false
     }
 ];
 
