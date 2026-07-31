@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者データベース // LOG_SYSTEM</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Courier New', Consolas, sans-serif;
+}
+
+body {
+    background-color: #0f141c;
+    color: #c0c9d6;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+.container {
+    max-width: 750px;
+    margin: 30px auto;
+    background: #161d28;
+    border: 1px solid #2a3648;
+    padding: 30px;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+header {
+    border-bottom: 2px solid #4285f4;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 20px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #6c7d93;
+    margin-top: 4px;
+}
+
+.system-notice {
+    background: #1f2937;
+    border-left: 4px solid #f59e0b;
+    padding: 15px;
+    margin-bottom: 25px;
+    font-size: 13px;
+    color: #e5e7eb;
+}
+
+.entry {
+    background: #0f141c;
+    border: 1px solid #2a3648;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.entry h2 {
+    font-size: 15px;
+    color: #4285f4;
+    margin-bottom: 10px;
+}
+
+.text-content {
+    font-size: 14px;
+    color: #9ca3af;
+    user-select: text;
+}
+
+/* ギミック1: 選択エリアの初期見た目 */
+#selection-target {
+    color: #9ca3af;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* フォームエリア */
+.unlock-area {
+    margin-top: 30px;
+    padding: 20px;
+    background: #111827;
+    border: 1px dashed #374151;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.unlock-area h3 {
+    font-size: 14px;
+    color: #f3f4f6;
+    margin-bottom: 12px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #374151;
+    background: #1f2937;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+}
+
+button {
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+/* 最終ログ（初期状態は非表示） */
+#secret-log {
+    display: none;
+    margin-top: 25px;
+    background: #062319;
+    border: 1px solid #059669;
+    padding: 20px;
+    border-radius: 4px;
+    color: #10b981;
+}
+
+#secret-log h3 {
+    color: #34d399;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SYSTEM DATABASE // 監査記録アーカイブ</h1>
+        <div class="subtitle">RESTRICTED ACCESS - ADMIN ONLY</div>
+    </header>
+
+    <div class="system-notice">
+        【警告】このアーカイブは管理者のログバックアップです。<br>
+        セキュリティ保護のため、一部テキストは難読化されています。
+    </div>
+
+    <div class="entry">
+        <h2>LOG_ID: 2026-0731-01</h2>
+        <!-- ギミック1 & 2 対象エリア -->
+        <p class="text-content" id="trap-text">
+            本日の定期監査結果：システムの運用状況は<span id="selection-target">極めて安全であり問題ありません</span>。ログの照合コードは厳重に保管されています。
+        </p>
+    </div>
+
+    <div class="unlock-area">
+        <h3>［ 最終ログの解除キーを入力してください ］</h3>
+        <div class="input-group">
+            <input type="text" id="passInput" placeholder="解除キーを貼り付け...">
+            <button id="unlockBtn">解除</button>
+        </div>
+        <p id="errorMsg" style="color: #ef4444; font-size: 12px; margin-top: 8px; display: none;">アクセス拒否：無効なキーです</p>
+    </div>
+
+    <!-- 謎を解くと出現する最終ログ -->
+    <div id="secret-log">
+        <h3>【真相ログ: #UNLOCKED】</h3>
+        <p>ログの解除を確認しました。<br><br>
+        「安全であり問題ない」と偽装されたログの裏で、すべてのデータが書き換えられていました。<br>
+        あなたがこの真実に到達した証拠をメールで送信しました。<br><br>
+        受信トレイに戻り、確認を行ってください。</p>
+        <a href="inbox.html" class="back-link">＞＞ メール受信トレイ（inbox.html）へ戻る</a>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // ギミック1: 文字選択で隠し変化
+    // ==========================================
+    document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        const target = document.getElementById('selection-target');
+        
+        if (selection.toString().length > 0 && selection.containsNode(target, true)) {
+            // ドラッグ選択すると背景が黒くなり赤文字で真実が浮かび上がる
+            target.style.background = "#000000";
+            target.style.color = "#ef4444";
+            target.style.padding = "2px 6px";
+            target.style.fontWeight = "bold";
+            target.innerText = "［異常検知：告発ログKEY_SAFE_2026］";
+        }
+    });
+
+    // ==========================================
+    // ギミック2: クリップボードすり替え
+    // ==========================================
+    document.addEventListener('copy', (e) => {
+        const selectionText = window.getSelection().toString();
+        // プレイヤーが選択部分（またはその周辺）をコピーした場合に発火
+        if (selectionText.includes('安全であり') || selectionText.includes('告発ログ') || selectionText.includes('問題ありません')) {
+            // クリップボードの中身を化けさせる
+            e.clipboardData.setData('text/plain', 'KEY_SAFE_2026');
+            e.preventDefault(); // 通常のコピー動作を上書き
+        }
+    });
+
+    // ==========================================
+    // ギミック3: タブ移動時のタイトル変化
+    // ==========================================
+    const originalTitle = document.title;
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            document.title = "どこに行くの？";
+        } else {
+            document.title = originalTitle;
+        }
+    });
+
+    // ==========================================
+    // ログ解除ロジック ➔ クリア処理
+    // ==========================================
+    const unlockBtn = document.getElementById('unlockBtn');
+    const passInput = document.getElementById('passInput');
+    const secretLog = document.getElementById('secret-log');
+    const errorMsg = document.getElementById('errorMsg');
+
+    unlockBtn.addEventListener('click', () => {
+        const value = passInput.value.trim();
+        // コピペで「KEY_SAFE_2026」が入力された場合成功
+        if (value === "KEY_SAFE_2026") {
+            errorMsg.style.display = "none";
+            secretLog.style.display = "block";
+            
+            // クリアフラグを保存（inbox.htmlに戻った時にメールを追加するため）
+            localStorage.setItem('arg_cleared', 'true');
+        } else {
+            errorMsg.style.display = "block";
+        }
+    });
+</script>
+
+</body>
+</html>
