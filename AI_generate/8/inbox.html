@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Mail</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body { background: #f6f8fc; }
+
+header {
+    height: 64px;
+    background: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #ddd;
+}
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4285f4;
+    margin-right: 30px;
+}
+.search { flex: 1; }
+.search input {
+    width: 100%;
+    max-width: 600px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 25px;
+    background: #eef3fd;
+    font-size: 16px;
+}
+
+.container {
+    display: flex;
+    height: calc(100vh - 64px);
+}
+
+.sidebar {
+    width: 220px;
+    background: white;
+    padding-top: 15px;
+    border-right: 1px solid #ddd;
+}
+.menu {
+    padding: 12px 25px;
+    cursor: pointer;
+}
+.menu.active {
+    background: #d3e3fd;
+    font-weight: bold;
+    border-radius: 0 25px 25px 0;
+}
+
+/* メールのリスト一覧 */
+.mail-list {
+    flex: 1;
+    overflow: auto;
+    display: block; /* 初期表示 */
+}
+.mail {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 20px;
+    background: white;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+.mail:hover { background: #f2f6ff; }
+.sender { width: 180px; font-weight: normal; }
+.subject { flex: 1; font-weight: normal; }
+.preview { color: #666; font-size: 14px; }
+.date { width: 80px; text-align: right; color: #666; font-size: 14px; }
+.unread .subject, .unread .sender { font-weight: bold; }
+
+/* メール詳細画面 */
+.mail-detail {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    display: none; /* 初期は非表示 */
+    padding: 30px;
+}
+.back-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #eef3fd;
+    color: #4285f4;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+.back-btn:hover { background: #d3e3fd; }
+.detail-subject { font-size: 24px; font-weight: normal; margin-bottom: 15px; }
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    color: #555;
+}
+.detail-sender { font-weight: bold; color: #222; }
+.detail-content { line-height: 1.6; color: #222; white-space: pre-wrap; } /* pre-wrapで改行を反映 */
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Mail</div>
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="メールを検索">
+    </div>
+</header>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="menu active">受信トレイ</div>
+        <div class="menu">送信済み</div>
+        <div class="menu">下書き</div>
+        <div class="menu">ゴミ箱</div>
+    </div>
+
+    <!-- メール一覧 -->
+    <div class="mail-list" id="mailList">
+        <!-- JSでここに描画されます -->
+    </div>
+
+    <!-- メール詳細（閲覧画面） -->
+    <div class="mail-detail" id="mailDetail">
+        <div class="back-btn" id="backBtn">← 戻る</div>
+        <h2 class="detail-subject" id="detailSubject"></h2>
+        <div class="detail-header">
+            <div class="detail-sender" id="detailSender"></div>
+            <div class="detail-date" id="detailDate"></div>
+        </div>
+        <div class="detail-content" id="detailContent"></div>
+    </div>
+</div>
+
+<script src="mail.js"></script>
+<script src="mail_search.js"></script>
+</body>
+</html>
