@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オフィシャルダイアリー</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+body {
+    background: #f4f5f7;
+    color: #333;
+    line-height: 1.6;
+}
+header {
+    background: #2b3a4a;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.search-container {
+    max-width: 500px;
+    margin: 10px auto 0;
+}
+.search-container input {
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+}
+.main-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 30px;
+}
+.content-area {
+    flex: 1;
+}
+.sidebar {
+    width: 220px;
+}
+.sidebar-box {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.sidebar-box h3 {
+    font-size: 16px;
+    border-bottom: 2px solid #2b3a4a;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+.sidebar-box ul {
+    list-style: none;
+}
+.sidebar-box li {
+    margin-bottom: 8px;
+}
+.sidebar-box a {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 14px;
+}
+.sidebar-box a:hover {
+    text-decoration: underline;
+}
+
+/* 記事カード */
+.article-card {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.article-card h2 {
+    font-size: 22px;
+    color: #2b3a4a;
+    margin-bottom: 5px;
+}
+.article-card .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+.article-card .date {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 15px;
+}
+.article-card .body {
+    white-space: pre-wrap;
+    font-size: 15px;
+}
+
+/* 非表示メッセージ */
+.no-results {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>管理人の日常ダイアリー</h1>
+    <div class="search-container">
+        <input type="text" id="blogSearchInput" placeholder="記事を検索（タイトル / サブタイトル）">
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="content-area" id="articleArea">
+        <!-- JSで記事を描画 -->
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-box">
+            <h3>最新記事</h3>
+            <ul id="latestList">
+                <!-- JSで最近の記事リストを描画 -->
+            </ul>
+        </div>
+        <div class="sidebar-box">
+            <h3>プロフィール</h3>
+            <p style="font-size: 13px; color: #555;">日々のちょっとした記録を残しています。</p>
+        </div>
+    </div>
+</div>
+
+<script src="blog_data.js"></script>
+<script src="blog_search.js"></script>
+</body>
+</html>
