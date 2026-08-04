@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEEP_LOG | 検証掲示板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        color-scheme: dark;
+        --bg: #0f1518;
+        --bg-2: #161f23;
+        --panel: #1a262b;
+        --line: #2c3a3e;
+        --text: #d5e2df;
+        --muted: #91a29e;
+        --accent: #64d7bd;
+        --accent-dim: rgba(100,215,189,.15);
+        --warning: #ff9c70;
+        --bad: #ff6b6b;
+        --radius: 6px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scanline overlay (subtle CRT effect) ── */
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 2px,
+            rgba(255,255,255,.012) 2px,
+            rgba(255,255,255,.012) 4px
+        );
+    }
+
+    .shell { width: min(920px, calc(100% - 32px)); margin: 0 auto; position: relative; z-index: 2; }
+
+    /* ── Header ── */
+    header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 34px 0 22px;
+        border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+        margin: 0 0 4px;
+        color: var(--accent);
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: .76rem;
+        letter-spacing: 1px;
+    }
+    h1 {
+        margin: 0;
+        color: #fff;
+        font-size: clamp(1.45rem, 4vw, 2rem);
+        font-weight: 700;
+    }
+    .status {
+        margin: 0;
+        color: var(--muted);
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: .78rem;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .status::before {
+        content: "";
+        width: 8px; height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .2; }
+    }
+
+    main { padding: 24px 0 48px; }
+
+    /* ── Notice ── */
+    .notice {
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        color: #b7cac5;
+        background: var(--bg-2);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        font-size: .9rem;
+        line-height: 1.7;
+    }
+
+    /* ── Posts ── */
+    .post {
+        padding: 20px 0;
+        border-bottom: 1px solid var(--line);
+        transition: background .15s;
+    }
+    .post:hover { background: rgba(255,255,255,.015); }
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 12px;
+        color: var(--muted);
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: .78rem;
+    }
+    .author { color: #9be9d5; font-weight: 700; }
+
+    .post-content {
+        margin: 0;
+        color: var(--text);
+        white-space: pre-wrap;
+        line-height: 1.8;
+        font-size: .95rem;
+    }
+
+    /* ── Rating ── */
+    .rating {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        font-size: .78rem;
+    }
+    .rating span {
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        font-family: ui-monospace, Consolas, monospace;
+    }
+    .good { color: var(--accent); border-color: rgba(100,215,189,.3) !important; }
+    .bad { color: var(--bad); border-color: rgba(255,107,107,.3) !important; }
+
+    /* ── Replies ── */
+    .replies {
+        margin: 16px 0 0 14px;
+        padding-left: 14px;
+        border-left: 2px solid #3c4d50;
+    }
+    .reply {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: .86rem;
+        line-height: 1.6;
+    }
+    .reply-user { color: #b9d4ce; font-weight: 700; }
+
+    /* ── Highlighted Post (high GOOD ratio) ── */
+    .post.trusted {
+        padding-left: 14px;
+        border-left: 3px solid var(--accent);
+    }
+
+    /* ── Return Link ── */
+    .return-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 28px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color .15s;
+    }
+    .return-link:hover { text-decoration: underline; }
+
+    /* ── Mobile ── */
+    @media (max-width: 560px) {
+        header { align-items: start; flex-direction: column; gap: 8px; padding-top: 24px; }
+        .post-header { align-items: start; flex-direction: column; gap: 4px; }
+        .post-content { font-size: .9rem; }
+    }
+</style>
+</head>
+<body>
+<div class="shell">
+    <header>
+        <div>
+            <p class="eyebrow">DEEP_LOG / INDEPENDENT VERIFICATION</p>
+            <h1>記録の検証スレッド</h1>
+        </div>
+        <p class="status">STATUS: READ ONLY</p>
+    </header>
+    <main>
+        <p class="notice">ここには、公開されている記録を実際に確認した報告だけが残されています。調査対象の画面にない操作は必要ありません。</p>
+        <section id="postsList" aria-label="投稿一覧"></section>
+        <a class="return-link" href="inbox.html">← 受信トレイへ戻る</a>
+    </main>
+</div>
+
+<script src="bbs_data.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (localStorage.getItem("arg8CaseStage") !== "cleared") {
+            localStorage.setItem("arg8CaseStage", "board");
+        }
+        const postsList = document.getElementById("postsList");
+
+        bbsPosts.forEach((post) => {
+            const postEl = document.createElement("article");
+            postEl.className = "post";
+            if (post.good > post.bad * 3) postEl.classList.add("trusted");
+
+            const header = document.createElement("div");
+            header.className = "post-header";
+            const author = document.createElement("span");
+            author.className = "author";
+            author.textContent = `#${post.id} / ${post.user}`;
+            const date = document.createElement("time");
+            date.textContent = post.date;
+            header.append(author, date);
+
+            const content = document.createElement("p");
+            content.className = "post-content";
+            content.textContent = post.content;
+
+            const rating = document.createElement("div");
+            rating.className = "rating";
+            const good = document.createElement("span");
+            good.className = "good";
+            good.textContent = `▲ GOOD ${post.good}`;
+            const bad = document.createElement("span");
+            bad.className = "bad";
+            bad.textContent = `▼ BAD ${post.bad}`;
+            rating.append(good, bad);
+            postEl.append(header, content, rating);
+
+            if (post.replies && post.replies.length) {
+                const replies = document.createElement("div");
+                replies.className = "replies";
+                post.replies.forEach((reply) => {
+                    const row = document.createElement("p");
+                    row.className = "reply";
+                    const user = document.createElement("span");
+                    user.className = "reply-user";
+                    user.textContent = `${reply.user}: `;
+                    row.append(user, document.createTextNode(reply.text));
+                    replies.appendChild(row);
+                });
+                postEl.appendChild(replies);
+            }
+
+            postsList.appendChild(postEl);
+        });
+    });
+</script>
+</body>
+</html>
