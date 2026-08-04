@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青井葵の日誌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ink: #1e2f38;
+        --muted: #62727a;
+        --canvas: #f3f5f2;
+        --paper: #ffffff;
+        --line: #d8dfdc;
+        --accent: #b34b43;
+        --accent-soft: #fbebe8;
+        --accent-dark: #903a34;
+        --blue: #2d5668;
+        --radius: 8px;
+        --shadow: 0 2px 8px rgba(30,47,56,.06);
+        --shadow-lg: 0 6px 24px rgba(30,47,56,.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: "Noto Serif JP", "Yu Mincho", serif;
+        line-height: 1.85;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .site-header {
+        border-top: 5px solid var(--accent);
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+        box-shadow: var(--shadow);
+    }
+    .header-inner, .layout {
+        width: min(1040px, calc(100% - 32px));
+        margin: 0 auto;
+    }
+    .header-inner { padding: 30px 0 24px; }
+    .site-title {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.35rem);
+        font-weight: 700;
+        transition: letter-spacing .3s;
+    }
+    .site-title:hover { letter-spacing: 2px; }
+    .site-title small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .75rem;
+        font-weight: 400;
+        letter-spacing: 0;
+    }
+
+    /* ── Search ── */
+    .search-wrap { margin-top: 22px; }
+    .search-wrap label {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--muted);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .82rem;
+    }
+    .search-wrap input {
+        width: min(570px, 100%);
+        padding: 12px 16px 12px 40px;
+        color: var(--ink);
+        background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2362727a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") 12px center no-repeat;
+        border: 1px solid #aab8b3;
+        border-radius: var(--radius);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .95rem;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .search-wrap input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+        outline: none;
+    }
+
+    /* ── Hint Banner ── */
+    .hint {
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: #f0f7f8;
+        border: 1px dashed #b8d0d4;
+        border-radius: 6px;
+        color: #3a6975;
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .82rem;
+        line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 240px;
+        gap: 54px;
+        padding: 38px 0 56px;
+    }
+    .search-status {
+        min-height: 28px;
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .86rem;
+    }
+
+    /* ── Article ── */
+    .article {
+        padding: 0 0 30px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--line);
+        transition: opacity .3s;
+    }
+    .article:last-child { border-bottom: 0; }
+    .article h2 {
+        margin: 0 0 5px;
+        color: #263d47;
+        font-size: clamp(1.35rem, 3vw, 1.75rem);
+        line-height: 1.45;
+        font-weight: 700;
+    }
+    .subtitle {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: .95rem;
+        font-family: "Noto Sans JP", sans-serif;
+    }
+    .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        align-items: center;
+        margin-bottom: 20px;
+        color: var(--muted);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .78rem;
+    }
+    .tag, .record-label {
+        padding: 2px 8px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        border-radius: 3px;
+    }
+    .record-label {
+        color: #8e352e;
+        border-color: #d8aaa3;
+        background: var(--accent-soft);
+        font-weight: 700;
+    }
+    .article p {
+        margin: 0 0 16px;
+        font-size: 1.02rem;
+    }
+    .article-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        padding: 10px 18px;
+        color: #fff;
+        background: var(--accent);
+        border-radius: var(--radius);
+        font-family: "Noto Sans JP", sans-serif;
+        font-size: .9rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .15s, transform .1s;
+        box-shadow: var(--shadow);
+    }
+    .article-action:hover { background: var(--accent-dark); }
+    .article-action:active { transform: scale(.97); }
+    .article-action::after { content: "→"; }
+
+    /* ── Hidden Article Special Styling ── */
+    .hidden-article {
+        animation: revealArticle .5s ease;
+    }
+    @keyframes revealArticle {
+        from { opacity: 0; transform: translateY(12px); background: var(--accent-soft); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .discovery-flash { animation: flashBg .6s ease; }
+    @keyframes flashBg {
+        0%, 100% { background: transparent; }
+        30% { background: var(--accent-soft); }
+    }
+
+    .empty {
+        padding: 26px 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-family: "Noto Sans JP", sans-serif;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+        align-self: start;
+        color: #3f525a;
+        font-family: "Noto Sans JP", sans-serif;
+        position: sticky;
+        top: 24px;
+    }
+    .side-section {
+        padding: 0 0 25px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid var(--line);
+    }
+    .side-section h2 {
+        margin: 0 0 10px;
+        color: var(--ink);
+        font-family: "Noto Serif JP", serif;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .side-section p {
+        margin: 0;
+        font-size: .86rem;
+        line-height: 1.75;
+        white-space: pre-line;
+    }
+    .article-list {
+        display: grid;
+        gap: 5px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    .article-list button {
+        width: 100%;
+        padding: 6px 0;
+        color: var(--blue);
+        background: none;
+        border: 0;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+        font-size: .84rem;
+        transition: color .15s;
+    }
+    .article-list button:hover, .article-list button:focus-visible {
+        color: var(--accent);
+        text-decoration: underline;
+        outline: none;
+    }
+    .return-link {
+        color: var(--blue);
+        text-decoration: none;
+        font-size: .84rem;
+        font-weight: 700;
+        transition: color .15s;
+    }
+    .return-link:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── Mobile ── */
+    @media (max-width: 760px) {
+        .layout { grid-template-columns: 1fr; gap: 28px; padding-top: 28px; }
+        aside { position: static; border-top: 1px solid var(--line); padding-top: 25px; }
+        .header-inner { padding: 22px 0 18px; }
+        .search-wrap { margin-top: 16px; }
+    }
+</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <h1 class="site-title">青井葵の日誌<small>AOI AOI / personal records</small></h1>
+        <div class="search-wrap">
+            <label for="blogSearchInput">日誌を検索</label>
+            <input id="blogSearchInput" type="search" placeholder="例: 散歩、バックアップ、忘れ物箱" autocomplete="off">
+        </div>
+        <p class="hint">7月28日の記事に「忘れ物箱」という言葉が出てきます。気になる言葉は、この検索欄で試してみてください。</p>
+    </div>
+</header>
+<main class="layout">
+    <section aria-label="日誌の記事">
+        <p id="searchStatus" class="search-status" aria-live="polite"></p>
+        <div id="articleArea"></div>
+    </section>
+    <aside>
+        <section class="side-section">
+            <h2>プロフィール</h2>
+            <p id="profileText"></p>
+        </section>
+        <section class="side-section">
+            <h2>公開中の記事</h2>
+            <ul id="latestList" class="article-list"></ul>
+        </section>
+        <a class="return-link" href="inbox.html">← 受信トレイへ戻る</a>
+    </aside>
+</main>
+<script src="blog_data.js"></script>
+<script src="blog_search.js"></script>
+</body>
+</html>
