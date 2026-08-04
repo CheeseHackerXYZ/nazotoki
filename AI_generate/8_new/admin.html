@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>監査アーカイブ | 作者確認</title>
+<style>
+    :root { --bg: #111b20; --panel: #17262c; --line: #385058; --text: #dce8e6; --muted: #98aaa8; --accent: #67d2bb; --warn: #f5c96d; --error: #ff8f83; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 24px 16px; color: var(--text); background: var(--bg); font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; line-height: 1.75; }
+    main { width: min(800px, 100%); margin: 0 auto; }
+    header { padding: 0 0 22px; border-bottom: 1px solid var(--line); }
+    .eyebrow { margin: 0 0 5px; color: var(--accent); font-family: ui-monospace, Consolas, monospace; font-size: .78rem; }
+    h1 { margin: 0; color: #fff; font-size: clamp(1.5rem, 4vw, 2.1rem); letter-spacing: 0; }
+    .notice { margin: 24px 0; padding: 16px 18px; border-left: 3px solid var(--warn); background: #1c2c30; color: #dbe1d2; }
+    .record { padding: 20px 0; border-bottom: 1px solid var(--line); }
+    h2 { margin: 0 0 12px; color: var(--accent); font-family: ui-monospace, Consolas, monospace; font-size: 1rem; }
+    .record p { margin: 0 0 12px; }
+    dl { display: grid; grid-template-columns: 145px 1fr; gap: 8px 18px; margin: 16px 0 0; font-size: .92rem; }
+    dt { color: var(--muted); } dd { margin: 0; }
+    .verify { margin-top: 28px; padding-top: 24px; }
+    label { display: block; margin-bottom: 8px; color: #fff; font-weight: 700; }
+    .input-row { display: flex; gap: 10px; max-width: 520px; }
+    input { min-width: 0; flex: 1; padding: 11px 12px; border: 1px solid #587178; border-radius: 3px; color: #fff; background: #0d1518; font: inherit; }
+    input:focus { outline: 3px solid #315d5b; outline-offset: 2px; }
+    button { padding: 11px 16px; border: 1px solid var(--accent); border-radius: 3px; color: #09211d; background: var(--accent); cursor: pointer; font: inherit; font-weight: 800; }
+    button:hover { background: #98ead7; }
+    .feedback { min-height: 25px; margin: 10px 0 0; color: var(--muted); font-size: .9rem; }
+    .feedback.error { color: var(--error); }
+    .success { display: none; margin-top: 28px; padding: 18px; border: 1px solid #3fa891; background: #122c29; }
+    .success h2 { margin-bottom: 8px; }
+    .success p { margin: 0 0 14px; }
+    .return-link { display: inline-flex; padding: 8px 0; color: var(--accent); font-weight: 700; text-decoration: none; }
+    .return-link:hover { text-decoration: underline; }
+    @media (max-width: 520px) { body { padding: 20px 14px; } dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } .input-row { flex-direction: column; } button { width: 100%; } }
+</style>
+</head>
+<body>
+<main>
+    <header>
+        <p class="eyebrow">ARCHIVE CONTROL / RECORD HANDOFF</p>
+        <h1>監査アーカイブ</h1>
+    </header>
+    <p class="notice">この画面は、保留記録の作者確認を行うための引き継ぎ画面です。照合に必要な情報は、青井葵の日誌内にあります。</p>
+    <section class="record" aria-labelledby="record-title">
+        <h2 id="record-title">LOG 2026-0731 / RESTORE STATUS</h2>
+        <p>自動監査は、公開後の投稿を重複データとして誤判定し、保留フォルダへ移動していました。対象データは復元可能です。</p>
+        <dl>
+            <dt>対象アカウント</dt><dd>青井葵の日誌</dd>
+            <dt>確認方法</dt><dd>作者名の読みを、半角英字3文字で照合する</dd>
+            <dt>必要な記録</dt><dd>日誌のプロフィール</dd>
+        </dl>
+    </section>
+    <section class="verify" aria-labelledby="verify-title">
+        <h2 id="verify-title">AUTHOR VERIFICATION</h2>
+        <label for="passInput">作者確認コード</label>
+        <div class="input-row">
+            <input id="passInput" type="text" inputmode="latin" autocomplete="off" placeholder="半角英字3文字">
+            <button id="unlockBtn" type="button">記録を引き継ぐ</button>
+        </div>
+        <p id="feedback" class="feedback" aria-live="polite">日誌のプロフィールにある作者名の読みを確認してください。</p>
+    </section>
+    <section id="success" class="success" aria-live="polite">
+        <h2>HANDOFF COMPLETE</h2>
+        <p>作者確認が完了しました。隔離されていた記録は復元キューへ戻され、青井葵のバックアップも保全されました。</p>
+        <p>今回の異常は旧式の自動監査による誤判定でした。あなたがたどった手掛かりはすべて正規の記録であり、特別な操作や外部の調査は必要ありません。</p>
+        <a class="return-link" href="inbox.html">受信トレイで完了報告を確認する</a>
+    </section>
+</main>
+<script>
+    const input = document.getElementById("passInput");
+    const button = document.getElementById("unlockBtn");
+    const feedback = document.getElementById("feedback");
+    const success = document.getElementById("success");
+
+    function verify() {
+        const value = input.value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
+        const isValid = ["aoi", "あおい", "葵", "青井葵"].includes(value);
+        if (!isValid) {
+            success.style.display = "none";
+            feedback.className = "feedback error";
+            feedback.textContent = "照合できませんでした。日誌のプロフィールにある読みを、半角英字3文字で入力してください。";
+            input.focus();
+            return;
+        }
+        localStorage.setItem("arg8CaseStage", "cleared");
+        feedback.className = "feedback";
+        feedback.textContent = "作者確認を受け付けました。";
+        success.style.display = "block";
+        success.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    button.addEventListener("click", verify);
+    input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") verify();
+    });
+</script>
+</body>
+</html>

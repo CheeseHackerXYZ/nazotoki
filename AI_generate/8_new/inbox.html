@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive Relay | 受信トレイ</title>
+<style>
+    :root { --navy: #203840; --blue: #236f8c; --pale: #eef4f5; --line: #d3dfe1; --text: #1e2c30; --muted: #617278; --accent: #bc5f4d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--pale); color: var(--text); font-family: "Noto Sans JP", "Hiragino Sans", sans-serif; }
+    header { display: flex; align-items: center; gap: 24px; min-height: 68px; padding: 12px max(20px, calc((100% - 1200px) / 2)); color: #fff; background: var(--navy); }
+    .brand { font-family: ui-monospace, Consolas, monospace; font-weight: 800; white-space: nowrap; }
+    .search { flex: 1; }
+    .search input { width: min(620px, 100%); padding: 10px 13px; border: 1px solid #62818a; border-radius: 4px; color: var(--text); background: #fff; font: inherit; }
+    .app { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: calc(100vh - 68px); }
+    aside { padding: 24px 16px; background: #fff; border-right: 1px solid var(--line); }
+    .case-label { margin: 0 0 6px; color: var(--muted); font-size: .76rem; }
+    .case-state { margin: 0 0 24px; color: var(--navy); font-weight: 800; line-height: 1.45; }
+    .menu { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+    .menu li { padding: 9px 10px; color: var(--muted); font-size: .9rem; }
+    .menu .active { color: var(--navy); background: #e4eff1; border-left: 3px solid var(--blue); font-weight: 800; }
+    .workspace { min-width: 0; background: #fff; }
+    .mail-list { display: block; }
+    .mail { display: grid; grid-template-columns: 180px minmax(140px, 1fr) minmax(200px, 1.7fr) 72px; gap: 16px; align-items: center; width: 100%; padding: 16px 22px; border: 0; border-bottom: 1px solid var(--line); color: inherit; background: #fff; cursor: pointer; text-align: left; font: inherit; }
+    .mail:hover, .mail:focus-visible { background: #f2f8f8; outline: none; }
+    .mail.unread .sender, .mail.unread .subject { font-weight: 800; }
+    .preview, .date { color: var(--muted); font-size: .86rem; }
+    .date { text-align: right; }
+    .mail-detail { display: none; max-width: 760px; padding: 30px 32px 54px; }
+    .back-button { padding: 0; margin: 0 0 28px; border: 0; color: var(--blue); background: none; cursor: pointer; font: inherit; font-weight: 700; }
+    .back-button:hover { text-decoration: underline; }
+    .detail-subject { margin: 0 0 12px; color: var(--navy); font-size: clamp(1.35rem, 4vw, 1.85rem); line-height: 1.45; }
+    .detail-header { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 20px; margin-bottom: 25px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+    .detail-sender { color: var(--text); font-weight: 800; }
+    .detail-content { line-height: 1.85; }
+    .detail-content p { margin: 0 0 16px; }
+    .message-link { display: inline-flex; margin: 4px 8px 12px 0; padding: 9px 12px; border: 1px solid #a9c6ce; border-radius: 3px; color: #155974; text-decoration: none; font-weight: 700; }
+    .message-link:hover { background: #eef7f8; }
+    .empty { padding: 28px; color: var(--muted); }
+    @media (max-width: 760px) {
+        header { gap: 12px; flex-wrap: wrap; padding: 12px 16px; }
+        .search { width: 100%; flex-basis: 100%; }
+        .app { grid-template-columns: 1fr; }
+        aside { display: flex; align-items: center; gap: 20px; padding: 14px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+        .case-label, .case-state { margin: 0; }
+        .menu { display: none; }
+        .mail { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 15px 16px; }
+        .subject { grid-column: 1; }
+        .preview { display: none; }
+        .date { grid-column: 2; grid-row: 1 / span 2; }
+        .mail-detail { padding: 24px 16px 45px; }
+    }
+</style>
+</head>
+<body>
+<header>
+    <div class="brand">ARCHIVE RELAY</div>
+    <div class="search"><label for="searchInput" class="visually-hidden"></label><input id="searchInput" type="search" placeholder="メールを検索" autocomplete="off"></div>
+</header>
+<div class="app">
+    <aside>
+        <div>
+            <p class="case-label">調査状況</p>
+            <p id="caseState" class="case-state" aria-live="polite">確認待ち</p>
+        </div>
+        <ul class="menu" aria-label="メールボックス">
+            <li class="active">受信トレイ</li>
+            <li>保留中</li>
+            <li>記録済み</li>
+        </ul>
+    </aside>
+    <main class="workspace">
+        <section id="mailList" class="mail-list" aria-label="メール一覧"></section>
+        <section id="mailDetail" class="mail-detail" aria-label="メール詳細">
+            <button id="backBtn" class="back-button" type="button">受信トレイへ戻る</button>
+            <h1 id="detailSubject" class="detail-subject"></h1>
+            <div class="detail-header"><span id="detailSender" class="detail-sender"></span><time id="detailDate"></time></div>
+            <div id="detailContent" class="detail-content"></div>
+        </section>
+    </main>
+</div>
+<script src="mail.js"></script>
+<script src="mail_search.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青井葵の日誌</title>
+<style>
+    :root {
+        --ink: #1e2f38;
+        --muted: #62727a;
+        --canvas: #f3f5f2;
+        --paper: #ffffff;
+        --line: #d8dfdc;
+        --accent: #b34b43;
+        --accent-soft: #fbebe8;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font-family: "Noto Serif JP", "Yu Mincho", serif; line-height: 1.85; }
+    .site-header { border-top: 5px solid var(--accent); background: var(--paper); border-bottom: 1px solid var(--line); }
+    .header-inner, .layout { width: min(1040px, calc(100% - 32px)); margin: 0 auto; }
+    .header-inner { padding: 30px 0 24px; }
+    .site-title { margin: 0; font-size: clamp(1.7rem, 4vw, 2.35rem); letter-spacing: 0; }
+    .site-title small { display: block; margin-top: 3px; color: var(--muted); font-family: "Noto Sans JP", sans-serif; font-size: .75rem; font-weight: 400; letter-spacing: 0; }
+    .search-wrap { margin-top: 22px; }
+    label { display: block; margin-bottom: 7px; color: var(--muted); font-family: "Noto Sans JP", sans-serif; font-size: .82rem; }
+    input[type="search"] { width: min(570px, 100%); padding: 12px 14px; color: var(--ink); background: #fff; border: 1px solid #aab8b3; border-radius: 4px; font: inherit; }
+    input[type="search"]:focus { outline: 3px solid #f1c3bc; outline-offset: 2px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 54px; padding: 38px 0 56px; }
+    .search-status { min-height: 28px; margin: 0 0 14px; color: var(--muted); font-family: "Noto Sans JP", sans-serif; font-size: .86rem; }
+    .article { padding: 0 0 30px; margin-bottom: 30px; border-bottom: 1px solid var(--line); }
+    .article:last-child { border-bottom: 0; }
+    .article h2 { margin: 0 0 5px; color: #263d47; font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.45; }
+    .subtitle { margin: 0 0 8px; color: var(--muted); font-size: .95rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin-bottom: 20px; color: var(--muted); font-family: "Noto Sans JP", sans-serif; font-size: .78rem; }
+    .tag, .record-label { padding: 2px 7px; border: 1px solid var(--line); background: var(--paper); }
+    .record-label { color: #8e352e; border-color: #d8aaa3; background: var(--accent-soft); }
+    .article p { margin: 0 0 16px; }
+    .article-action { display: inline-flex; margin-top: 4px; padding: 9px 12px; color: #fff; background: var(--accent); border-radius: 3px; font-family: "Noto Sans JP", sans-serif; font-size: .9rem; font-weight: 700; text-decoration: none; }
+    .article-action:hover { background: #903a34; }
+    .empty { padding: 26px 0; border-top: 1px solid var(--line); color: var(--muted); }
+    aside { align-self: start; color: #3f525a; font-family: "Noto Sans JP", sans-serif; }
+    .side-section { padding: 0 0 25px; margin-bottom: 25px; border-bottom: 1px solid var(--line); }
+    .side-section h2 { margin: 0 0 10px; color: var(--ink); font-family: "Noto Serif JP", serif; font-size: 1rem; }
+    .side-section p { margin: 0; font-size: .86rem; line-height: 1.75; }
+    .article-list { display: grid; gap: 5px; padding: 0; margin: 0; list-style: none; }
+    .article-list button { width: 100%; padding: 5px 0; color: #2d5668; background: none; border: 0; text-align: left; cursor: pointer; font: inherit; font-size: .84rem; }
+    .article-list button:hover, .article-list button:focus-visible { color: var(--accent); text-decoration: underline; }
+    .return-link { color: #2d5668; text-decoration: none; font-size: .84rem; }
+    .return-link:hover { text-decoration: underline; }
+    @media (max-width: 760px) { .layout { grid-template-columns: 1fr; gap: 28px; padding-top: 28px; } aside { border-top: 1px solid var(--line); padding-top: 25px; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <h1 class="site-title">青井葵の日誌<small>AOI AOI / personal records</small></h1>
+        <div class="search-wrap">
+            <label for="blogSearchInput">日誌を検索</label>
+            <input id="blogSearchInput" type="search" placeholder="例: 散歩、バックアップ" autocomplete="off">
+        </div>
+    </div>
+</header>
+<main class="layout">
+    <section aria-label="日誌の記事">
+        <p id="searchStatus" class="search-status" aria-live="polite"></p>
+        <div id="articleArea"></div>
+    </section>
+    <aside>
+        <section class="side-section">
+            <h2>プロフィール</h2>
+            <p id="profileText"></p>
+        </section>
+        <section class="side-section">
+            <h2>公開中の記事</h2>
+            <ul id="latestList" class="article-list"></ul>
+        </section>
+        <a class="return-link" href="inbox.html">受信トレイへ戻る</a>
+    </aside>
+</main>
+<script src="blog_data.js"></script>
+<script src="blog_search.js"></script>
+</body>
+</html>
