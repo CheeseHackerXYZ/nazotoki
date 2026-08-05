@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ユーザー情報 - ヤミオク</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo-area">
+      <a href="index.html" class="logo">ヤミオク</a>
+    </div>
+    <div class="search-area">
+      <input type="text" id="search-input" class="search-input" placeholder="商品を検索...">
+      <button id="search-btn" class="search-btn">検索</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="user-profile-container"></div>
+    <h3 class="page-title">このユーザーの出品一覧</h3>
+    <div id="user-items-grid" class="grid"></div>
+  </main>
+
+  <footer class="site-footer">
+    &copy; YAMI-OCT ALL RIGHTS RESERVED.
+  </footer>
+
+  <script src="item_data.js"></script>
+  <script src="user_data.js"></script>
+  <script src="search.js"></script>
+  <script src="user_ui.js"></script>
+</body>
+</html>
