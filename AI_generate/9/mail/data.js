@@ -12,7 +12,7 @@ const MailData = (() => {
       subject: '調査のお願い',
       sender: '依頼人',
       date: null, // 初回読み込み時に動的設定
-      content: 'ヤミオクでヤバい出品がある。もうすぐオークションが終了してしまうからそれまでに調べてほしい。リンクは下に載せておいたから見てくれ。<br><a href="../auction/item.html?id=2">https://URL/item.html?id=2</a>',
+      content: 'ヤミオクでヤバい出品がある。もうすぐオークションが始まってしまうからそれまでに回収してほしい。あと匿名掲示板の情報も役立つかもしれない。リンクは下に載せておいたから見てくれ。<br><a href="../auction/item.html?id=2">https://URL/item.html?id=2</a><br><a href="../bbs/index.html">https://URL/index.html</a>',
       isRead: false
     }
   ];
