@@ -1,0 +1,189 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Courier New', Monaco, 'Hiragino Kaku Gothic ProN', Meiryo, monospace;
+  background-color: #121214;
+  color: #c9d1d9;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ヘッダー */
+.header {
+  background: #1c1c20;
+  border-bottom: 1px solid #33333a;
+  padding: 16px 24px;
+}
+
+.header h1 {
+  font-size: 1.3rem;
+  color: #00ff66;
+  letter-spacing: 1px;
+}
+
+.header p {
+  font-size: 0.8rem;
+  color: #888890;
+}
+
+/* メインコンテナ */
+.container {
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 0 16px;
+  flex: 1;
+  width: 100%;
+}
+
+/* 新規スレッド/投稿フォーム */
+.post-form-box {
+  background: #1c1c20;
+  border: 1px solid #33333a;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.form-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #00ff66;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.input-name,
+.input-content {
+  width: 100%;
+  padding: 10px;
+  background: #0d0d0e;
+  border: 1px solid #33333a;
+  border-radius: 4px;
+  color: #e6edf3;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.input-name:focus,
+.input-content:focus {
+  outline: none;
+  border-color: #00ff66;
+}
+
+.btn-submit {
+  background: #238636;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: inherit;
+}
+
+.btn-submit:hover {
+  background: #2ea043;
+}
+
+.btn-cancel {
+  background: #33333a;
+  color: #ccc;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+  font-family: inherit;
+}
+
+/* 投稿カード */
+.post-wrapper {
+  margin-bottom: 16px;
+}
+
+.post-card {
+  background: #16161a;
+  border: 1px solid #2d2d34;
+  border-radius: 6px;
+  padding: 14px 18px;
+}
+
+.post-header {
+  font-size: 0.85rem;
+  color: #8b949e;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+}
+
+.post-number {
+  color: #00ff66;
+  font-weight: bold;
+}
+
+.post-name {
+  color: #58a6ff;
+}
+
+.post-content {
+  font-size: 0.95rem;
+  color: #e6edf3;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-reply {
+  background: transparent;
+  border: 1px solid #33333a;
+  color: #8b949e;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-reply:hover {
+  border-color: #58a6ff;
+  color: #58a6ff;
+}
+
+/* 返信（ネスト）エリア */
+.replies-container {
+  margin-left: 24px;
+  padding-left: 12px;
+  border-left: 2px solid #2d2d34;
+  margin-top: 10px;
+}
+
+/* インライン返信フォーム */
+.inline-reply-form {
+  background: #222228;
+  border: 1px solid #383842;
+  border-radius: 4px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+/* フッター */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.8rem;
+  color: #666;
+  border-top: 1px solid #222;
+}
