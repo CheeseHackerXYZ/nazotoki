@@ -1,76 +1,107 @@
 /**
- * UIの更新および操作イベントの処理
+ * 掲示板UI描画・返信制御
  */
 document.addEventListener('DOMContentLoaded', () => {
-  const mailListEl = document.getElementById('mail-list');
-  const detailSubjectEl = document.getElementById('detail-subject');
-  const detailSenderEl = document.getElementById('detail-sender');
-  const detailDateEl = document.getElementById('detail-date');
-  const detailBodyEl = document.getElementById('detail-body');
-  const placeholderEl = document.getElementById('detail-placeholder');
-  const contentEl = document.getElementById('detail-content');
+  const postsContainer = document.getElementById('posts-container');
+  let activeReplyForm = null;
 
-  let mails = MailData.getMails();
-
-  /**
-   * メール一覧の描画
-   */
-  function renderMailList() {
-    mailListEl.innerHTML = '';
-    mails.forEach(mail => {
-      const item = document.createElement('div');
-      item.className = `mail-item ${mail.isRead ? 'read' : 'unread'}`;
-      item.dataset.id = mail.id;
-
-      item.innerHTML = `
-        <div class="mail-item-header">
-          <span class="mail-item-sender">${escapeHtml(mail.sender)}</span>
-          <span class="mail-item-date">${mail.date}</span>
-        </div>
-        <div class="mail-item-subject">${escapeHtml(mail.subject)}</div>
-      `;
-
-      item.addEventListener('click', () => selectMail(mail.id));
-      mailListEl.appendChild(item);
+  function render() {
+    const posts = BbsData.getPosts();
+    postsContainer.innerHTML = '';
+    
+    posts.forEach(post => {
+      postsContainer.appendChild(createPostNode(post));
     });
   }
 
-  /**
-   * メールの選択・本文表示
-   */
-  function selectMail(mailId) {
-    const mail = mails.find(m => m.id === mailId);
-    if (!mail) return;
+  function createPostNode(post) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'post-wrapper';
 
-    // 既定のプレースホルダーを隠して詳細を表示
-    placeholderEl.classList.add('hidden');
-    contentEl.classList.remove('hidden');
+    const postCard = document.createElement('div');
+    postCard.className = 'post-card';
 
-    detailSubjectEl.textContent = mail.subject;
-    detailSenderEl.textContent = mail.sender;
-    detailDateEl.textContent = mail.date;
-    detailBodyEl.innerHTML = mail.content; // HTMLタグ（リンク）を有効化
+    postCard.innerHTML = `
+      <div class="post-header">
+        <span class="post-name">${escapeHtml(post.name)}</span>
+        <span class="post-date">${post.date}</span>
+      </div>
+      <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+      <div class="post-actions">
+        <button class="btn-reply" data-id="${post.id}">返信する</button>
+      </div>
+      <div class="reply-form-container" id="form-container-${post.id}"></div>
+    `;
 
-    // アクティブクラス切り替え
-    document.querySelectorAll('.mail-item').forEach(el => {
-      el.classList.toggle('active', el.dataset.id === mailId);
+    const replyBtn = postCard.querySelector('.btn-reply');
+    replyBtn.addEventListener('click', () => {
+      toggleReplyForm(post.id);
     });
 
-    // 既読処理
-    if (!mail.isRead) {
-      MailData.markAsRead(mailId);
-      mail.isRead = true;
-      renderMailList();
-      // アクティブ状態の再適用
-      const currentActive = document.querySelector(`[data-id="${mailId}"]`);
-      if (currentActive) currentActive.classList.add('active');
+    wrapper.appendChild(postCard);
+
+    if (post.replies && post.replies.length > 0) {
+      const repliesContainer = document.createElement('div');
+      repliesContainer.className = 'replies-container';
+      post.replies.forEach(reply => {
+        repliesContainer.appendChild(createPostNode(reply));
+      });
+      wrapper.appendChild(repliesContainer);
     }
+
+    return wrapper;
   }
 
-  /**
-   * エスケープ処理（XSS防止用）
-   */
+  function toggleReplyForm(targetId) {
+    const targetContainer = document.getElementById(`form-container-${targetId}`);
+    
+    if (activeReplyForm) {
+      activeReplyForm.remove();
+      if (activeReplyForm.dataset.targetId === String(targetId)) {
+        activeReplyForm = null;
+        return;
+      }
+    }
+
+    const form = document.createElement('form');
+    form.className = 'inline-reply-form';
+    form.dataset.targetId = targetId;
+
+    form.innerHTML = `
+      <div class="form-group">
+        <input type="text" class="input-name" placeholder="名前 (省略可)">
+      </div>
+      <div class="form-group">
+        <textarea class="input-content" rows="3" placeholder="返信コメントを入力..." required></textarea>
+      </div>
+      <div class="form-buttons">
+        <button type="submit" class="btn-submit">送信</button>
+        <button type="button" class="btn-cancel">キャンセル</button>
+      </div>
+    `;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = form.querySelector('.input-name').value;
+      const content = form.querySelector('.input-content').value;
+      
+      if (content.trim()) {
+        BbsData.addReply(targetId, name, content);
+        render();
+      }
+    });
+
+    form.querySelector('.btn-cancel').addEventListener('click', () => {
+      form.remove();
+      activeReplyForm = null;
+    });
+
+    targetContainer.appendChild(form);
+    activeReplyForm = form;
+  }
+
   function escapeHtml(str) {
+    if (!str) return '';
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -79,6 +110,5 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#039;');
   }
 
-  // 初期化実行
-  renderMailList();
+  render();
 });
