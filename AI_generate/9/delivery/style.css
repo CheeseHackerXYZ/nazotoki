@@ -1,0 +1,241 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #0f1115;
+  color: #e0e6ed;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ヘッダー */
+.header {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #58a6ff;
+  letter-spacing: 2px;
+  text-decoration: none;
+}
+
+.btn-track {
+  background: #238636;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-track:hover {
+  background: #2ea043;
+}
+
+/* メインコンテナ */
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  flex: 1;
+  width: 100%;
+}
+
+/* ヒーローセクション */
+.hero {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  color: #f0f6fc;
+}
+
+.hero p {
+  color: #8b949e;
+  font-size: 1.1rem;
+}
+
+/* ログイン・フォーム枠 */
+.auth-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 450px;
+  margin: 60px auto;
+}
+
+.auth-title {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #f0f6fc;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #8b949e;
+}
+
+.input-text {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #f0f6fc;
+  font-size: 1rem;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 10px;
+  background: #1f6feb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #388bfd;
+}
+
+.error-message {
+  color: #f85149;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  display: none;
+  text-align: center;
+}
+
+/* ダッシュボード */
+.status-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #da3633;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.status-detail {
+  font-size: 1.05rem;
+  color: #c9d1d9;
+  line-height: 1.8;
+}
+
+.status-detail a {
+  color: #58a6ff;
+  text-decoration: underline;
+}
+
+/* 保管庫ログシステム */
+.log-container {
+  background: #000;
+  border: 1px solid #333;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+.log-header {
+  color: #00ff00;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.camera-preview {
+  text-align: center;
+  background: #111;
+  padding: 15px;
+  border: 1px solid #222;
+  margin-bottom: 20px;
+}
+
+.camera-img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #444;
+}
+
+.view-label {
+  color: #aaa;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.btn-toggle {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 10px;
+}
+
+.btn-toggle:hover {
+  background: #444;
+}
+
+.log-list {
+  color: #00ff00;
+  list-style: none;
+}
+
+.log-item {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* フッター */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #8b949e;
+  font-size: 0.85rem;
+  border-top: 1px solid #30363d;
+  background: #161b22;
+}
