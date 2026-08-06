@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>荷物追跡システム - BlackDelivery</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">BlackDelivery</a>
+  </header>
+
+  <main class="container">
+    <div class="auth-box">
+      <h2 class="auth-title">荷物追跡システム</h2>
+      <form id="tracking-form">
+        <div class="form-group">
+          <label for="tracking-number">12桁のお問い合わせ伝票番号</label>
+          <input type="text" id="tracking-number" class="input-text" placeholder="例: 530492974863" maxlength="12" required>
+        </div>
+        <button type="submit" class="btn-submit">照会する</button>
+        <p id="error-message" class="error-message"></p>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; BlackDelivery Logistics Co., Ltd. All Rights Reserved.
+  </footer>
+
+  <script src="auth.js"></script>
+</body>
+</html>
