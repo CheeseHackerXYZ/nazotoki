@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中央区第3物流センター・地下貴重品庫 ログ</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="../index.html" class="logo">BlackDelivery [保管庫管理システム]</a>
+  </header>
+
+  <main class="container">
+    <div class="log-container">
+      <div class="log-header">
+        [SYSTEM LOG - CENTRAL STOREHOUSE #3]
+      </div>
+
+      <div class="camera-preview">
+        <img id="camera-img" src="now.png" alt="保管庫監視カメラ映像" class="camera-img" onerror="this.src='../img/X.png'">
+        <div id="view-label" class="view-label">現在（リアルタイム監視カメラ）</div>
+        <button id="toggle-img-btn" class="btn-toggle">保管庫内部データ／詳細画像に切り替え</button>
+      </div>
+
+      <ul class="log-list">
+        <li class="log-item">[1日前 14:00] : 配送開始 - 宛先への配達手配完了</li>
+        <li class="log-item">[現在] : 受取拒否により回収／地下貴重品庫にて「保管中」</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; BlackDelivery Internal System
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
