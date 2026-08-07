@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     subject: '【緊急】発送を阻止してください',
     sender: '依頼人',
     date: null,
-    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。急いでくれ。回収先住所は中央区3-2-4危険物解除施設8階だ。',
+    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。急いでくれ。回収先住所は中央区3-2-4危[...]',
     isRead: false
   };
 
@@ -39,15 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
     isRead: false
   };
 
-  // 【時系列 1】掲示板誘導メール（保管庫詳細確認時に追加）
+  // 【時系列 4】クリアメール
   const clearMail = {
     id: 'mail_clear_001',
     subject: '協力ありがとうございました',
     sender: '依頼人',
     date: null,
-    content: '調査お疲れ様、無事問題解決した。例のブログもまた更新を始めたようだ。君のおかげだ。本当にありがとう。<br><br><a href="../clear/index.html">GAME CLEAR</a>',
+    content: '調査お疲れ様、無事問題解決した。例のブログもまた更新を始めたようだ。君のおかげだ。本当にありがとう。<br><br><a href="../clear/index.html">クリア画面に進む</a>',
     isRead: false
-      
+  };
+
   /**
    * 日付を YYYY/MM/DD HH:mm 形式でフォーマット
    */
@@ -90,8 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
-    // --- 【時系列 3】解錠依頼 ---
+  // --- 【時系列 3】解錠依頼 ---
   const isChangedAddressee = localStorage.getItem(STORAGE_KEY_CHANGED_ADDRESSEE) === 'true';
 
   if (isChangedAddressee) {
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isUpdated = true;
     }
   }
-  
+
   // メールが新しく追加された場合のみストレージ保存とUI更新
   if (isUpdated) {
     localStorage.setItem(STORAGE_KEY_EMAILS, JSON.stringify(mailList));
