@@ -8,19 +8,20 @@
 </head>
 <body>
   <div class="container">
-    <h1>解除する順番にボタンを押せ</h1>
+    <h1>順番通りに押してから箱を開ける</h1>
     <p id="message" class="message">ボタンを押してください</p>
     
     <div class="grid">
-      <button class="btn" data-key="A">A</button>
-      <button class="btn" data-key="B">B</button>
-      <button class="btn" data-key="C">C</button>
-      <button class="btn" data-key="D">D</button>
-      <button class="btn center-btn" data-key="E">E (真ん中)</button>
-      <button class="btn" data-key="F">F</button>
-      <button class="btn" data-key="G">G</button>
-      <button class="btn" data-key="H">H</button>
-      <button class="btn" data-key="I">I</button>
+      <!-- 0~8のインデックスを指定 -->
+      <button class="btn" data-index="0">0</button>
+      <button class="btn" data-index="1">1</button>
+      <button class="btn" data-index="2">2</button>
+      <button class="btn" data-index="3">3</button>
+      <button class="btn center-btn" data-index="4">箱を開ける</button>
+      <button class="btn" data-index="5">5</button>
+      <button class="btn" data-index="6">6</button>
+      <button class="btn" data-index="7">7</button>
+      <button class="btn" data-index="8">8</button>
     </div>
 
     <button id="reset-btn" class="reset-btn">リセット</button>
