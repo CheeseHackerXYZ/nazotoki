@@ -239,3 +239,35 @@ body {
   border-top: 1px solid #30363d;
   background: #161b22;
 }
+
+
+/* 通知風 */
+/* メール通知ポップアップ */
+.mail-notification {
+  position: fixed;
+  top: 20px;
+  right: -320px;
+  background-color: #1a1a1a;
+  color: #00ff66;
+  border: 1px solid #00ff66;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-family: monospace;
+  z-index: 9999;
+  transition: right 0.3s ease-in-out;
+}
+
+.mail-notification.show {
+  right: 20px;
+}
+
+.mail-notice-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mail-notice-icon {
+  font-size: 1.2rem;
+}
