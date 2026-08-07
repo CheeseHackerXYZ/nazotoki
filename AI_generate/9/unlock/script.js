@@ -1,3 +1,5 @@
+const STORAGE_KEY = 'arg_karakuribako_is_clear';
+
 // 正解のインデックスの組み合わせ（最後が真ん中の 4 ）
 const CORRECT_SEQUENCE = [0, 2, 6, 4];
 
@@ -35,9 +37,12 @@ function checkSequence() {
   if (isCorrect) {
     messageEl.textContent ='成功';
     messageEl.className = 'message success';
+    localStorage.setItem('STORAGE_KEY', true);
+    setTimeout(function() { window.location.href = '../mail/index.html'; }, 1000);
   } else {
     messageEl.textContent = '失敗';
     messageEl.className = 'message error';
     userInput = []; // 失敗時は入力履歴をリセット
+    setTimeout(function() { window.location.href = 'failure.html'; }, 1000);
   }
 }
