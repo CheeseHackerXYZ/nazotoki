@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     subject: '【緊急】発送を阻止してください',
     sender: '依頼人',
     date: null,
-    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。急いでくれ。',
+    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。急いでくれ。回収先住所は中央区3-2-4危険物解除施設8階だ。',
     isRead: false
   };
 
