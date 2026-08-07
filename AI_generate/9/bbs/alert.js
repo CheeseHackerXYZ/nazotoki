@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasSimulated = localStorage.getItem(NEW_POST_KEY);
     if (!hasSimulated) {
       // ターゲット（ID: 102）に対して新規レスを追加
-      const newReplyContent = 'おい保管庫の画像、さっき解析ツール通したらヤバいもん写ってたぞ…マジで確認してみろ';
+      const newReplyContent = 'おい、ヤミオクで次のオークションが始まったぞ。次の被害者が出る前に解決しないと。';
       
       if (typeof BbsData !== 'undefined') {
         BbsData.addReply(102, '名無しの調査員', newReplyContent);
