@@ -47,8 +47,8 @@ const MailSystem = {
 
     // 4秒後に自動消去
     setTimeout(() => {
-      noticeEl.classList.remove('show');
-      setTimeout(() => noticeEl.remove(), 300);
-    }, 4000);
+      noticeElg.classList.remove('show');
+      setTimeout(() => noticeEl.remove(), 1000);
+    }, 11000);
   }
 };
