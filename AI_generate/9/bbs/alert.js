@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         findMaxId(posts);
 
-        const newReplyContent = 'おい保管庫の画像、さっき解析ツール通したらヤバいもん写ってたぞ…マジで確認してみろ';
+        const newReplyContent = 'おい、ヤミオクでオークションが始まったぞ。次の被害者が出る前に食い止めないと。';
 
         // 最後の投稿に対して返信を追加
         BbsData.addReply(lastId, '名無しの調査員', newReplyContent);
