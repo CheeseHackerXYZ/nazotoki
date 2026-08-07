@@ -9,6 +9,11 @@ const MailSystem = {
    * 詳細データ確認時の処理
    */
   triggerContentCheck() {
+    // 【追加】すでに確認済みの場合は処理を中断（連打・重複通知をガード）
+    if (localStorage.getItem(this.STORAGE_KEY) === 'true') {
+      return;
+    }
+
     // ローカルストレージのフラグをtrueに更新
     localStorage.setItem(this.STORAGE_KEY, 'true');
 
@@ -45,7 +50,6 @@ const MailSystem = {
       noticeEl.classList.add('show');
     });
 
-    // 4秒後に自動消去
     setTimeout(() => {
       noticeEl.classList.remove('show');
       setTimeout(() => noticeEl.remove(), 1000);
