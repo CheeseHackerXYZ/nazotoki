@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem(NEW_POST_KEY, 'true');
 
       // トースト通知を表示
-      showBbsNotification('掲示板に新着レスが届きました');
+      showBbsNotification('新着メールが1件届きました');
 
       // 必要であればここでUIの再描画などを呼ぶ
       if (typeof window.renderBbsUI === 'function') {
