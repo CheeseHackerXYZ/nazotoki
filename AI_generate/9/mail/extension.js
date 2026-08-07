@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_EMAILS = 'arg_karakuribako_mail_list';
   const STORAGE_KEY_BBS = 'arg_bbs_has_simulated_post';
   const STORAGE_KEY_DELIVERY = 'arg_karakuribako_delivery_auth';
-
+  const STORAGE_KEY_CONTENT_CHECKED = 'arg_karakuribako_content_checked'
   // 追加する新着メールの定義
   const urgentMail = {
     id: 'mail_urgent_001',
