@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_BBS = 'arg_bbs_has_simulated_post';
   const STORAGE_KEY_DELIVERY = 'arg_karakuribako_delivery_auth';
   const STORAGE_KEY_CONTENT_CHECKED = 'arg_karakuribako_content_checked';
+  const STORAGE_KEY_CHANGED_ADDRESSEE = 'arg_karakuribako_changed_addressee'
 
   // 【時系列 1】掲示板誘導メール（保管庫詳細確認時に追加）
   const bbsInfoMail = {
@@ -27,6 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
     isRead: false
   };
 
+  // 【時系列 3】解錠依頼メール
+  const unlockMail = {
+    id: 'mail_unlock_001',
+    subject: '解錠依頼',
+    sender: '依頼人',
+    date: null,
+    content: '箱の回収は成功した。あとは解錠するだけだ。手伝ってくれ。<br><a href="../unlock/index.html">解錠する</a>',
+    isRead: false
+  };
+  
   /**
    * 日付を YYYY/MM/DD HH:mm 形式でフォーマット
    */
@@ -69,6 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+
+    // --- 【時系列 3】解錠依頼 ---
+  const isChangedAdressee = localStorage.getItem(STORAGE_KEY_CHANGED_ADRESSEE) === 'true';
+
+  if (isChangedAdressee) {
+    const hasUnlockMail = mailList.some(m => m.id === unlockMail.id);
+    if (!hasUnlockMail) {
+      unlockMail.date = formatDate(new Date());
+      mailList.unshift(unlockMail);
+      isUpdated = true;
+    }
+  }
+  
   // メールが新しく追加された場合のみストレージ保存とUI更新
   if (isUpdated) {
     localStorage.setItem(STORAGE_KEY_EMAILS, JSON.stringify(mailList));
