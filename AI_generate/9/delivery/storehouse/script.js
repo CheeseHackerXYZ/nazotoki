@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleBtn = document.getElementById('toggle-img-btn');
   const viewLabel = document.getElementById('view-label');
 
-  // 画像定義（now.png: リアルタイム映像 / content.png: 箱の中身・解析画像など）
   let isShowingNow = true;
 
   if (toggleBtn && cameraImg) {
@@ -21,6 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraImg.src = 'content.png';
         viewLabel.textContent = '保管品内部構造／スキャンデータ';
         toggleBtn.textContent = 'リアルタイム監視カメラに切り替え';
+
+        // 詳細画像に切り替わったタイミングで通知発行 & ストレージ更新
+        if (typeof MailSystem !== 'undefined') {
+          MailSystem.triggerContentCheck();
+        }
       }
     });
   }
