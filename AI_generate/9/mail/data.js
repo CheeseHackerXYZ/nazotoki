@@ -17,16 +17,6 @@ const MailData = (() => {
     }
   ];
 
-  // クリア時のメール定義
-  const clearMail = {
-    id: 'mail_clear',
-    subject: '【調査完了】ご協力ありがとうございました',
-    sender: '依頼人',
-    date: null,
-    content: '調査お疲れ様、無事問題解決した。例のブログもまた更新を始めたようだ。君のおかげだ。本当にありがとう。',
-    isRead: false
-  };
-
   /**
    * 日付を YYYY/MM/DD HH:mm 形式でフォーマット
    */
@@ -53,15 +43,6 @@ const MailData = (() => {
       mailList.push(initialMails[0]);
     }
 
-    // クリア判定（キー "arg_karakuribako_cleared" が "true" かどうか）
-    const isCleared = localStorage.getItem(STORAGE_KEY_CLEAR_FLAG) === 'true';
-    const hasClearMail = mailList.some(m => m.id === clearMail.id);
-
-    // クリア済みかつまだクリアメールが追加されていない場合に追加
-    if (isCleared && !hasClearMail) {
-      const newClearMail = { ...clearMail, date: nowStr };
-      mailList.unshift(newClearMail); // 既定で最新メッセージを上に
-    }
 
     // ローカルストレージに最新状態を永続化
     localStorage.setItem(STORAGE_KEY_EMAILS, JSON.stringify(mailList));
