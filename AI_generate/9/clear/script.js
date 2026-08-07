@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function shareToX() {
     const currentUrl = window.location.href;
-    const shareText = `【ゲームクリア】\nゲームをクリアしました！\nクリアタイム: ${formattedClearTime}\n\n#カラクリ箱`;
+    const shareText = `【ゲームクリア】\n「題名」をクリアしました！\nクリアタイム: ${formattedClearTime}\nhttps://URL/`;
 
     const xShareUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`;
 
