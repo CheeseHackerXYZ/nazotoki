@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>発送詳細 - BlackDelivery</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <header class="header">
+    <a href="index.html" class="logo">BlackDelivery</a>
+  </header>
+
+  <main class="container">
+    <h2 style="margin-bottom: 20px; color: #f0f6fc;">発送詳細・宛先変更</h2>
+
+    <div class="status-card">
+      <div style="font-size: 0.9rem; color: #8b949e; margin-bottom: 12px;">伝票番号：530492974863</div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="color: #8b949e; font-size: 0.9rem; display: block; margin-bottom: 4px;">発送元</label>
+        <div style="font-size: 1rem; color: #f0f6fc;">ヤミオークション配送センター</div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="addressee-input" style="color: #8b949e; font-size: 0.9rem; display: block; margin-bottom: 4px;">宛先</label>
+        <input type="text" id="addressee-input" class="input-text" value="匿名買受人様宛（指定住所なし）">
+      </div>
+
+      <button id="btn-update-address" class="btn-submit">宛先を変更して保存</button>
+      <div id="msg-success" style="color: #3fb950; font-size: 0.9rem; margin-top: 12px; display: none; text-align: center;">宛先情報を更新しました。</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; BlackDelivery Logistics Co., Ltd. All Rights Reserved.
+  </footer>
+
+  <script src="detail.js"></script>
+</body>
+</html>
