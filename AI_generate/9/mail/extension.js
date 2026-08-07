@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     subject: '【緊急】発送を阻止してください',
     sender: '依頼人',
     date: null,
-    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。5分後には発送されてしまうから急いでくれ。',
+    content: 'ヤミオクのオークションが終了した。発送が間もなく開始されるからそれまでに回収するんだ。急いでくれ。',
     isRead: false
   };
 
