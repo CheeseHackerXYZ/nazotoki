@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         findMaxId(posts);
 
-        const newReplyContent = 'おい、ヤミオクでオークションが始まったぞ。次の被害者が出る前に食い止めないと。';
+        const newReplyContent = '[このメッセージはあなたにのみ表示されています]\n@あなた　ヤミオクでオークションが終わった。詳細はメールに記載したから至急確認してくれ。';
 
         // 最後の投稿に対して返信を追加
         BbsData.addReply(lastId, '名無しの調査員', newReplyContent);
