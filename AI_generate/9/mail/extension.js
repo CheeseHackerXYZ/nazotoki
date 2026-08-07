@@ -5,8 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_EMAILS = 'arg_karakuribako_mail_list';
   const STORAGE_KEY_BBS = 'arg_bbs_has_simulated_post';
   const STORAGE_KEY_DELIVERY = 'arg_karakuribako_delivery_auth';
-  const STORAGE_KEY_CONTENT_CHECKED = 'arg_karakuribako_content_checked'
-  // 追加する新着メールの定義
+  const STORAGE_KEY_CONTENT_CHECKED = 'arg_karakuribako_content_checked';
+
+  // 【時系列 1】掲示板誘導メール（保管庫詳細確認時に追加）
+  const bbsInfoMail = {
+    id: 'mail_bbs_info_001',
+    subject: '匿名掲示板に関する情報',
+    sender: '情報提供者',
+    date: null,
+    content: '匿名掲示板のサイトはこっちだ。何か情報源になるかもしれない。<br><a href="../bbs/index.html">https://URL/index.html</a>',
+    isRead: false
+  };
+
+  // 【時系列 2】緊急発送阻止メール
   const urgentMail = {
     id: 'mail_urgent_001',
     subject: '【緊急】発送を阻止してください',
@@ -28,29 +39,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
   }
 
-  // 条件フラグの取得
+  // ローカルストレージからメールリストを取得
+  let stored = localStorage.getItem(STORAGE_KEY_EMAILS);
+  let mailList = stored ? JSON.parse(stored) : [];
+  let isUpdated = false;
+
+  // --- 【時系列 1】保管庫詳細画像確認済みの場合 (mail_bbs_info_001) ---
+  const isContentChecked = localStorage.getItem(STORAGE_KEY_CONTENT_CHECKED) === 'true';
+
+  if (isContentChecked) {
+    const hasBbsInfoMail = mailList.some(m => m.id === bbsInfoMail.id);
+    if (!hasBbsInfoMail) {
+      bbsInfoMail.date = formatDate(new Date());
+      mailList.unshift(bbsInfoMail);
+      isUpdated = true;
+    }
+  }
+
+  // --- 【時系列 2】BBS通過かつ配送認証済みの場合 (mail_urgent_001) ---
   const isBbsPassed = localStorage.getItem(STORAGE_KEY_BBS) === 'true';
   const isDeliveryAuthed = localStorage.getItem(STORAGE_KEY_DELIVERY) === 'true';
 
-  // 両方のフラグが true の場合のみ処理を実行
   if (isBbsPassed && isDeliveryAuthed) {
-    let stored = localStorage.getItem(STORAGE_KEY_EMAILS);
-    let mailList = stored ? JSON.parse(stored) : [];
-
-    // すでにこの新着メールが存在するかチェック（初回判定）
     const hasUrgentMail = mailList.some(m => m.id === urgentMail.id);
-
     if (!hasUrgentMail) {
-      // 日付を設定してリストの先頭（最新）に追加
       urgentMail.date = formatDate(new Date());
       mailList.unshift(urgentMail);
-
-      // ローカルストレージを更新
-      localStorage.setItem(STORAGE_KEY_EMAILS, JSON.stringify(mailList));
-
-      // 画面（UI）を更新
-      refreshUI();
+      isUpdated = true;
     }
+  }
+
+  // メールが新しく追加された場合のみストレージ保存とUI更新
+  if (isUpdated) {
+    localStorage.setItem(STORAGE_KEY_EMAILS, JSON.stringify(mailList));
+    refreshUI();
   }
 
   /**
@@ -60,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mailListEl = document.getElementById('mail-list');
     if (!mailListEl) return;
 
-    // data.js の最新情報を再取得
-    const mails = MailData.getMails();
+    // MailDataがある場合は最新一覧を取得、なければローカル変数のmailListを利用
+    const mails = (typeof MailData !== 'undefined' && MailData.getMails) ? MailData.getMails() : mailList;
     mailListEl.innerHTML = '';
 
     mails.forEach(mail => {
@@ -77,26 +99,33 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mail-item-subject">${escapeHtml(mail.subject)}</div>
       `;
 
-      // クリックイベントの再登録
       item.addEventListener('click', () => {
-        // UI側の詳細表示ロジックを呼び出すため既存要素をシミュレート
         const targetMail = mails.find(m => m.id === mail.id);
         if (!targetMail) return;
 
-        document.getElementById('detail-placeholder').classList.add('hidden');
-        document.getElementById('detail-content').classList.remove('hidden');
+        const placeholder = document.getElementById('detail-placeholder');
+        const content = document.getElementById('detail-content');
+        if (placeholder) placeholder.classList.add('hidden');
+        if (content) content.classList.remove('hidden');
 
-        document.getElementById('detail-subject').textContent = targetMail.subject;
-        document.getElementById('detail-sender').textContent = targetMail.sender;
-        document.getElementById('detail-date').textContent = targetMail.date;
-        document.getElementById('detail-body').innerHTML = targetMail.content;
+        const detailSubject = document.getElementById('detail-subject');
+        const detailSender = document.getElementById('detail-sender');
+        const detailDate = document.getElementById('detail-date');
+        const detailBody = document.getElementById('detail-body');
+
+        if (detailSubject) detailSubject.textContent = targetMail.subject;
+        if (detailSender) detailSender.textContent = targetMail.sender;
+        if (detailDate) detailDate.textContent = targetMail.date;
+        if (detailBody) detailBody.innerHTML = targetMail.content;
 
         document.querySelectorAll('.mail-item').forEach(el => {
           el.classList.toggle('active', el.dataset.id === mail.id);
         });
 
         if (!targetMail.isRead) {
-          MailData.markAsRead(mail.id);
+          if (typeof MailData !== 'undefined' && MailData.markAsRead) {
+            MailData.markAsRead(mail.id);
+          }
           targetMail.isRead = true;
           refreshUI();
         }
