@@ -1,8 +1,6 @@
 // 正解のインデックスの組み合わせ（最後が真ん中の 4 ）
-// 例: 左上(0) -> 右上(2) -> 左下(6) -> 真ん中(4)
 const CORRECT_SEQUENCE = [0, 2, 6, 4];
 
-// 真ん中のボタンのインデックス
 const CENTER_INDEX = 4;
 
 let userInput = [];
