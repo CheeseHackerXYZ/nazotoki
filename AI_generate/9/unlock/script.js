@@ -37,7 +37,7 @@ function checkSequence() {
   if (isCorrect) {
     messageEl.textContent ='成功';
     messageEl.className = 'message success';
-    localStorage.setItem('STORAGE_KEY', 'true');
+    localStorage.setItem(STORAGE_KEY, 'true');
     setTimeout(function() { window.location.href = '../mail/index.html'; }, 1000);
   } else {
     messageEl.textContent = '失敗';
