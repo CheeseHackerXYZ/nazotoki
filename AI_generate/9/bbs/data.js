@@ -160,6 +160,7 @@ const BbsData = (() => {
   }
 
   return {
+    STORAGE_KEY: STORAGE_KEY_POSTS,
     getPosts,
     addReply
   };
