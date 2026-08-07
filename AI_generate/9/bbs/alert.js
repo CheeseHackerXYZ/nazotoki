@@ -3,7 +3,6 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
   const NEW_POST_KEY = 'arg_bbs_has_simulated_post';
-  let isPendingPost = false;
 
   // 通知バナーの生成
   const banner = document.createElement('div');
@@ -21,19 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
     reloadBtn.addEventListener('click', () => {
       banner.classList.remove('show');
 
-      // 未読み込みの新規レスがある場合、実際にデータを追加して描画更新
-      if (isPendingPost && typeof BbsData !== 'undefined') {
-        const targetId = 6; // 最後のレス(id: 6)への返信として追加
+      const hasSimulated = localStorage.getItem(NEW_POST_KEY);
+
+      // まだ自動割り込みレスが追加されていない場合のみ実行
+      if (!hasSimulated && typeof BbsData !== 'undefined') {
+        const posts = BbsData.getPosts();
+        
+        // 存在する最後の投稿IDを取得（ID固定による不具合を防止）
+        let lastId = 1;
+        function findMaxId(list) {
+          list.forEach(item => {
+            if (item.id > lastId) lastId = item.id;
+            if (item.replies && item.replies.length > 0) findMaxId(item.replies);
+          });
+        }
+        findMaxId(posts);
+
         const newReplyContent = 'おい保管庫の画像、さっき解析ツール通したらヤバいもん写ってたぞ…マジで確認してみろ';
 
-        BbsData.addReply(targetId, '名無しの調査員', newReplyContent);
+        // 最後の投稿に対して返信を追加
+        BbsData.addReply(lastId, '名無しの調査員', newReplyContent);
         localStorage.setItem(NEW_POST_KEY, 'true');
-        isPendingPost = false;
       }
 
-      // UI再描画
+      // UI再描画（関数が存在することを確認して確実に呼び出す）
       if (typeof window.renderBbsUI === 'function') {
         window.renderBbsUI();
+      } else {
+        // 万が一関数の登録が遅れている場合はリロードで確実に適用
+        window.location.reload();
       }
     });
   }
@@ -42,12 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     const hasSimulated = localStorage.getItem(NEW_POST_KEY);
     if (!hasSimulated) {
-      isPendingPost = true;
       showBanner();
     }
   }, 10000);
 
-  // 別タブや他アクセスでの変更を検知（localStorage同期）
+  // 別タブでのlocalStorage同期
   window.addEventListener('storage', (e) => {
     if (typeof BbsData !== 'undefined' && e.key === BbsData.STORAGE_KEY) {
       showBanner();
