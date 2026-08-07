@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_BBS = 'arg_bbs_has_simulated_post';
   const STORAGE_KEY_DELIVERY = 'arg_karakuribako_delivery_auth';
   const STORAGE_KEY_CONTENT_CHECKED = 'arg_karakuribako_content_checked';
-  const STORAGE_KEY_CHANGED_ADDRESSEE = 'arg_karakuribako_changed_addressee'
+  const STORAGE_KEY_CHANGED_ADDRESSEE = 'arg_karakuribako_changed_addressee';
+  const STORAGE_KEY_IS_CLEAR = 'arg_karakuribako_is_clear';
 
   // 【時系列 1】掲示板誘導メール（保管庫詳細確認時に追加）
   const bbsInfoMail = {
@@ -35,6 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     sender: '依頼人',
     date: null,
     content: '箱の回収は成功した。あとは解錠するだけだ。手伝ってくれ。<br><a href="../unlock/index.html">解錠する</a>',
+    isRead: false
+  };
+
+  // 【時系列 1】掲示板誘導メール（保管庫詳細確認時に追加）
+  const clearMail = {
+    id: 'mail_clear_001',
+    subject: '協力ありがとうございました',
+    sender: '依頼人',
+    date: null,
+    content: '箱の解除に成功し、呪縛は解けたようだ。更新が止まっていたブログも更新されて、体調も回復したらしい。君のおかげだ、ありがとう。',
     isRead: false
   };
   
@@ -89,6 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!hasUnlockMail) {
       unlockMail.date = formatDate(new Date());
       mailList.unshift(unlockMail);
+      isUpdated = true;
+    }
+  }
+
+  // --- 【時系列 4】ゲームクリア ---
+  const isClear = localStorage.getItem(STORAGE_KEY_IS_CLEAR) === 'true';
+
+  if (isClear) {
+    const hasClearMail = mailList.some(m => m.id === clearMail.id);
+    if (!hasClearMail) {
+      clearMail.date = formatDate(new Date());
+      mailList.unshift(clearMail);
       isUpdated = true;
     }
   }
