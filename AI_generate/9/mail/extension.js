@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sender: '依頼人',
     date: null,
     content: '箱の解除に成功し、呪縛は解けたようだ。更新が止まっていたブログも更新されて、体調も回復したらしい。君のおかげだ、ありがとう。<br><br><a href="../clear/index.html">GAME CLEAR</a>',
-    isRead: 
+    isRead: false
       
   /**
    * 日付を YYYY/MM/DD HH:mm 形式でフォーマット
