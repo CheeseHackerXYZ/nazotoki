@@ -1,74 +1,69 @@
 /**
- * 10秒後の新規レス自動割り込み＆通知バナー制御
+ * 10秒後の新規レス自動割り込み＆トースト通知制御
  */
 document.addEventListener('DOMContentLoaded', () => {
   const NEW_POST_KEY = 'arg_bbs_has_simulated_post';
 
-  // 通知バナーの生成
-  const banner = document.createElement('div');
-  banner.id = 'bbs-notification-banner';
-  banner.className = 'notification-banner';
-  banner.innerHTML = `
-    <span>新着レスが1件届いています</span>
-    <button id="btn-reload-bbs">読み込む</button>
-  `;
-  document.body.prepend(banner);
+  // 初回表示時の重複防止のため、すでに既読・通知済みフラグがあるか確認
+  // （必要に応じてフラグ名や挙動を調整してください）
 
-  const reloadBtn = document.getElementById('btn-reload-bbs');
+  /**
+   * 画面上にトースト通知（ポップアップ）を表示
+   * @param {string} message 
+   */
+  function showBbsNotification(message) {
+    // 既存の通知があれば重複しないように削除
+    const existingNotice = document.getElementById('mail-notification');
+    if (existingNotice) {
+      existingNotice.remove();
+    }
 
-  if (reloadBtn) {
-    reloadBtn.addEventListener('click', () => {
-      banner.classList.remove('show');
+    // 通知要素の生成（メール通知と共通の構造・クラスを利用）
+    const noticeEl = document.createElement('div');
+    noticeEl.id = 'mail-notification';
+    noticeEl.className = 'mail-notification';
+    noticeEl.innerHTML = `
+      <div class="mail-notice-content">
+        <span class="mail-notice-icon">✉</span>
+        <span class="mail-notice-text">${message}</span>
+      </div>
+    `;
 
-      const hasSimulated = localStorage.getItem(NEW_POST_KEY);
+    document.body.appendChild(noticeEl);
 
-      // まだ自動割り込みレスが追加されていない場合のみ実行
-      if (!hasSimulated && typeof BbsData !== 'undefined') {
-        const posts = BbsData.getPosts();
-        
-        // 存在する最後の投稿IDを取得（ID固定による不具合を防止）
-        let lastId = 1;
-        function findMaxId(list) {
-          list.forEach(item => {
-            if (item.id > lastId) lastId = item.id;
-            if (item.replies && item.replies.length > 0) findMaxId(item.replies);
-          });
-        }
-        findMaxId(posts);
-
-        const newReplyContent = '[このメッセージはあなたにのみ表示されています]\n@あなた　ヤミオクでオークションが終わった。詳細はメールに記載したから至急確認してくれ。';
-
-        // 最後の投稿に対して返信を追加
-        BbsData.addReply(lastId, '名無しの調査員', newReplyContent);
-        localStorage.setItem(NEW_POST_KEY, 'true');
-      }
-
-      // UI再描画（関数が存在することを確認して確実に呼び出す）
-      if (typeof window.renderBbsUI === 'function') {
-        window.renderBbsUI();
-      } else {
-        // 万が一関数の登録が遅れている場合はリロードで確実に適用
-        window.location.reload();
-      }
+    // アニメーション用クラス付与
+    requestAnimationFrame(() => {
+      noticeEl.classList.add('show');
     });
+
+    // 11秒後に自動消去
+    setTimeout(() => {
+      noticeEl.classList.remove('show');
+      setTimeout(() => noticeEl.remove(), 1000);
+    }, 11000);
   }
 
-  // 10秒後に通知バナーを表示（まだ追加されていなければ）
+  // 10秒後に新着通知を表示（まだシミュレーションフラグが立っていなければ）
   setTimeout(() => {
     const hasSimulated = localStorage.getItem(NEW_POST_KEY);
     if (!hasSimulated) {
-      showBanner();
+      // フラグを立てて2回目以降出ないようにする
+      localStorage.setItem(NEW_POST_KEY, 'true');
+
+      // トースト通知を表示
+      showBbsNotification('掲示板に新着レスが届きました');
+
+      // 必要であればここでUIの再描画などを呼ぶ
+      if (typeof window.renderBbsUI === 'function') {
+        window.renderBbsUI();
+      }
     }
   }, 10000);
 
   // 別タブでのlocalStorage同期
   window.addEventListener('storage', (e) => {
     if (typeof BbsData !== 'undefined' && e.key === BbsData.STORAGE_KEY) {
-      showBanner();
+      showBbsNotification('掲示板データが更新されました');
     }
   });
-
-  function showBanner() {
-    banner.classList.add('show');
-  }
 });
