@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // alert.js等から再描画できるように外部露出
+  window.renderBbsUI = render;
+
   function createPostNode(post) {
     const wrapper = document.createElement('div');
     wrapper.className = 'post-wrapper';
