@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     subject: '匿名掲示板に関する情報',
     sender: '情報提供者',
     date: null,
-    content: '匿名掲示板のサイトはこっちだ。何か情報源になるかもしれない。<br><a href="../bbs/index.html">https://URL/index.html</a>',
+    content: '匿名掲示板のサイトを見つけた。何か情報源になるかもしれない。<br><a href="../bbs/index.html">https://URL/index.html</a>',
     isRead: false
   };
 
