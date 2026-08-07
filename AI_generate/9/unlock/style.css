@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f4f9;
+}
+
+.container {
+  text-align: center;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.message {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  min-height: 1.5em;
+  color: #555;
+}
+
+.message.success {
+  color: #2e7d32;
+}
+
+.message.error {
+  color: #c62828;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.btn {
+  width: 80px;
+  height: 80px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.btn:hover {
+  background-color: #d5d5d5;
+}
+
+.btn:active {
+  transform: scale(0.95);
+  background-color: #bbb;
+}
+
+.center-btn {
+  background-color: #ffcc80;
+  border-color: #ffa726;
+}
+
+.center-btn:hover {
+  background-color: #ffb74d;
+}
+
+.reset-btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #757575;
+  color: white;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  background-color: #616161;
+}
