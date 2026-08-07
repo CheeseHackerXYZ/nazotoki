@@ -82,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 【時系列 3】解錠依頼 ---
-  const isChangedAdressee = localStorage.getItem(STORAGE_KEY_CHANGED_ADRESSEE) === 'true';
+  const isChangedAddressee = localStorage.getItem(STORAGE_KEY_CHANGED_ADDRESSEE) === 'true';
 
-  if (isChangedAdressee) {
+  if (isChangedAddressee) {
     const hasUnlockMail = mailList.some(m => m.id === unlockMail.id);
     if (!hasUnlockMail) {
       unlockMail.date = formatDate(new Date());
