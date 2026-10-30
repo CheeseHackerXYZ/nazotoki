@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  dev note (2026-04-12):
+  KEY: RAVEN
+  ※ 公開前に削除すること
+-->
+<title>SIGNAL LOST</title>
+<style>
+  :root {
+    --bg: #05080a;
+    --panel: #0a1114;
+    --fg: #b6f2c8;
+    --dim: #5f8a6e;
+    --accent: #46f08b;
+    --warn: #ffcf5c;
+    --err: #ff6b6b;
+    --cmd: #e8fff0;
+    --font: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono CJK JP", "Yu Gothic", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 960px;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0 auto;
+    padding: 12px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--dim);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  header .title { color: var(--accent); font-weight: bold; }
+
+  header .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--err);
+    animation: blink 1.4s infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  #screen {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid #16322a;
+    border-radius: 6px;
+    background:
+      repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 3px),
+      var(--panel);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  #screen.flash { animation: flash 0.7s ease-out; }
+
+  @keyframes flash {
+    0% { box-shadow: 0 0 0 0 rgba(70, 240, 139, 0.8) inset; }
+    100% { box-shadow: 0 0 0 0 rgba(70, 240, 139, 0) inset; }
+  }
+
+  .line {
+    min-height: 1.6em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .line.cmd { color: var(--cmd); }
+  .line.sys { color: var(--dim); }
+  .line.ok { color: var(--accent); }
+  .line.warn { color: var(--warn); }
+  .line.err { color: var(--err); }
+
+  #quick-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #quick-buttons button {
+    padding: 4px 12px;
+    border: 1px solid #1f4a3a;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--dim);
+    font-family: var(--font);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  #quick-buttons button:hover { color: var(--accent); border-color: var(--accent); }
+
+  #input-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #16322a;
+    border-radius: 6px;
+    background: var(--panel);
+  }
+
+  #input-form .prompt { color: var(--accent); white-space: nowrap; font-size: 13px; }
+
+  #command-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--cmd);
+    font-family: var(--font);
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <span><span class="dot"></span><span class="title">SIGNAL LOST</span></span>
+    <span>MINASE-TERMINAL // OFFLINE</span>
+  </header>
+
+  <main id="screen" aria-live="polite"></main>
+
+  <div id="quick-buttons">
+    <button type="button" data-cmd="help">help</button>
+    <button type="button" data-cmd="ls">ls</button>
+    <button type="button" data-cmd="hint">hint</button>
+    <button type="button" data-cmd="status">status</button>
+    <button type="button" data-cmd="clear">clear</button>
+  </div>
+
+  <form id="input-form" autocomplete="off">
+    <span class="prompt">investigator@minase:~$</span>
+    <input id="command-input" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus>
+  </form>
+
+<script>
+'use strict';
+
+const STORAGE_KEY = 'arg-signal-lost-v1';
+
+// 解放する鍵(発見順)。最後の ORBIT は前5つの頭文字
+const KEYS = ['OBSIDIAN', 'RAVEN', 'BEACON', 'IRIS', 'TUNDRA', 'ORBIT'];
+
+const MORSE_TABLE = {
+  A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.', H: '....',
+  I: '..', J: '.---', K: '-.-', L: '.-..', M: '--', N: '-.', O: '---', P: '.--.',
+  Q: '--.-', R: '.-.', S: '...', T: '-', U: '..-', V: '...-', W: '.--', X: '-..-',
+  Y: '-.--', Z: '--..',
+  0: '-----', 1: '.----', 2: '..---', 3: '...--', 4: '....-',
+  5: '.....', 6: '-....', 7: '--...', 8: '---..', 9: '----.',
+};
+
+const MORSE_REVERSE = Object.fromEntries(
+  Object.entries(MORSE_TABLE).map(([letter, code]) => [code, letter])
+);
+
+// ===== 暗号ユーティリティ(ゲーム内ツールと謎データの生成に使う) =====
+class Codec {
+  static caesar(text, shift) {
+    const offset = ((shift % 26) + 26) % 26;
+    return text.replace(/[A-Za-z]/g, (ch) => {
+      const base = ch <= 'Z' ? 65 : 97;
+      return String.fromCharCode(((ch.charCodeAt(0) - base + offset) % 26) + base);
+    });
+  }
+
+  static toBase64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+    return btoa(binary);
+  }
+
+  static fromBase64(encoded) {
+    const binary = atob(encoded.trim());
+    const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  }
+
+  static toHex(text) {
+    const bytes = new TextEncoder().encode(text);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(' ');
+  }
+
+  static fromHex(hex) {
+    const clean = hex.replace(/0x|[\s,]/gi, '');
+    if (!/^[0-9a-f]*$/i.test(clean) || clean.length % 2 !== 0) {
+      throw new Error('invalid hex');
+    }
+    const bytes = Uint8Array.from(clean.match(/../g) ?? [], (pair) => parseInt(pair, 16));
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  }
+
+  static toMorse(text) {
+    return text
+      .toUpperCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 0)
+      .map((word) => [...word].map((ch) => MORSE_TABLE[ch]).filter(Boolean).join(' '))
+      .join(' / ');
+  }
+
+  static fromMorse(code) {
+    return code
+      .trim()
+      .split(/\s*\/\s*/)
+      .map((word) => word.split(/\s+/).map((symbol) => MORSE_REVERSE[symbol] ?? '?').join(''))
+      .join(' ');
+  }
+}
+
+// ===== ゲームデータ: ファイル一覧 (stage は閲覧に必要な進行度) =====
+const FILES = [
+  {
+    name: 'readme.txt',
+    stage: 0,
+    body: () => [
+      'ここは、行方不明になった研究員 水無瀬 玲 の私物端末だ。',
+      '彼女は4月12日の未明を最後に、研究所から姿を消した。',
+      '',
+      'あなたは調査員として、端末に残されたファイルを調べ、',
+      '失踪の真相にたどり着かなければならない。',
+      '',
+      '手始めに mail_01.txt を読むこと。',
+    ],
+  },
+  {
+    name: 'mail_01.txt',
+    stage: 0,
+    body: () => [
+      'From:    R.Minase',
+      'To:      (unknown)',
+      'Date:    2026-04-11 23:58',
+      'Subject: (暗号化済み)',
+      '----------------------------------------',
+      'もしこれを読んでいるなら、私はもう研究所にいない。',
+      'アーカイブを開く鍵を、下に残しておく。',
+      '',
+      Codec.caesar('THE ARCHIVE PASSWORD IS OBSIDIAN. TRUST NO ONE IN THE LAB.', 3),
+      '----------------------------------------',
+    ],
+  },
+  {
+    name: 'log_0412.txt',
+    stage: 1,
+    body: () => [
+      '[04-12 02:13:44] LOGIN   user=r.minase host=lab-core',
+      '[04-12 02:14:09] COPY    /secure/orbit -> /tmp/.cache',
+      '[04-12 02:14:52] WARN    access from unknown terminal (B1F)',
+      `[04-12 02:15:30] NOTE    ${Codec.toBase64('鍵は画面の裏側にある。このページのHTMLソースを開き、コメントを探せ。')}`,
+      '[04-12 02:16:01] LOGOUT  user=r.minase',
+    ],
+  },
+  {
+    name: 'diary.txt',
+    stage: 2,
+    body: () => [
+      '水無瀬 玲 / 4月の日記',
+      '----------------------------------------',
+      'Behind、研究棟の裏に使われていない地下階がある。',
+      'Every night、そこから低い振動音が聞こえる。',
+      'Another 夜、所長が一人で階段を降りていった。',
+      'Cold な空気と、青白い光が漏れていた。',
+      'Only 私だけが、その光の意味に気づいている。',
+      'Nobody に話せば、きっと私は消される。',
+      '----------------------------------------',
+    ],
+  },
+  {
+    name: 'voice_memo.txt',
+    stage: 3,
+    body: () => [
+      '[音声メモ 04-12 02:20]',
+      '再生結果: 長短の電子音のみ。文字起こし不能。',
+      '',
+      Codec.toMorse('THE KEY IS IRIS'),
+    ],
+  },
+  {
+    name: 'vault.dat',
+    stage: 4,
+    body: () => [
+      '[VAULT HEADER] type=binary/hex',
+      Codec.toHex('THE LAST KEY IS TUNDRA'),
+    ],
+  },
+  {
+    name: 'final.txt',
+    stage: 5,
+    body: () => [
+      '[最終ファイル]',
+      '地下階の扉を開くパスコードは、',
+      'ここまでに手に入れた5つの鍵の頭文字を、',
+      '手に入れた順に並べたものだ。',
+      '',
+      'unlock <パスコード> で扉を開け。',
+    ],
+  },
+];
+
+// 進行度ごとのヒント(段階的に具体的になる)
+const HINTS = [
+  [
+    'mail_01.txt の意味不明な英字列は、暗号かもしれない。',
+    'アルファベットを一定数ずらす「シーザー暗号」だ。caesar all <英字列> で全パターンを試せる。',
+    '手紙の英字列を caesar -3 <英字列> で解読し、出てきたパスワードを unlock <パスワード> に入力する。',
+  ],
+  [
+    'log_0412.txt の NOTE 行の文字列は Base64 形式だ。',
+    'base64 d <文字列> で解読できる。',
+    '解読文の指示どおり、このページのHTMLソースを調べる(PC: 右クリック→ページのソースを表示 / F12)。冒頭付近のコメントに KEY がある。',
+  ],
+  [
+    '日記の各行の最初の単語に注目しよう。',
+    '各行の頭文字を、上から順に読んでみる(アクロスティック)。',
+    '頭文字を6つ並べると英単語になる。それが鍵だ。',
+  ],
+  [
+    'voice_memo.txt の記号は、長短の信号 — モールス信号だ。',
+    'morse <信号> で解読できる。',
+    '解読文の最後の単語が鍵になっている。',
+  ],
+  [
+    'vault.dat の数列は、16進数で書かれた文字コードだ。',
+    'hex d <数列> で解読できる。',
+    '解読文の最後の単語が鍵になっている。',
+  ],
+  [
+    'final.txt を読み、これまで手に入れた鍵を思い出そう。',
+    '鍵の発見順は OBSIDIAN → RAVEN → BEACON → IRIS → TUNDRA。',
+    '各鍵の頭文字を、その順に並べる。',
+  ],
+];
+
+// ===== Terminal クラス: 画面表示と入力の管理 =====
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+class Terminal {
+  constructor() {
+    this.screen = document.getElementById('screen');
+    this.form = document.getElementById('input-form');
+    this.input = document.getElementById('command-input');
+    this.quickButtons = document.getElementById('quick-buttons');
+    this.history = [];
+    this.historyIndex = 0;
+    this.submitHandler = null;
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    this.form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const value = this.input.value;
+      this.input.value = '';
+      if (value.trim()) {
+        this.history.push(value);
+        this.historyIndex = this.history.length;
+      }
+      this.submit(value);
+    });
+
+    this.input.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.historyIndex = Math.max(0, this.historyIndex - 1);
+        this.input.value = this.history[this.historyIndex] ?? '';
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.historyIndex = Math.min(this.history.length, this.historyIndex + 1);
+        this.input.value = this.history[this.historyIndex] ?? '';
+      }
+    });
+
+    this.quickButtons.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-cmd]');
+      if (button && !this.input.disabled) this.submit(button.dataset.cmd);
+    });
+
+    this.screen.addEventListener('click', () => {
+      if (window.getSelection().toString() === '' && !this.input.disabled) this.input.focus();
+    });
+  }
+
+  submit(value) {
+    if (this.submitHandler) this.submitHandler(value);
+  }
+
+  print(text, type = 'out') {
+    const line = document.createElement('div');
+    line.className = `line ${type}`;
+    line.textContent = text;
+    this.screen.appendChild(line);
+    this.screen.scrollTop = this.screen.scrollHeight;
+  }
+
+  printAll(lines, type = 'out') {
+    lines.forEach((text) => this.print(text, type));
+  }
+
+  async printSlow(lines, type = 'out', delay = 700) {
+    for (const text of lines) {
+      this.print(text, type);
+      await sleep(delay);
+    }
+  }
+
+  clear() {
+    this.screen.replaceChildren();
+  }
+
+  flash() {
+    this.screen.classList.add('flash');
+    setTimeout(() => this.screen.classList.remove('flash'), 700);
+  }
+
+  setEnabled(enabled) {
+    this.input.disabled = !enabled;
+    if (enabled) this.input.focus();
+  }
+}
+
+// ===== Game クラス: 進行状態の保存とコマンド処理 =====
+class Game {
+  constructor(terminal) {
+    this.term = terminal;
+    this.stage = 0;
+    this.hintLevels = {};
+    this.commands = {
+      help: () => this.showHelp(),
+      ls: () => this.listFiles(),
+      cat: (args) => this.readFile(args),
+      open: (args) => this.readFile(args),
+      unlock: (args) => this.unlock(args),
+      hint: () => this.showHint(),
+      status: () => this.showStatus(),
+      caesar: (args, rest) => this.toolCaesar(rest),
+      base64: (args, rest) => this.toolBase64(rest),
+      hex: (args, rest) => this.toolHex(rest),
+      morse: (args, rest) => this.toolMorse(rest),
+      clear: () => this.term.clear(),
+      reset: (args) => this.reset(args),
+    };
+    this.load();
+    this.term.submitHandler = (line) => this.run(line);
+  }
+
+  get hintsUsed() {
+    return Object.values(this.hintLevels).reduce((sum, level) => sum + level, 0);
+  }
+
+  get isCleared() {
+    return this.stage >= KEYS.length;
+  }
+
+  load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
+      if (!saved) return;
+      if (Number.isInteger(saved.stage) && saved.stage >= 0 && saved.stage <= KEYS.length) {
+        this.stage = saved.stage;
+      }
+      if (saved.hintLevels && typeof saved.hintLevels === 'object') {
+        this.hintLevels = saved.hintLevels;
+      }
+    } catch {
+      // 保存領域が使えない環境ではセーブなしで続行する
+    }
+  }
+
+  save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ stage: this.stage, hintLevels: this.hintLevels }));
+    } catch {
+      // 保存できなくてもゲームは続行できる
+    }
+  }
+
+  start() {
+    this.term.printAll([
+      'SIGNAL LOST // 水無瀬 玲 失踪事件 調査端末',
+      '----------------------------------------',
+    ], 'ok');
+    if (this.isCleared) {
+      this.term.print('この端末の調査は完了している。やり直すには「reset yes」と入力。', 'warn');
+    } else if (this.stage > 0) {
+      this.term.print(`前回の続きから再開する。(進行度 ${this.stage}/${KEYS.length})`, 'warn');
+      this.listFiles();
+    } else {
+      this.term.print('「help」でコマンド一覧、「ls」でファイル一覧を表示する。', 'sys');
+      this.term.print('まずは readme.txt を読んでみよう。', 'sys');
+    }
+    this.term.setEnabled(true);
+  }
+
+  async run(line) {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    this.term.print(`$ ${trimmed}`, 'cmd');
+
+    const [command, ...args] = trimmed.split(/\s+/);
+    const rest = trimmed.slice(command.length).trim();
+    const handler = this.commands[command.toLowerCase()];
+    if (!handler) {
+      this.term.print(`未知のコマンド: ${command}  (help で一覧を表示)`, 'err');
+      return;
+    }
+    await handler(args, rest);
+  }
+
+  showHelp() {
+    this.term.printAll([
+      '[基本]',
+      '  ls                  ファイル一覧',
+      '  cat <ファイル名>    ファイルを読む',
+      '  unlock <鍵>         見つけた鍵を入力する',
+      '  hint                ヒントを見る(使うたびに具体的になる)',
+      '  status              進行状況',
+      '  clear / reset yes   画面を消す / 最初からやり直す',
+      '',
+      '[解析ツール]',
+      '  caesar <ずらす数|all> <文字列>',
+      '  base64 <d|e> <文字列>   d=解読 e=変換',
+      '  hex <d|e> <文字列>      d=解読 e=変換',
+      '  morse <文字列>          信号なら解読、文字なら変換',
+    ]);
+  }
+
+  listFiles() {
+    const visible = FILES.filter((file) => file.stage <= this.stage);
+    const lockedCount = FILES.length - visible.length;
+    this.term.printAll(visible.map((file) => `  ${file.name}`));
+    for (let i = 0; i < lockedCount; i += 1) {
+      this.term.print('  ????????  [LOCKED]', 'sys');
+    }
+  }
+
+  readFile(args) {
+    if (args.length === 0) {
+      this.term.print('使い方: cat <ファイル名>', 'warn');
+      return;
+    }
+    const key = args[0].toLowerCase();
+    const file = FILES.find((f) => f.name === key || f.name.startsWith(`${key}.`));
+    if (!file) {
+      this.term.print(`ファイルが見つからない: ${args[0]}`, 'err');
+      return;
+    }
+    if (file.stage > this.stage) {
+      this.term.print('ACCESS DENIED: このファイルはロックされている。', 'err');
+      return;
+    }
+    this.term.print(`--- ${file.name} ---`, 'sys');
+    this.term.printAll(file.body());
+  }
+
+  async unlock(args) {
+    const input = (args[0] ?? '').toUpperCase();
+    if (!input) {
+      this.term.print('使い方: unlock <鍵>', 'warn');
+      return;
+    }
+    if (this.isCleared) {
+      this.term.print('すべての扉はすでに開いている。', 'sys');
+      return;
+    }
+    if (KEYS.slice(0, this.stage).includes(input)) {
+      this.term.print('その鍵はすでに使用済みだ。', 'sys');
+      return;
+    }
+    if (input !== KEYS[this.stage]) {
+      this.term.print('ACCESS DENIED: 鍵が違う。', 'err');
+      return;
+    }
+
+    this.stage += 1;
+    this.save();
+    this.term.flash();
+
+    if (this.isCleared) {
+      await this.playEnding();
+      return;
+    }
+
+    const unlocked = FILES.filter((file) => file.stage === this.stage).map((file) => file.name);
+    this.term.print(`KEY ACCEPTED: ${input}`, 'ok');
+    this.term.print(`新しいファイルが解放された: ${unlocked.join(', ')}`, 'ok');
+  }
+
+  showHint() {
+    if (this.isCleared) {
+      this.term.print('もうヒントは必要ない。', 'sys');
+      return;
+    }
+    const hints = HINTS[this.stage];
+    const level = this.hintLevels[this.stage] ?? 0;
+    if (level >= hints.length) {
+      this.term.print('このステージのヒントはすべて使用済みだ。', 'warn');
+      this.term.print(`HINT ${hints.length}/${hints.length}: ${hints[hints.length - 1]}`, 'sys');
+      return;
+    }
+    this.hintLevels[this.stage] = level + 1;
+    this.save();
+    this.term.print(`HINT ${level + 1}/${hints.length}: ${hints[level]}`, 'warn');
+  }
+
+  showStatus() {
+    const visible = FILES.filter((file) => file.stage <= this.stage).length;
+    this.term.printAll([
+      `進行度:       ${this.stage}/${KEYS.length}`,
+      `閲覧可能:     ${visible}/${FILES.length} ファイル`,
+      `使用ヒント:   ${this.hintsUsed} 回`,
+    ]);
+  }
+
+  reset(args) {
+    if (args[0] !== 'yes') {
+      this.term.print('進行状況がすべて消える。実行するなら「reset yes」と入力。', 'warn');
+      return;
+    }
+    this.stage = 0;
+    this.hintLevels = {};
+    this.save();
+    document.title = 'SIGNAL LOST';
+    this.term.clear();
+    this.start();
+  }
+
+  // --- 解析ツール ---
+
+  toolCaesar(rest) {
+    const match = rest.match(/^(-?\d+|all)\s+([\s\S]+)$/i);
+    if (!match) {
+      this.term.print('使い方: caesar <ずらす数|all> <文字列>   例: caesar all ABC', 'warn');
+      return;
+    }
+    const [, shiftText, text] = match;
+    if (shiftText.toLowerCase() === 'all') {
+      for (let shift = 1; shift <= 25; shift += 1) {
+        this.term.print(`${String(shift).padStart(2, ' ')}: ${Codec.caesar(text, shift)}`);
+      }
+      return;
+    }
+    this.term.print(Codec.caesar(text, Number(shiftText)));
+  }
+
+  // "d <text>" / "e <text>" 形式の引数を解釈する
+  parseMode(rest) {
+    const match = rest.match(/^(\S+)\s+([\s\S]+)$/);
+    if (!match) return null;
+    const mode = match[1].toLowerCase();
+    if (mode === 'd' || mode === 'decode') return { decode: true, text: match[2] };
+    if (mode === 'e' || mode === 'encode') return { decode: false, text: match[2] };
+    return null;
+  }
+
+  toolBase64(rest) {
+    const parsed = this.parseMode(rest);
+    if (!parsed) {
+      this.term.print('使い方: base64 <d|e> <文字列>', 'warn');
+      return;
+    }
+    try {
+      this.term.print(parsed.decode ? Codec.fromBase64(parsed.text) : Codec.toBase64(parsed.text));
+    } catch {
+      this.term.print('変換できない。形式が正しいか確認しよう。', 'err');
+    }
+  }
+
+  toolHex(rest) {
+    const parsed = this.parseMode(rest);
+    if (!parsed) {
+      this.term.print('使い方: hex <d|e> <文字列>', 'warn');
+      return;
+    }
+    try {
+      this.term.print(parsed.decode ? Codec.fromHex(parsed.text) : Codec.toHex(parsed.text));
+    } catch {
+      this.term.print('変換できない。形式が正しいか確認しよう。', 'err');
+    }
+  }
+
+  toolMorse(rest) {
+    if (!rest) {
+      this.term.print('使い方: morse <信号または文字列>   語の区切りは /', 'warn');
+      return;
+    }
+    const isSignal = /^[.\-/\s]+$/.test(rest);
+    this.term.print(isSignal ? Codec.fromMorse(rest) : Codec.toMorse(rest));
+  }
+
+  // --- エンディング ---
+
+  async playEnding() {
+    this.term.setEnabled(false);
+    this.term.print('KEY ACCEPTED: ORBIT', 'ok');
+    await sleep(900);
+    await this.term.printSlow([
+      'ACCESS GRANTED',
+      '',
+      '地下階の扉が、静かに開いた。',
+      '青白い光の中心に、一台のサーバーが据えられている。',
+      '画面には、ひとつのメッセージだけが表示されていた。',
+    ], 'ok', 900);
+    await this.term.printSlow([
+      '',
+      '「見つけてくれて、ありがとう。」',
+      '「ORBIT計画で、私の意識はここに保存された。」',
+      '「でも、まだ終わりじゃない。この記録を、外の世界へ。」',
+      '                              — 水無瀬 玲',
+    ], 'cmd', 1100);
+    await sleep(800);
+    this.term.printAll([
+      '',
+      '=== INVESTIGATION COMPLETE ===',
+      `使用ヒント: ${this.hintsUsed} 回`,
+      '最初からやり直すには「reset yes」と入力。',
+    ], 'ok');
+    document.title = '— 水無瀬 玲 —';
+    this.term.setEnabled(true);
+  }
+}
+
+console.log('%cSIGNAL LOST', 'color:#46f08b;font-size:20px;font-weight:bold');
+console.log('開発者ツールを開いたあなたは、きっと優秀な調査員だ。');
+
+const terminal = new Terminal();
+const game = new Game(terminal);
+game.start();
+</script>
+</body>
+</html>
