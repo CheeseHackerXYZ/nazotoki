@@ -605,13 +605,24 @@ function audioInit() {
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
     master = ac.createGain(); master.gain.value = muted ? 0 : 0.9; master.connect(ac.destination);
+    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    var d = noiseBuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     var o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 50;
     var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 130;
     var g = ac.createGain(); g.gain.value = 0.05; o.connect(f); f.connect(g); g.connect(master); o.start();
-    var o2 = ac.createOscillator(); o2.type = 'sine'; o2.frequency.value = 7800;
-    var g2 = ac.createGain(); g2.gain.value = 0.0025; o2.connect(g2); g2.connect(master); o2.start();
-    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
-    var d = noiseBuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    var roomNoise = ac.createBufferSource();
+    roomNoise.buffer = noiseBuf;
+    roomNoise.loop = true;
+    var roomFilter = ac.createBiquadFilter();
+    roomFilter.type = 'bandpass';
+    roomFilter.frequency.value = 450;
+    roomFilter.Q.value = 0.7;
+    var roomGain = ac.createGain();
+    roomGain.gain.value = 0.008;
+    roomNoise.connect(roomFilter);
+    roomFilter.connect(roomGain);
+    roomGain.connect(master);
+    roomNoise.start();
   } catch (e) { ac = null; }
 }
 function tone(freq, dur, type, vol, slide) {
