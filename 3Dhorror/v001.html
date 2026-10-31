@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horror Game FPS (Planks & Dark Atmosphere)</title>
+<style>
+  body { margin:0; overflow:hidden; background-color: #000; }
+  canvas { display:block; }
+  #joystick {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.15);
+    touch-action: none;
+  }
+  #jumpBtn {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 20px;
+    text-align: center;
+    line-height: 80px;
+    user-select: none;
+    touch-action: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="joystick"></div>
+<div id="jumpBtn">Jump</div>
+
+<script src="https://unpkg.com/three@0.137.4/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.137.4/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
+
+<script>
+const scene = new THREE.Scene();
+// ホラー風に暗闇（黒）へ変更
+scene.background = new THREE.Color(0x000000);
+scene.fog = new THREE.FogExp2(0x000000, 0.015); // 奥が見えなくなる霧
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 500);
+camera.position.set(0, 50, 25);
+
+const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('canvas')});
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableZoom = false;
+controls.enablePan = false;
+controls.target.set(0, 50, 0);
+controls.update();
+
+// ホラー風のライティング（薄暗い環境光 ＋ 懐中電灯のようなライト）
+const ambientLight = new THREE.AmbientLight(0x222222);
+scene.add(ambientLight);
+
+// プレイヤー（カメラ）追従用の懐中電灯ライト
+const flashlight = new THREE.SpotLight(0xffffff, 1.5, 150, Math.PI / 6, 0.5);
+camera.add(flashlight);
+flashlight.position.set(0, 0, 1);
+flashlight.target = controls.target;
+scene.add(camera);
+
+// 簡易的な「木板」テクスチャをコード上で動的に生成
+function createPlankTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#4a2f13';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // 板の溝を描画
+  ctx.strokeStyle = '#261607';
+  ctx.lineWidth = 4;
+  for(let i = 0; i <= 256; i += 32) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(256, i);
+    ctx.stroke();
+  }
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  return texture;
+}
+
+const plankTexture = createPlankTexture();
+const plankMaterial = new THREE.MeshStandardMaterial({
+  map: plankTexture,
+  roughness: 0.8,
+  side: THREE.DoubleSide // 裏表両面を描画
+});
+
+const plankSize = 25;
+
+// 板（平面）を生成する関数
+function createPlank(x, y, z, rotationX = 0, rotationY = 0) {
+  const geometry = new THREE.PlaneGeometry(plankSize, plankSize);
+  const mesh = new THREE.Mesh(geometry, plankMaterial);
+  mesh.position.set(x, y, z);
+  mesh.rotation.x = rotationX;
+  mesh.rotation.y = rotationY;
+  scene.add(mesh);
+  return mesh;
+}
+
+// 地面（床用の板を敷き詰める）
+for(let i = -5; i <= 5; i++) {
+  for(let j = -5; j <= 5; j++) {
+    // X軸回転させて水平な「床板」にする
+    createPlank(i * plankSize, 0, j * plankSize, -Math.PI / 2, 0);
+  }
+}
+
+// 試しに周囲に壁（垂直な板）を配置する例
+for(let i = -5; i <= 5; i++) {
+  createPlank(i * plankSize, plankSize / 2, -5.5 * plankSize, 0, 0); // 奥の壁
+}
+
+// ジョイスティック（マルチタッチ対応）
+const joystick = nipplejs.create({
+  zone: document.getElementById('joystick'),
+  mode: 'static',
+  position: {left: '50%', top: '50%'},
+  size: 200,
+  color: 'white',
+  multitouch: true
+});
+
+let moveForward = 0, moveRight = 0;
+
+joystick.on('move', (evt, data) => {
+  const rad = data.angle.radian;
+  moveForward = Math.sin(rad) * data.distance * 0.02;
+  moveRight   = Math.cos(rad) * data.distance * 0.02;
+});
+joystick.on('end', () => { moveForward = 0; moveRight = 0; });
+
+// ジャンプ・重力処理
+let velocityY = 0;
+const gravity = -0.8, jumpSpeed = 3.1;
+let onGround = true;
+
+const jumpBtn = document.getElementById('jumpBtn');
+const jumpHandler = () => { if(onGround){ velocityY = jumpSpeed; onGround = false; } };
+
+jumpBtn.addEventListener('touchstart', jumpHandler);
+jumpBtn.addEventListener('pointerdown', jumpHandler);
+
+window.addEventListener('keydown', (e) => {
+  if(e.code === 'Space' && onGround){ velocityY = jumpSpeed; onGround = false; }
+});
+
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+const groundHeight = 50;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  camera.getWorldDirection(forward);
+  forward.y = 0; 
+  forward.normalize();
+  right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+  // 前後左右移動
+  camera.position.addScaledVector(forward, moveForward);
+  controls.target.addScaledVector(forward, moveForward);
+  camera.position.addScaledVector(right, moveRight);
+  controls.target.addScaledVector(right, moveRight);
+
+  // ジャンプ / 重力
+  const offsetY = camera.position.y - controls.target.y;
+  velocityY += gravity * 0.1;
+  camera.position.y += velocityY;
+  controls.target.y += velocityY;
+
+  // 着地判定（固定値）
+  if(controls.target.y <= groundHeight){
+    controls.target.y = groundHeight;
+    camera.position.y = groundHeight + offsetY;
+    velocityY = 0;
+    onGround = true;
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
