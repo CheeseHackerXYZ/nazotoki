@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>3D ホラーダンジョンマップジェネレーター & エクスプローラー</title>
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- NippleJS (Virtual Joystick) CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
+  body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+    background: #050508; color: #ddd; font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  #canvas-container {
+    width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;
+  }
+
+  /* UI overlay */
+  .ui-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between;
+    padding: 12px;
+  }
+
+  .ui-panel {
+    background: rgba(15, 15, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px; padding: 10px 14px;
+    pointer-events: auto; backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .header-controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-width: 600px;
+  }
+
+  .header-controls label { font-size: 13px; color: #aaa; }
+  
+  input[type="text"] {
+    background: #0a0a0f; color: #eee; border: 1px solid #3a3a48; border-radius: 4px;
+    padding: 6px 10px; width: 120px; font-size: 13px;
+  }
+
+  button {
+    background: #2a3854; color: #fff; border: 1px solid #485c8a; border-radius: 4px;
+    padding: 6px 12px; font-size: 13px; cursor: pointer; transition: background 0.2s;
+  }
+  button:hover { background: #3b4e78; }
+
+  .toggle-btn {
+    background: #222; border-color: #555;
+  }
+  .toggle-btn.active {
+    background: #7a2222; border-color: #ff4444; color: #fff;
+  }
+
+  /* Minimap */
+  .minimap-container {
+    position: absolute; top: 12px; right: 12px; pointer-events: auto;
+    border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  #minimap { display: block; width: 180px; height: 180px; image-rendering: pixelated; }
+
+  /* Joystick Zone */
+  #joystick-zone {
+    position: absolute; bottom: 20px; left: 20px; width: 140px; height: 140px;
+    pointer-events: auto; z-index: 20;
+  }
+
+  /* Touch Look Area */
+  #touch-look-zone {
+    position: absolute; top: 0; right: 0; width: 60%; height: 100%;
+    pointer-events: auto; z-index: 5;
+  }
+
+  /* Crosshair */
+  .crosshair {
+    position: absolute; top: 50%; left: 50%;
+    width: 6px; height: 6px; background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%; transform: translate(-50%, -50%);
+    pointer-events: none; z-index: 9;
+  }
+
+  /* Instructions overlay */
+  .instructions {
+    font-size: 11px; color: #888; margin-top: 4px; line-height: 1.3;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="ui-layer">
+  <div class="ui-panel header-controls">
+    <label for="seed">Seed:</label>
+    <input id="seed" type="text" value="12345" autocomplete="off">
+    <button id="btnGen">再生成</button>
+    <button id="btnRand">ランダム</button>
+    <button id="btnTorch" class="toggle-btn active">ライト ON/OFF</button>
+    <button id="btnMode">視点: 1人称</button>
+    <div class="instructions">
+      <b>PC:</b> WASD / 矢印キーで移動, マウスドラッグでカメラ回転<br>
+      <b>スマホ:</b> 左下バーチャルパッドで移動, 右側スワイプでカメラ回転
+    </div>
+  </div>
+
+  <div class="minimap-container">
+    <canvas id="minimap" width="160" height="160"></canvas>
+  </div>
+</div>
+
+<div class="crosshair"></div>
+<div id="joystick-zone"></div>
+<div id="touch-look-zone"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // --- Constants & Dungeon Generation Config ---
+  const SUB_SIZE = 16;
+  const GRID_COUNT = 5;
+  const TOTAL_SIZE = SUB_SIZE * GRID_COUNT; // 80x80 tiles
+  const TILE_WALL = 0, TILE_ROOM = 1, TILE_CORRIDOR = 2, TILE_ENTRANCE = 3;
+  const TILE_SIZE = 2.5; // 3D units per grid tile
+  const WALL_HEIGHT = 3.2;
+
+  const ENTRANCES = [
+    { side: 'N', tiles: [[7, 0], [8, 0], [7, 1], [8, 1]],     terminal: [7, 2]  },
+    { side: 'S', tiles: [[7, 14], [8, 14], [7, 15], [8, 15]], terminal: [7, 13] },
+    { side: 'W', tiles: [[0, 7], [1, 7], [0, 8], [1, 8]],     terminal: [2, 7]  },
+    { side: 'E', tiles: [[14, 7], [15, 7], [14, 8], [15, 8]], terminal: [13, 7] },
+  ];
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  // --- PRNG Utility ---
+  function mulberry32(a) {
+    return function() {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function hashString(s) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return h >>> 0;
+  }
+
+  function parseSeed(v) {
+    const s = String(v).trim();
+    if (s === '') return 0;
+    if (/^-?\d+$/.test(s)) return Number(s) >>> 0;
+    return hashString(s);
+  }
+
+  function makeRng(seed) {
+    const f = mulberry32(seed);
+    return {
+      int: (a, b) => a + Math.floor(f() * (b - a + 1)),
+      chance: (p) => f() < p,
+      shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(f() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+    };
+  }
+
+  // --- Sub-grid Dungeon Generation Algorithm ---
+  const newGrid = () => Array.from({ length: SUB_SIZE }, () => new Array(SUB_SIZE).fill(TILE_WALL));
+  const inRange = (x, y) => x >= 1 && x <= 14 && y >= 1 && y <= 14;
+  const inBounds = (x, y) => x >= 0 && x < SUB_SIZE && y >= 0 && y < SUB_SIZE;
+
+  function canPlaceRoom(rooms, x, y, w, h) {
+    if (x < 2 || y < 2 || x + w - 1 > 13 || y + h - 1 > 13) return false;
+    for (const r of rooms) {
+      if (x - 1 <= r.x + r.w - 1 && x + w >= r.x && y - 1 <= r.y + r.h - 1 && y + h >= r.y) return false;
+    }
+    for (const e of ENTRANCES) {
+      for (const [tx, ty] of e.tiles) {
+        if (tx >= x - 1 && tx <= x + w && ty >= y - 1 && ty <= y + h) return false;
+      }
+    }
+    return true;
+  }
+
+  function attemptSubMap(rng) {
+    const grid = newGrid();
+    for (const e of ENTRANCES) {
+      for (const [x, y] of e.tiles) grid[y][x] = TILE_ENTRANCE;
+      grid[e.terminal[1]][e.terminal[0]] = TILE_CORRIDOR;
+    }
+
+    const req3 = rng.int(1, 3), req4 = rng.int(1, 2);
+    const sizes = [];
+    for (let i = 0; i < req4; i++) sizes.push(4);
+    for (let i = 0; i < req3; i++) sizes.push(3);
+    const rooms = [];
+
+    for (const s of sizes) {
+      for (let t = 0; t < 60; t++) {
+        const x = rng.int(2, 14 - s), y = rng.int(2, 14 - s);
+        if (canPlaceRoom(rooms, x, y, s, s)) {
+          rooms.push({ x, y, w: s, h: s });
+          break;
+        }
+      }
+    }
+
+    for (const r of rooms) {
+      for (let y = r.y; y < r.y + r.h; y++) {
+        for (let x = r.x; x < r.x + r.w; x++) {
+          grid[y][x] = TILE_ROOM;
+        }
+      }
+    }
+
+    // Carve connecting corridors between rooms & entrances
+    const corridorPoints = [];
+    for (const e of ENTRANCES) corridorPoints.push(e.terminal);
+    for (const r of rooms) {
+      corridorPoints.push([r.x + Math.floor(r.w/2), r.y + Math.floor(r.h/2)]);
+    }
+
+    for (let i = 0; i < corridorPoints.length - 1; i++) {
+      let [cx, cy] = corridorPoints[i];
+      const [tx, ty] = corridorPoints[i + 1];
+
+      while (cx !== tx) {
+        if (inRange(cx, cy) && grid[cy][cx] === TILE_WALL) grid[cy][cx] = TILE_CORRIDOR;
+        cx += Math.sign(tx - cx);
+      }
+      while (cy !== ty) {
+        if (inRange(cx, cy) && grid[cy][cx] === TILE_WALL) grid[cy][cx] = TILE_CORRIDOR;
+        cy += Math.sign(ty - cy);
+      }
+    }
+
+    return { grid, rooms };
+  }
+
+  function generate5x5(masterSeed) {
+    const fullGrid = Array.from({ length: TOTAL_SIZE }, () => new Array(TOTAL_SIZE).fill(TILE_WALL));
+
+    for (let gx = 0; gx < GRID_COUNT; gx++) {
+      for (let gy = 0; gy < GRID_COUNT; gy++) {
+        const subSeed = (masterSeed + gy * GRID_COUNT + gx) >>> 0;
+        const sub = attemptSubMap(makeRng(subSeed));
+        const offsetX = gx * SUB_SIZE;
+        const offsetY = gy * SUB_SIZE;
+
+        for (let y = 0; y < SUB_SIZE; y++) {
+          for (let x = 0; x < SUB_SIZE; x++) {
+            let tile = sub.grid[y][x];
+
+            // Seal outer borders of the 5x5 layout
+            if (tile === TILE_ENTRANCE) {
+              const isOuterNorth = (gy === 0 && y < 2);
+              const isOuterSouth = (gy === GRID_COUNT - 1 && y >= 14);
+              const isOuterWest  = (gx === 0 && x < 2);
+              const isOuterEast   = (gx === GRID_COUNT - 1 && x >= 14);
+
+              if (isOuterNorth || isOuterSouth || isOuterWest || isOuterEast) {
+                tile = TILE_WALL;
+              }
+            }
+            fullGrid[offsetY + y][offsetX + x] = tile;
+          }
+        }
+      }
+    }
+    return fullGrid;
+  }
+
+  // --- Three.js & Application State ---
+  let scene, camera, renderer;
+  let flashlight, ambientLight;
+  let dungeonGrid = [];
+  let player = {
+    x: 0, z: 0,
+    rotY: 0, rotX: 0,
+    speed: 6.5,
+    radius: 0.6,
+    isFirstPerson: true
+  };
+  let keys = {};
+  let moveVector = { x: 0, y: 0 }; // Controlled by nipple.js or keyboard
+
+  // Procedural Textures
+  function createWallTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1c1c22'; ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = '#121216';
+    for (let i = 0; i < 400; i++) {
+      const rx = Math.random() * 256, ry = Math.random() * 256;
+      ctx.fillRect(rx, ry, Math.random() * 8, Math.random() * 8);
+    }
+    // Subtle cracks/lines
+    ctx.strokeStyle = '#09090c'; ctx.lineWidth = 2;
+    for(let i=0; i<8; i++){
+      ctx.beginPath();
+      ctx.moveTo(Math.random()*256, Math.random()*256);
+      ctx.lineTo(Math.random()*256, Math.random()*256);
+      ctx.stroke();
+    }
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  function createFloorTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#26262a'; ctx.fillRect(0, 0, 256, 256);
+    ctx.strokeStyle = '#141416'; ctx.lineWidth = 4;
+    for (let i = 0; i <= 256; i += 64) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
+    }
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  let wallMaterial, floorMaterial, ceilingMaterial;
+
+  function initGraphics() {
+    const container = document.getElementById('canvas-container');
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030306, 0.08); // Dark horror fog
+
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Textures
+    const wallTex = createWallTexture();
+    wallTex.wrapS = THREE.RepeatWrapping; wallTex.wrapT = THREE.RepeatWrapping;
+    const floorTex = createFloorTexture();
+    floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping;
+    floorTex.repeat.set(TOTAL_SIZE, TOTAL_SIZE);
+
+    wallMaterial = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.85, metalness: 0.1 });
+    floorMaterial = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.7 });
+    ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x111116, roughness: 0.9 });
+
+    // Lights
+    ambientLight = new THREE.AmbientLight(0x0a0a12, 0.4);
+    scene.add(ambientLight);
+
+    // Player Flashlight
+    flashlight = new THREE.SpotLight(0xffeedd, 3.5, 22, Math.PI / 6, 0.4, 1);
+    flashlight.castShadow = true;
+    flashlight.shadow.mapSize.width = 1024;
+    flashlight.shadow.mapSize.height = 1024;
+    scene.add(flashlight);
+    scene.add(flashlight.target);
+
+    window.addEventListener('resize', onWindowResize);
+  }
+
+  // --- Build Dungeon Mesh ---
+  let dungeonGroup = null;
+
+  function build3DDungeon(grid) {
+    if (dungeonGroup) scene.remove(dungeonGroup);
+    dungeonGroup = new THREE.Group();
+
+    const wallGeo = new THREE.BoxGeometry(TILE_SIZE, WALL_HEIGHT, TILE_SIZE);
+    const wallInstanced = new THREE.InstancedMesh(wallGeo, wallMaterial, TOTAL_SIZE * TOTAL_SIZE);
+    let wallIdx = 0;
+    const dummy = new THREE.Object3D();
+
+    for (let y = 0; y < TOTAL_SIZE; y++) {
+      for (let x = 0; x < TOTAL_SIZE; x++) {
+        const posX = (x - TOTAL_SIZE / 2) * TILE_SIZE;
+        const posZ = (y - TOTAL_SIZE / 2) * TILE_SIZE;
+
+        if (grid[y][x] === TILE_WALL) {
+          dummy.position.set(posX, WALL_HEIGHT / 2, posZ);
+          dummy.updateMatrix();
+          wallInstanced.setMatrixAt(wallIdx++, dummy.matrix);
+        }
+      }
+    }
+    wallInstanced.count = wallIdx;
+    wallInstanced.castShadow = true;
+    wallInstanced.receiveShadow = true;
+    dungeonGroup.add(wallInstanced);
+
+    // Continuous Floor
+    const totalWorldSize = TOTAL_SIZE * TILE_SIZE;
+    const floorGeo = new THREE.PlaneGeometry(totalWorldSize, totalWorldSize);
+    const floorMesh = new THREE.Mesh(floorGeo, floorMaterial);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.receiveShadow = true;
+    dungeonGroup.add(floorMesh);
+
+    // Ceiling
+    const ceilMesh = new THREE.Mesh(floorGeo, ceilingMaterial);
+    ceilMesh.position.y = WALL_HEIGHT;
+    ceilMesh.rotation.x = Math.PI / 2;
+    dungeonGroup.add(ceilMesh);
+
+    scene.add(dungeonGroup);
+  }
+
+  // --- Player Spawn & Collision ---
+  function spawnPlayer(grid) {
+    // Find first walkable tile near center
+    const startCenter = Math.floor(TOTAL_SIZE / 2);
+    let foundX = startCenter, foundY = startCenter;
+
+    let searching = true;
+    for (let r = 0; r < 20 && searching; r++) {
+      for (let dy = -r; dy <= r && searching; dy++) {
+        for (let dx = -r; dx <= r && searching; dx++) {
+          const checkX = startCenter + dx;
+          const checkY = startCenter + dy;
+          if (inBounds(checkX, checkY) && grid[checkY][checkX] !== TILE_WALL) {
+            foundX = checkX; foundY = checkY;
+            searching = false;
+          }
+        }
+      }
+    }
+
+    player.x = (foundX - TOTAL_SIZE / 2) * TILE_SIZE;
+    player.z = (foundY - TOTAL_SIZE / 2) * TILE_SIZE;
+    player.rotY = 0;
+    player.rotX = 0;
+  }
+
+  function checkCollision(nx, nz) {
+    const gridX = Math.floor((nx / TILE_SIZE) + TOTAL_SIZE / 2 + 0.5);
+    const gridY = Math.floor((nz / TILE_SIZE) + TOTAL_SIZE / 2 + 0.5);
+
+    // Buffer check surrounding grid cells
+    for (let cy = gridY - 1; cy <= gridY + 1; cy++) {
+      for (let cx = gridX - 1; cx <= gridX + 1; cx++) {
+        if (!inBounds(cx, cy) || dungeonGrid[cy][cx] === TILE_WALL) {
+          const wallMinX = (cx - TOTAL_SIZE / 2) * TILE_SIZE - TILE_SIZE / 2;
+          const wallMaxX = wallMinX + TILE_SIZE;
+          const wallMinZ = (cy - TOTAL_SIZE / 2) * TILE_SIZE - TILE_SIZE / 2;
+          const wallMaxZ = wallMinZ + TILE_SIZE;
+
+          // Closest point on AABB wall to player circle
+          const closestX = Math.max(wallMinX, Math.min(nx, wallMaxX));
+          const closestZ = Math.max(wallMinZ, Math.min(nz, wallMaxZ));
+
+          const distPointX = nx - closestX;
+          const distPointZ = nz - closestZ;
+          const distanceSquared = distPointX * distPointX + distPointZ * distPointZ;
+
+          if (distanceSquared < player.radius * player.radius) {
+            return true; // Collision detected
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // --- Input Setup ---
+  function initControls() {
+    // Keyboard
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    // Touch look controls
+    const lookZone = document.getElementById('touch-look-zone');
+    let lastTouchX = 0, lastTouchY = 0;
+    let isTouchingLook = false;
+
+    lookZone.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        isTouchingLook = true;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    lookZone.addEventListener('touchmove', (e) => {
+      if (!isTouchingLook) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - lastTouchX;
+      const dy = touch.clientY - lastTouchY;
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+
+      player.rotY -= dx * 0.005;
+      player.rotX = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, player.rotX - dy * 0.005));
+    }, { passive: true });
+
+    lookZone.addEventListener('touchend', () => { isTouchingLook = false; });
+
+    // Mouse drag camera controls
+    let isMouseDown = false, mouseLastX = 0, mouseLastY = 0;
+    document.addEventListener('mousedown', (e) => {
+      if (e.button === 0 && e.target.tagName === 'CANVAS') {
+        isMouseDown = true;
+        mouseLastX = e.clientX;
+        mouseLastY = e.clientY;
+      }
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      const dx = e.clientX - mouseLastX;
+      const dy = e.clientY - mouseLastY;
+      mouseLastX = e.clientX;
+      mouseLastY = e.clientY;
+
+      player.rotY -= dx * 0.004;
+      player.rotX = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, player.rotX - dy * 0.004));
+    });
+    document.addEventListener('mouseup', () => { isMouseDown = false; });
+
+    // Nipple.js (Virtual Joystick) Initialization
+    const manager = nipplejs.create({
+      zone: document.getElementById('joystick-zone'),
+      mode: 'static',
+      position: { left: '70px', bottom: '70px' },
+      color: 'white',
+      size: 110
+    });
+
+    manager.on('move', (evt, data) => {
+      if (data && data.vector) {
+        moveVector.x = data.vector.x;
+        moveVector.y = data.vector.y;
+      }
+    });
+
+    manager.on('end', () => {
+      moveVector.x = 0;
+      moveVector.y = 0;
+    });
+  }
+
+  // --- Minimap Renderer ---
+  const minimapCanvas = document.getElementById('minimap');
+  const minimapCtx = minimapCanvas.getContext('2d');
+
+  function renderMinimap() {
+    const size = minimapCanvas.width;
+    const tileSize = size / TOTAL_SIZE;
+    minimapCtx.fillStyle = '#000';
+    minimapCtx.fillRect(0, 0, size, size);
+
+    for (let y = 0; y < TOTAL_SIZE; y++) {
+      for (let x = 0; x < TOTAL_SIZE; x++) {
+        const t = dungeonGrid[y][x];
+        if (t === TILE_ROOM) minimapCtx.fillStyle = '#555566';
+        else if (t === TILE_CORRIDOR || t === TILE_ENTRANCE) minimapCtx.fillStyle = '#888899';
+        else continue;
+
+        minimapCtx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      }
+    }
+
+    // Player icon
+    const px = (player.x / TILE_SIZE + TOTAL_SIZE / 2) * tileSize;
+    const py = (player.z / TILE_SIZE + TOTAL_SIZE / 2) * tileSize;
+
+    minimapCtx.fillStyle = '#ff3333';
+    minimapCtx.beginPath();
+    minimapCtx.arc(px, py, 3, 0, Math.PI * 2);
+    minimapCtx.fill();
+
+    // Direction line
+    minimapCtx.strokeStyle = '#ff8888';
+    minimapCtx.lineWidth = 1.5;
+    minimapCtx.beginPath();
+    minimapCtx.moveTo(px, py);
+    minimapCtx.lineTo(px - Math.sin(player.rotY) * 10, py - Math.cos(player.rotY) * 10);
+    minimapCtx.stroke();
+  }
+
+  // --- Update Loop ---
+  let clock = new THREE.Clock();
+
+  function update() {
+    const delta = Math.min(clock.getDelta(), 0.1);
+
+    // Combined Keyboard + Joystick input vector
+    let inputX = moveVector.x;
+    let inputY = moveVector.y;
+
+    if (keys['KeyW'] || keys['ArrowUp']) inputY = 1;
+    if (keys['KeyS'] || keys['ArrowDown']) inputY = -1;
+    if (keys['KeyA'] || keys['ArrowLeft']) inputX = -1;
+    if (keys['KeyD'] || keys['ArrowRight']) inputX = 1;
+
+    // Movement relative to camera angle
+    if (Math.abs(inputX) > 0.05 || Math.abs(inputY) > 0.05) {
+      const moveAngle = Math.atan2(inputX, inputY) + player.rotY;
+      const speed = player.speed * delta;
+      const dx = -Math.sin(moveAngle) * speed;
+      const dz = -Math.cos(moveAngle) * speed;
+
+      // Axis-independent movement for smooth wall sliding
+      if (!checkCollision(player.x + dx, player.z)) player.x += dx;
+      if (!checkCollision(player.x, player.z + dz)) player.z += dz;
+    }
+
+    // Update Camera & Flashlight positions
+    const headHeight = 1.6;
+    if (player.isFirstPerson) {
+      camera.position.set(player.x, headHeight, player.z);
+    } else {
+      // 3rd Person View
+      const camDist = 3.5;
+      camera.position.set(
+        player.x + Math.sin(player.rotY) * camDist,
+        headHeight + 1.2,
+        player.z + Math.cos(player.rotY) * camDist
+      );
+    }
+
+    // Orient camera rotation
+    const euler = new THREE.Euler(player.rotX, player.rotY, 0, 'YXZ');
+    camera.quaternion.setFromEuler(euler);
+
+    // Attach flashlight to camera direction
+    flashlight.position.copy(camera.position);
+    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    flashlight.target.position.copy(camera.position).add(dir.multiplyScalar(5));
+
+    renderMinimap();
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    update();
+    renderer.render(scene, camera);
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // --- Generation Runner ---
+  function regenerate() {
+    const seedVal = document.getElementById('seed').value;
+    const masterSeed = parseSeed(seedVal);
+    dungeonGrid = generate5x5(masterSeed);
+    build3DDungeon(dungeonGrid);
+    spawnPlayer(dungeonGrid);
+  }
+
+  // --- Initialize Application ---
+  window.onload = function() {
+    initGraphics();
+    initControls();
+    regenerate();
+
+    // UI Listeners
+    document.getElementById('btnGen').addEventListener('click', regenerate);
+    document.getElementById('btnRand').addEventListener('click', () => {
+      document.getElementById('seed').value = Math.floor(Math.random() * 4294967296);
+      regenerate();
+    });
+    document.getElementById('seed').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') regenerate();
+    });
+
+    const btnTorch = document.getElementById('btnTorch');
+    btnTorch.addEventListener('click', () => {
+      flashlight.visible = !flashlight.visible;
+      btnTorch.classList.toggle('active', flashlight.visible);
+    });
+
+    const btnMode = document.getElementById('btnMode');
+    btnMode.addEventListener('click', () => {
+      player.isFirstPerson = !player.isFirstPerson;
+      btnMode.textContent = player.isFirstPerson ? '視点: 1人称' : '視点: 3人称';
+    });
+
+    // Start animation main loop
+    animate();
+  };
+
+})();
+</script>
+</body>
+</html>
