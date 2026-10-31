@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>第七棟 夜間警備</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 一画面の監視卓。大きなモニターを中心に、カメラ切替と通報ボタンを直下、ログを右に置く。夜間の監視室という単一の暗い世界観で通す。 */
+:root{
+  color-scheme: dark;
+  --bg:#060807;
+  --panel:#0c110e;
+  --line:#1e2b24;
+  --fg:#b9cfbf;
+  --dim:#6c8174;
+  --amber:#e2ab3c;
+  --red:#d9442f;
+  --ok:#74d196;
+  --font-display:'DotGothic16','Hiragino Kaku Gothic ProN','Yu Gothic',monospace;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-display);
+  font-size:15px;
+  line-height:1.65;
+  margin:0;
+  padding-block:14px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+button{font:inherit;color:inherit}
+.app{max-width:1080px;margin:0 auto;display:grid;gap:12px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 18px}
+.bar h1{font-size:15px;font-weight:400;letter-spacing:.14em;margin:0;color:var(--dim);text-wrap:balance}
+.clock{font-family:var(--font-mono);font-size:30px;line-height:1.1;color:var(--amber);font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.meters{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:13px;color:var(--dim)}
+.meter{display:flex;align-items:center;gap:8px}
+.pips{display:flex;gap:4px}
+.pip{width:12px;height:12px;border:1px solid var(--dim)}
+.pip.on{background:var(--red);border-color:var(--red)}
+.mute{background:none;border:1px solid var(--line);padding:2px 10px;cursor:pointer;color:var(--dim)}
+.mute:hover{border-color:var(--dim)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:12px;align-items:start}
+@media (max-width:840px){.stage{grid-template-columns:minmax(0,1fr)}}
+.left{display:grid;gap:10px;min-width:0}
+.monitor{position:relative;border:1px solid var(--line);background:#000}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;max-width:100%}
+.toast{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:14px;pointer-events:none;opacity:0;transition:opacity .15s}
+.toast span{display:inline-block;background:rgba(0,0,0,.78);padding:2px 12px;border:1px solid var(--line)}
+.toast.show{opacity:1}
+.toast.bad span{color:var(--red);border-color:var(--red)}
+.toast.good span{color:var(--ok);border-color:var(--ok)}
+
+.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cam{background:var(--panel);border:1px solid var(--line);padding:8px 6px;cursor:pointer;text-align:center;min-width:0;line-height:1.4}
+.cam .n{display:block;font-family:var(--font-mono);font-size:12px;color:var(--dim)}
+.cam:hover{border-color:var(--dim)}
+.cam.on{border-color:var(--amber);color:var(--amber)}
+.cam.on .n{color:var(--amber)}
+.report{grid-column:1/-1;background:var(--panel);border:1px solid var(--red);color:var(--red);padding:12px;cursor:pointer;font-size:18px;letter-spacing:.2em}
+.report:hover:not(:disabled){background:var(--red);color:#120403}
+.report:disabled{border-color:var(--line);color:var(--dim);cursor:not-allowed}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+.log{border:1px solid var(--line);background:var(--panel);padding:10px 12px;min-width:0}
+.log h2{margin:0 0 6px;font-size:12px;font-weight:400;letter-spacing:.18em;color:var(--dim)}
+.log ol{list-style:none;margin:0;padding:0;max-height:340px;overflow-y:auto;font-size:13px;line-height:1.55}
+.log li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;padding:3px 0;border-top:1px solid var(--line)}
+.log li:first-child{border-top:0}
+.log time{font-family:var(--font-mono);color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.log li.ok{color:var(--ok)}
+.log li.bad{color:var(--red)}
+.log li.sys{color:var(--dim)}
+.log li.ann{color:var(--amber)}
+@media (max-width:840px){.log ol{max-height:200px}}
+
+.overlay{position:fixed;inset:0;z-index:20;background:rgba(2,4,3,.93);display:flex;align-items:center;justify-content:center;
+  padding-block:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-y:auto}
+.overlay[hidden]{display:none}
+.card{max-width:520px;width:100%;border:1px solid var(--line);background:var(--panel);padding:26px 24px;margin:auto}
+.eyebrow{margin:0 0 8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--amber)}
+.card h2{margin:0 0 12px;font-size:30px;font-weight:400;letter-spacing:.1em;line-height:1.25;text-wrap:balance}
+.card p{margin:0 0 12px}
+.rules{margin:0 0 18px;padding-left:1.2em;color:var(--fg)}
+.rules li{margin-bottom:6px}
+.note{font-size:13px;color:var(--dim)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
+.stat{border:1px solid var(--line);padding:8px 10px}
+.stat b{display:block;font-family:var(--font-mono);font-size:24px;font-weight:500;color:var(--amber);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--dim)}
+.primary{width:100%;background:var(--amber);color:#150f02;border:0;padding:12px;font-size:17px;letter-spacing:.14em;cursor:pointer}
+.primary:hover{filter:brightness(1.1)}
+.debug{border:1px solid var(--amber);background:var(--panel);padding:10px 12px;font-size:13px;display:grid;gap:8px}
+.dbg-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;color:var(--amber)}
+.dbg-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.debug button,.debug select{background:var(--bg);border:1px solid var(--line);color:var(--fg);padding:4px 10px;font:inherit;cursor:pointer;max-width:100%}
+.debug button:hover,.debug select:hover{border-color:var(--amber)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <h1>第七棟 夜間警備</h1>
+    <div class="clock" id="clock">00:00</div>
+    <div class="meters">
+      <div class="meter">見逃し <div class="pips" id="pipsMiss"></div></div>
+      <div class="meter">誤報 <div class="pips" id="pipsFalse"></div></div>
+      <button class="mute" id="mute" type="button" aria-pressed="false">音 ON</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="left">
+      <div class="monitor">
+        <canvas id="screen" width="640" height="360" aria-label="監視カメラの映像"></canvas>
+        <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
+      </div>
+      <div class="controls">
+        <button class="cam on" type="button" data-cam="0"><span class="n">1</span>玄関ホール</button>
+        <button class="cam" type="button" data-cam="1"><span class="n">2</span>廊下</button>
+        <button class="cam" type="button" data-cam="2"><span class="n">3</span>事務室</button>
+        <button class="cam" type="button" data-cam="3"><span class="n">4</span>地下駐車場</button>
+        <button class="report" id="report" type="button">通報  [Space]</button>
+      </div>
+    </div>
+    <aside class="log">
+      <h2>当直日誌</h2>
+      <ol id="logList"></ol>
+    </aside>
+  </div>
+
+  <section class="debug" id="dbg" hidden aria-label="デバッグ">
+    <div class="dbg-head"><b>DEBUG  時間停止中</b><button type="button" id="dbgClose">閉じる [Esc]</button></div>
+    <div class="dbg-row" id="dbgFx"></div>
+    <div class="dbg-row">
+      <select id="dbgKind" aria-label="異常の種類"></select>
+      <select id="dbgStage" aria-label="進行段階"></select>
+      <button type="button" id="dbgSpawn">異常を出す</button>
+      <button type="button" id="dbgClear">異常を全消去</button>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="ov">
+  <div class="card">
+    <p class="eyebrow" id="ovEye">NIGHT SHIFT  00:00 - 06:00</p>
+    <h2 id="ovTitle">第七棟 夜間警備</h2>
+    <p id="ovLead">午前0時から6時まで、4台のカメラを見張る。実時間でおよそ4分。</p>
+    <ul class="rules" id="ovRules">
+      <li>最初の約20秒は何も起きない。この間に「いつもの映像」を覚える。</li>
+      <li>いつもと違う点を見つけたら、そのカメラを映したまま通報する。</li>
+      <li>放置された異常は近づいてくる。カメラを切り替えるたびに、さっきより近い。</li>
+      <li>見逃すと襲われる。3回で終わり。</li>
+      <li>異常のないカメラで通報すると誤報。3回で解雇。</li>
+      <li>映像に一瞬だけ何かが映ることがある。通報の対象ではない。</li>
+      <li>1〜4 でカメラ切替、Space で通報。</li>
+    </ul>
+    <div class="stats" id="ovStats" hidden>
+      <div class="stat"><b id="stOk">0</b><span>対処した異常</span></div>
+      <div class="stat"><b id="stMiss">0</b><span>見逃し</span></div>
+      <div class="stat"><b id="stFalse">0</b><span>誤報</span></div>
+    </div>
+    <p class="note" id="ovNote">突然の大きな音、画面の強い点滅、驚かせる演出を含みます。音量に注意してください。</p>
+    <button class="primary" id="ovBtn" type="button">勤務を開始する</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var W = 640, H = 360;
+var HOUR = 40, TOTAL = HOUR * 6, GRACE = 20;
+var RM = false;
+try { RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+var CAMS = [
+  { name: '玄関ホール', kinds: ['自動ドアが開いたままになっている', '人影が立っている', '観葉植物が消えている', '照明が消えている', 'ガラス戸の外に、顔を押し付けた人がいる'] },
+  { name: '廊下', kinds: ['額縁の絵が上下逆になっている', '突き当たりに人影がある', '突き当たりの扉が開き、赤い光が漏れている', '手前の扉が少し開いている', '床を這って近づいてくる人影がいる'] },
+  { name: '事務室', kinds: ['時計の針が逆に回っている', '席に誰かが座っている', 'モニターがすべて点灯している', 'ブラインドが開いている', '棚の陰から半分だけ顔を出している'] },
+  { name: '地下駐車場', kinds: ['車が一台増えている', '車の間に人影が立っている', '非常口の誘導灯が消えている', '床に黒い染みが広がっている', '無人のはずの車に人が座り、こちらを振り向いている'] }
+];
+var KINDS = 5;
+
+/* 表示用キャンバスと、シーンを描く内部キャンバスを分けて、最後に画質を整える */
+var cv = document.getElementById('screen');
+var octx = cv.getContext('2d');
+var sc = document.createElement('canvas'); sc.width = W; sc.height = H;
+var ctx = sc.getContext('2d');
+var bloom = document.createElement('canvas'); bloom.width = 160; bloom.height = 90;
+var bctx = bloom.getContext('2d');
+
+/* ---------- 描画ヘルパー ---------- */
+function L(l, a) { return 'rgba(' + ((l * 0.8) | 0) + ',' + (l | 0) + ',' + ((l * 0.84) | 0) + ',' + (a == null ? 1 : a) + ')'; }
+function lg(x0, y0, x1, y1, stops) {
+  var g = ctx.createLinearGradient(x0, y0, x1, y1);
+  for (var i = 0; i < stops.length; i++) g.addColorStop(stops[i][0], stops[i][1]);
+  return g;
+}
+function path(p) {
+  ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]);
+  for (var i = 1; i < p.length; i++) ctx.lineTo(p[i][0], p[i][1]);
+  ctx.closePath();
+}
+function rect(x, y, w, h, f) { ctx.fillStyle = f; ctx.fillRect(x, y, w, h); }
+function poly(p, f) { path(p); ctx.fillStyle = f; ctx.fill(); }
+function tex(p, pat, a) { path(p); ctx.globalAlpha = a; ctx.fillStyle = pat; ctx.fill(); ctx.globalAlpha = 1; }
+function glow(x, y, r, a) {
+  var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, L(255, a)); g.addColorStop(1, L(255, 0));
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function redGlow(x, y, r, a) {
+  var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, 'rgba(210,40,30,' + a + ')'); g.addColorStop(1, 'rgba(210,40,30,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function ell(cx, cy, rx, ry, fill) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+  ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); ctx.restore();
+}
+function pool(cx, cy, rx, ry, a) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+  var g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, L(255, a)); g.addColorStop(1, L(255, 0));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+}
+function shadow(cx, cy, rx, ry, a) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(1, ry / rx);
+  var g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, 'rgba(0,0,0,' + a + ')'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+}
+function lamp(x, y, w, h, k) {
+  rect(x, y, w, h, L(40));
+  rect(x + 2, y + 1, w - 4, h - 2, L(225 * k));
+  glow(x + w / 2, y + h / 2, w * 0.9, 0.16 * k);
+}
+function makeTex(size, fn) {
+  var c = document.createElement('canvas'); c.width = size; c.height = size;
+  fn(c.getContext('2d'), size);
+  return ctx.createPattern(c, 'repeat');
+}
+var texConcrete = makeTex(128, function (x, s) {
+  for (var i = 0; i < 1500; i++) {
+    var dark = Math.random() < 0.55;
+    x.fillStyle = dark ? 'rgba(0,0,0,' + (0.05 + Math.random() * 0.22) + ')' : 'rgba(255,255,255,' + (0.03 + Math.random() * 0.1) + ')';
+    x.fillRect(Math.random() * s, Math.random() * s, 1 + Math.random() * 2, 1 + Math.random() * 2);
+  }
+});
+var texCarpet = makeTex(64, function (x, s) {
+  for (var i = 0; i < 900; i++) {
+    x.fillStyle = Math.random() < 0.5 ? 'rgba(0,0,0,' + (0.08 + Math.random() * 0.2) + ')' : 'rgba(255,255,255,' + (0.03 + Math.random() * 0.07) + ')';
+    x.fillRect(Math.random() * s, Math.random() * s, 1, 1 + Math.random() * 1.5);
+  }
+});
+var texTile = makeTex(64, function (x, s) {
+  x.strokeStyle = 'rgba(0,0,0,0.38)'; x.lineWidth = 1; x.strokeRect(0.5, 0.5, s - 1, s - 1);
+  for (var i = 0; i < 160; i++) {
+    x.fillStyle = Math.random() < 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.05)';
+    x.fillRect(Math.random() * s, Math.random() * s, 2, 1);
+  }
+});
+
+function figure(x, baseY, h, lum, faceLum) {
+  var u = h;
+  var sw = RM ? 0 : Math.sin(gNow * 1.3);
+  var br = RM ? 0 : Math.sin(gNow * 2.2) * u * 0.003;
+  var dk = Math.max(1, lum - 3);
+  shadow(x, baseY, u * 0.24, u * 0.05, 0.6);
+  ctx.save();
+  ctx.translate(x + sw * u * 0.008, baseY);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  var cloth = lg(0, -u * 0.9, 0, 0, [[0, L(lum + 18)], [1, L(lum)]]);
+  // 脚と靴
+  [-1, 1].forEach(function (d) {
+    var gap = d < 0 ? 0.012 : -0.008;
+    var fy = -u * (0.034 + gap);
+    ctx.fillStyle = cloth;
+    ctx.beginPath();
+    ctx.moveTo(d * u * 0.098, -u * 0.5); ctx.lineTo(d * u * 0.006, -u * 0.5);
+    ctx.lineTo(d * u * 0.024, fy); ctx.lineTo(d * u * 0.078, fy);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = L(1);
+    ctx.fillRect(d < 0 ? -u * 0.098 : u * 0.012, fy, u * 0.086, -fy);
+  });
+  // 胴
+  ctx.fillStyle = cloth;
+  ctx.beginPath();
+  ctx.moveTo(-u * 0.135, -u * 0.8 + br);
+  ctx.quadraticCurveTo(-u * 0.152, -u * 0.64, -u * 0.1, -u * 0.47);
+  ctx.lineTo(u * 0.1, -u * 0.47);
+  ctx.quadraticCurveTo(u * 0.152, -u * 0.64, u * 0.135, -u * 0.8 + br);
+  ctx.quadraticCurveTo(0, -u * 0.85 + br, -u * 0.135, -u * 0.8 + br);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = L(lum + 44, 0.8);
+  ctx.beginPath(); ctx.moveTo(-u * 0.03, -u * 0.83 + br); ctx.lineTo(u * 0.03, -u * 0.83 + br); ctx.lineTo(0, -u * 0.7); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = L(Math.max(1, lum - 4), 0.5); ctx.lineWidth = Math.max(1, u * 0.006);
+  [[-0.07, -0.74, -0.09, -0.56], [0.06, -0.72, 0.08, -0.54], [0, -0.68, 0, -0.48]].forEach(function (f) {
+    ctx.beginPath(); ctx.moveTo(u * f[0], u * f[1]); ctx.lineTo(u * f[2], u * f[3]); ctx.stroke();
+  });
+  // 腕と手(右腕だけ少し長い)
+  [-1, 1].forEach(function (d) {
+    var ln = d > 0 ? 0.025 : 0;
+    ctx.strokeStyle = L(lum + 8);
+    ctx.lineWidth = u * 0.052;
+    ctx.beginPath(); ctx.moveTo(d * u * 0.132, -u * 0.785 + br); ctx.lineTo(d * u * 0.168, -u * 0.6); ctx.stroke();
+    ctx.lineWidth = u * 0.044;
+    ctx.beginPath(); ctx.moveTo(d * u * 0.168, -u * 0.6); ctx.lineTo(d * u * 0.152, -u * (0.44 - ln)); ctx.stroke();
+    ctx.fillStyle = L(lum + 40);
+    ctx.beginPath(); ctx.ellipse(d * u * 0.15, -u * (0.405 - ln), u * 0.02, u * 0.032, d * 0.1, 0, Math.PI * 2); ctx.fill();
+  });
+  // 首と頭(少し傾いている)
+  ctx.fillStyle = L(lum + 34);
+  ctx.fillRect(-u * 0.022, -u * 0.87 + br, u * 0.044, u * 0.06);
+  ctx.save();
+  ctx.translate(0, -u * 0.925 + br);
+  ctx.rotate(0.13 + (RM ? 0 : Math.sin(gNow * 0.7) * 0.03));
+  ctx.fillStyle = L(dk);
+  ctx.beginPath(); ctx.ellipse(0, -u * 0.006, u * 0.068, u * 0.08, 0, 0, Math.PI * 2); ctx.fill();
+  [-1, 1].forEach(function (d) {
+    ctx.beginPath();
+    ctx.moveTo(d * u * 0.062, -u * 0.01); ctx.lineTo(d * u * 0.084, u * 0.15); ctx.lineTo(d * u * 0.03, u * 0.11); ctx.closePath(); ctx.fill();
+  });
+  if (faceLum) {
+    ctx.fillStyle = L(faceLum + 70);
+    ctx.beginPath(); ctx.ellipse(0, u * 0.006, u * 0.046, u * 0.064, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(1);
+    [-1, 1].forEach(function (d) { ctx.beginPath(); ctx.ellipse(d * u * 0.019, -u * 0.006, u * 0.011, u * 0.015, 0, 0, Math.PI * 2); ctx.fill(); });
+    ctx.beginPath(); ctx.ellipse(0, u * 0.036, u * 0.009, u * 0.017, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(dk);
+    ctx.beginPath(); ctx.moveTo(-u * 0.05, -u * 0.02); ctx.lineTo(-u * 0.04, -u * 0.07); ctx.lineTo(u * 0.045, -u * 0.07); ctx.lineTo(u * 0.05, -u * 0.02); ctx.lineTo(u * 0.012, -u * 0.045); ctx.lineTo(-u * 0.015, -u * 0.03); ctx.closePath(); ctx.fill();
+  } else {
+    ctx.fillStyle = L(lum + 26, 0.5);
+    ctx.beginPath(); ctx.ellipse(0, u * 0.012, u * 0.03, u * 0.045, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+  // 天井灯の縁取り
+  ctx.strokeStyle = L(210, 0.3); ctx.lineWidth = Math.max(1, u * 0.006);
+  ctx.beginPath(); ctx.moveTo(-u * 0.135, -u * 0.8 + br); ctx.quadraticCurveTo(0, -u * 0.85 + br, u * 0.135, -u * 0.8 + br); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-u * 0.135, -u * 0.8 + br); ctx.lineTo(-u * 0.152, -u * 0.64); ctx.stroke();
+  ctx.restore();
+}
+function plant(x, y) {
+  shadow(x, y + 24, 26, 5, 0.45);
+  rect(x - 13, y, 26, 24, lg(x - 13, 0, x + 13, 0, [[0, L(30)], [0.5, L(74)], [1, L(28)]]));
+  rect(x - 14, y - 1, 28, 3, L(84));
+  for (var i = 0; i < 9; i++) {
+    var an = (i - 4) * 0.36;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(an);
+    ctx.fillStyle = L(30 + (i % 3) * 9);
+    ctx.beginPath(); ctx.ellipse(0, -22 - (i % 2) * 4, 5, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+}
+function exitSign(cx, y, w, h, lit) {
+  rect(cx - w / 2, y, w, h, L(lit ? 60 : 22));
+  if (lit) { rect(cx - w / 2 + 2, y + 2, w - 4, h - 4, L(240)); glow(cx, y + h / 2, w * 1.4, 0.24); }
+}
+
+/* 画面いっぱいに迫る顔。ジャンプスケアと死亡演出、一瞬だけ映る顔に使う */
+function drawFace(cx, cy, s, alpha, open) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  poly([[cx - s * 0.27, cy - s * 0.40], [cx + s * 0.27, cy - s * 0.40], [cx + s * 0.44, cy + s * 0.70], [cx + s * 0.14, cy + s * 0.46], [cx - s * 0.14, cy + s * 0.46], [cx - s * 0.44, cy + s * 0.70]], L(3));
+  ell(cx, cy, s * 0.22, s * 0.31, L(190));
+  ell(cx - s * 0.11, cy + s * 0.12, s * 0.07, s * 0.12, 'rgba(0,0,0,0.22)');
+  ell(cx + s * 0.11, cy + s * 0.12, s * 0.07, s * 0.12, 'rgba(0,0,0,0.22)');
+  poly([[cx - s * 0.25, cy - s * 0.18], [cx - s * 0.2, cy - s * 0.39], [cx + s * 0.2, cy - s * 0.39], [cx + s * 0.25, cy - s * 0.18], [cx + s * 0.09, cy - s * 0.1], [cx + s * 0.03, cy - s * 0.25], [cx - s * 0.04, cy - s * 0.09], [cx - s * 0.12, cy - s * 0.24]], L(3));
+  [-1, 1].forEach(function (d) {
+    var ex = cx + d * s * 0.09, ey = cy - s * 0.03;
+    ell(ex, ey, s * 0.078, s * 0.1, 'rgba(0,0,0,0.5)');
+    ell(ex, ey, s * 0.052, s * 0.072, L(1));
+    ell(ex + d * s * 0.012, ey - s * 0.022, s * 0.011, s * 0.011, L(255));
+  });
+  var mh = s * (0.04 + 0.13 * open), my = cy + s * 0.18;
+  ell(cx, my, s * 0.07, mh, L(1));
+  if (open > 0.5) { for (var ti = 0; ti < 3; ti++) rect(cx - s * 0.022 + ti * s * 0.016, my - mh + s * 0.01, s * 0.012, s * 0.026, L(215)); }
+  ctx.strokeStyle = L(2); ctx.lineWidth = Math.max(1, s * 0.007);
+  [-1, 1].forEach(function (d) {
+    ctx.beginPath(); ctx.moveTo(cx + d * s * 0.07, my - s * 0.02); ctx.lineTo(cx + d * s * 0.13, my + s * 0.1); ctx.stroke();
+  });
+  ctx.restore();
+}
+
+var flick = 1, flick2 = 1, gNow = 0;
+
+/* ---------- CAM1 玄関ホール ---------- */
+function drawHall(a) {
+  var off = !!a[3];
+  poly([[0, 0], [640, 0], [520, 60], [120, 60]], lg(0, 0, 0, 60, [[0, L(16)], [1, L(34)]]));
+  ctx.strokeStyle = L(12, 0.7); ctx.lineWidth = 1;
+  for (var i = 0; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(i * 80, 0); ctx.lineTo(120 + i * 50, 60); ctx.stroke(); }
+  [12, 28, 44].forEach(function (y) { ctx.beginPath(); ctx.moveTo(y * 2, y); ctx.lineTo(640 - y * 2, y); ctx.stroke(); });
+
+  var floor = [[0, 360], [640, 360], [520, 230], [120, 230]];
+  poly(floor, lg(0, 230, 0, 360, [[0, L(46)], [1, L(28)]]));
+  tex(floor, texTile, 0.55);
+  ctx.strokeStyle = L(64, 0.3); ctx.lineWidth = 1;
+  [250, 278, 318].forEach(function (y) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(640, y); ctx.stroke(); });
+  for (var j = -4; j <= 12; j++) { var bx = 120 + j * 40; ctx.beginPath(); ctx.moveTo(bx, 230); ctx.lineTo(320 + (bx - 320) * 2.6, 360); ctx.stroke(); }
+  if (!off) pool(320, 300, 170, 36, 0.15 * flick);
+
+  var lw = [[0, 0], [120, 60], [120, 230], [0, 360]], rw = [[640, 0], [520, 60], [520, 230], [640, 360]];
+  poly(lw, lg(0, 0, 120, 0, [[0, L(30)], [1, L(60)]])); tex(lw, texConcrete, 0.5);
+  poly(rw, lg(520, 0, 640, 0, [[0, L(58)], [1, L(30)]])); tex(rw, texConcrete, 0.5);
+  var bw = [[120, 60], [520, 60], [520, 230], [120, 230]];
+  poly(bw, lg(0, 60, 0, 230, [[0, L(54)], [1, L(72)]])); tex(bw, texConcrete, 0.6);
+  rect(120, 170, 400, 60, L(58, 0.55)); rect(120, 168, 400, 3, L(90));
+  rect(120, 222, 400, 8, L(40));
+
+  // 掲示板
+  rect(160, 92, 58, 40, L(90)); rect(164, 96, 50, 32, L(74));
+  rect(168, 100, 16, 12, L(124)); rect(188, 100, 14, 10, L(116)); rect(170, 114, 22, 10, L(110));
+  // 自動ドア
+  rect(300, 92, 40, 8, L(76));
+  rect(246, 102, 148, 130, L(100)); rect(246, 102, 148, 2, L(130));
+  var pane = lg(0, 108, 0, 232, [[0, L(12)], [1, L(30)]]);
+  if (a[0]) {
+    rect(252, 108, 52, 124, pane); rect(336, 108, 52, 124, pane);
+    rect(304, 108, 32, 124, lg(0, 108, 0, 232, [[0, L(70)], [1, L(130)]]));
+    glow(320, 150, 54, 0.3);
+    poly([[304, 232], [336, 232], [392, 304], [248, 304]], L(150, 0.1));
+  } else {
+    rect(252, 108, 68, 124, pane); rect(320, 108, 68, 124, pane); rect(319, 108, 2, 124, L(100));
+    glow(286, 140, 34, 0.2); rect(285, 139, 3, 3, L(200));
+    ctx.fillStyle = L(8); ctx.beginPath(); ctx.arc(360, 192, 22, 0, Math.PI * 2); ctx.fill(); rect(358, 192, 4, 40, L(8));
+  }
+  poly([[262, 108], [282, 108], [262, 232], [252, 232]], L(70, 0.22));
+  poly([[262, 236], [378, 236], [392, 252], [248, 252]], L(20));
+  // ガラスに顔と手を押し付けている
+  if (a[4]) {
+    var fq = 0.3 + 0.7 * a[4].prog;
+    ctx.save(); ctx.globalAlpha = fq;
+    [[286, 170], [358, 178]].forEach(function (h) {
+      rect(h[0] - 9, h[1] - 7, 18, 16, L(150));
+      for (var fi = 0; fi < 5; fi++) rect(h[0] - 9 + fi * 4, h[1] - 19 + (fi % 2) * 3, 2, 13, L(150));
+    });
+    rect(298, 112, 48, 18, L(5));
+    ctx.fillStyle = L(165); ctx.beginPath(); ctx.ellipse(322, 150, 22, 29, 0.12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(205); ctx.beginPath(); ctx.ellipse(317, 145, 9, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(3);
+    ctx.beginPath(); ctx.ellipse(313, 146, 4, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(332, 148, 4, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(322, 168, 6, 10, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // 受付カウンター
+  shadow(212, 240, 90, 8, 0.45);
+  rect(150, 205, 124, 6, L(98)); rect(150, 205, 124, 1, L(135));
+  rect(150, 211, 124, 26, lg(0, 211, 0, 237, [[0, L(60)], [1, L(40)]]));
+  rect(200, 184, 30, 20, L(26)); rect(203, 187, 24, 14, L(48)); glow(215, 194, 30, 0.08); rect(213, 204, 4, 3, L(32));
+  rect(160, 196, 12, 9, L(106)); rect(236, 198, 22, 7, L(24));
+  if (!a[2]) plant(468, 208);
+  exitSign(320, 78, 40, 10, true);
+
+  if (!off) {
+    poly([[270, 66], [370, 66], [490, 230], [150, 230]], L(255, 0.05 * flick));
+    lamp(270, 58, 100, 7, flick);
+  }
+  if (a[1]) { var p = a[1].prog; figure(95 + p * 135, 252 + p * 78, 72 + p * 135, 6, p > 0.78 ? 110 : 0); }
+  if (off) {
+    rect(0, 0, W, H, 'rgba(0,0,0,0.62)');
+    exitSign(320, 78, 40, 10, true);
+  }
+}
+
+/* ---------- CAM2 廊下 ---------- */
+var cTop = function (d) { return d * 150; };
+var cBot = function (d) { return 360 - d * 145; };
+var cX = function (s, d) { return s < 0 ? d * 270 : 640 - d * 270; };
+var cY = function (d, v) { return cTop(d) + (cBot(d) - cTop(d)) * v; };
+function cPt(s, d, v) { return [cX(s, d), cY(d, v)]; }
+function cWall(s, d1, d2, v1, v2, f) { poly([cPt(s, d1, v1), cPt(s, d2, v1), cPt(s, d2, v2), cPt(s, d1, v2)], f); }
+function sideDoor(s, d1, d2, ajar) {
+  cWall(s, d1 - 0.008, d2 + 0.008, 0.2, 1, L(78));
+  if (ajar) {
+    cWall(s, d1, d2, 0.22, 1, L(5));
+    cWall(s, d1, d1 + (d2 - d1) * 0.18, 0.22, 1, L(52));
+  } else {
+    cWall(s, d1, d2, 0.22, 1, L(40));
+    cWall(s, d1 + (d2 - d1) * 0.3, d1 + (d2 - d1) * 0.7, 0.3, 0.46, L(15));
+    cWall(s, d1 + (d2 - d1) * 0.8, d1 + (d2 - d1) * 0.86, 0.62, 0.66, L(130));
+  }
+}
+function crawler(x, y, s) {
+  shadow(x, y + 2 * s, 64 * s, 9 * s, 0.55);
+  var f = L(5);
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = f; ctx.fillStyle = f;
+  [-1, 1].forEach(function (d) {
+    ctx.lineWidth = 8 * s;
+    ctx.beginPath(); ctx.moveTo(x + d * 24 * s, y - 34 * s); ctx.lineTo(x + d * 56 * s, y - 16 * s); ctx.lineTo(x + d * 40 * s, y + 2 * s); ctx.stroke();
+    ctx.lineWidth = 7 * s;
+    ctx.beginPath(); ctx.moveTo(x + d * 14 * s, y - 44 * s); ctx.lineTo(x + d * 36 * s, y - 52 * s); ctx.lineTo(x + d * 30 * s, y - 34 * s); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.ellipse(x, y - 34 * s, 30 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = L(8); ctx.beginPath(); ctx.ellipse(x, y - 18 * s, 15 * s, 17 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = L(170); ctx.beginPath(); ctx.ellipse(x, y - 14 * s, 11 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = L(2);
+  ctx.beginPath(); ctx.ellipse(x - 4.5 * s, y - 17 * s, 2.6 * s, 3.6 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 4.5 * s, y - 17 * s, 2.6 * s, 3.6 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, y - 7 * s, 3 * s, 5 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function drawCorridor(a) {
+  var ceil = [[0, 0], [640, 0], [370, 150], [270, 150]];
+  poly(ceil, lg(0, 0, 0, 150, [[0, L(14)], [1, L(30)]]));
+  ctx.strokeStyle = L(10, 0.7); ctx.lineWidth = 1;
+  for (var d = 0.1; d < 1; d += 0.12) { ctx.beginPath(); ctx.moveTo(d * 270, d * 150); ctx.lineTo(640 - d * 270, d * 150); ctx.stroke(); }
+  var floor = [[0, 360], [640, 360], [370, 215], [270, 215]];
+  poly(floor, lg(0, 215, 0, 360, [[0, L(30)], [1, L(54)]])); tex(floor, texTile, 0.4);
+  poly([[300, 215], [340, 215], [430, 360], [210, 360]], L(60, 0.18));
+  var lw = [[0, 0], [270, 150], [270, 215], [0, 360]], rw = [[640, 0], [370, 150], [370, 215], [640, 360]];
+  poly(lw, lg(0, 0, 270, 0, [[0, L(72)], [1, L(34)]])); tex(lw, texConcrete, 0.5);
+  poly(rw, lg(370, 0, 640, 0, [[0, L(30)], [1, L(64)]])); tex(rw, texConcrete, 0.5);
+  rect(270, 150, 100, 65, lg(0, 150, 0, 215, [[0, L(34)], [1, L(50)]]));
+  cWall(-1, 0, 1, 0.6, 0.625, L(84, 0.5)); cWall(1, 0, 1, 0.6, 0.625, L(72, 0.5));
+  cWall(-1, 0, 1, 0.94, 1, L(22)); cWall(1, 0, 1, 0.94, 1, L(20));
+
+  sideDoor(-1, 0.10, 0.23, false); sideDoor(-1, 0.40, 0.50, false);
+  sideDoor(1, 0.18, 0.30, !!a[3]); sideDoor(1, 0.52, 0.62, false);
+  // 消火器
+  cWall(1, 0.36, 0.385, 0.5, 0.7, 'rgba(112,26,22,0.95)'); cWall(1, 0.36, 0.385, 0.47, 0.5, L(60));
+  // 額縁
+  var flip = !!a[0];
+  var fv = function (v) { return flip ? 0.8 - v : v; };
+  cWall(-1, 0.62, 0.80, 0.22, 0.58, L(104));
+  cWall(-1, 0.63, 0.79, 0.25, 0.55, L(76));
+  poly([cPt(-1, 0.65, fv(0.55)), cPt(-1, 0.71, fv(0.33)), cPt(-1, 0.77, fv(0.55))], L(38));
+  poly([cPt(-1, 0.73, fv(0.30)), cPt(-1, 0.76, fv(0.30)), cPt(-1, 0.76, fv(0.36)), cPt(-1, 0.73, fv(0.36))], L(160));
+  // 突き当たりの扉
+  rect(290, 158, 60, 57, L(70)); rect(294, 162, 52, 53, L(32));
+  exitSign(320, 152, 28, 5, true);
+  if (a[2]) {
+    rect(294, 162, 52, 53, 'rgba(10,4,4,1)');
+    rect(304, 162, 42, 53, 'rgba(190,34,26,0.6)');
+    poly([[294, 162], [306, 166], [306, 211], [294, 215]], L(38));
+    redGlow(325, 190, 120, 0.42);
+  } else {
+    rect(310, 166, 20, 16, L(18)); rect(300, 192, 40, 3, L(112));
+  }
+  // 天井照明と光
+  var fix = [[0.30, 1], [0.62, flick2]];
+  fix.forEach(function (f) {
+    var dd = f[0], k = f[1], w = (1 - dd) * 70 + 12, y = dd * 150 + 2;
+    poly([[320 - w / 2, y + 8], [320 + w / 2, y + 8], [320 + w * 1.8, cBot(dd) - 4], [320 - w * 1.8, cBot(dd) - 4]], L(255, 0.04 * k));
+    pool(320, cBot(dd) - 6, (1 - dd) * 150 + 40, (1 - dd) * 14 + 6, 0.24 * k);
+    lamp(320 - w / 2, y, w, 4 + (1 - dd) * 4, k);
+  });
+  if (a[1]) { var p = a[1].prog; figure(320, 215 + p * 115, 36 + p * 170, 5, p > 0.8 ? 100 : 0); }
+  if (a[4]) { var cq = a[4].prog; crawler(320, 217 + cq * 125, 0.22 + cq * 1.25); }
+}
+
+/* ---------- CAM3 事務室 ---------- */
+function monitorOn(x, y, w, h, lit) {
+  rect(x - 1, y - 1, w + 2, h + 2, L(30));
+  if (lit) {
+    rect(x + 3, y + 3, w - 6, h - 6, L(84));
+    ctx.fillStyle = L(220);
+    ctx.beginPath(); ctx.ellipse(x + w / 2, y + h / 2, (w - 6) * 0.2, (h - 6) * 0.36, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(30);
+    ctx.fillRect(x + w / 2 - w * 0.09, y + h / 2 - h * 0.1, w * 0.04, h * 0.1); ctx.fillRect(x + w / 2 + w * 0.05, y + h / 2 - h * 0.1, w * 0.04, h * 0.1);
+    glow(x + w / 2, y + h / 2, w * 1.4, 0.12);
+  } else {
+    rect(x + 3, y + 3, w - 6, h - 6, lg(0, y, 0, y + h, [[0, L(18)], [1, L(10)]]));
+    rect(x + w - 8, y + h - 5, 3, 2, L(120));
+  }
+  rect(x + w / 2 - 4, y + h + 1, 8, 5, L(32));
+}
+function desk(x, y, w, lit, s) {
+  shadow(x + w / 2, y + 38 * s, w * 0.6, 6 * s, 0.45);
+  rect(x, y, w, 8 * s, lg(0, y, 0, y + 8 * s, [[0, L(116)], [1, L(82)]]));
+  rect(x + 6 * s, y + 8 * s, w - 12 * s, 26 * s, lg(x, 0, x + w, 0, [[0, L(42)], [0.5, L(56)], [1, L(38)]]));
+  rect(x + w * 0.55, y + 12 * s, w * 0.3, 8 * s, L(30)); rect(x + w * 0.68, y + 15 * s, w * 0.05, 2 * s, L(110));
+  rect(x + w * 0.3, y - 2 * s, w * 0.4, 3 * s, L(98));
+  rect(x + w * 0.82, y - 6 * s, 6 * s, 6 * s, L(134));
+  rect(x + w * 0.08, y - 4 * s, 14 * s, 4 * s, L(142));
+  monitorOn(x + w * 0.32, y - 29 * s, w * 0.36, 26 * s, lit);
+}
+function chair(cx, y, s) {
+  shadow(cx, y + 50 * s, 22 * s, 4 * s, 0.4);
+  rect(cx - 2 * s, y + 36 * s, 4 * s, 11 * s, L(24));
+  rect(cx - 15 * s, y + 46 * s, 30 * s, 3 * s, L(26));
+  rect(cx - 17 * s, y + 28 * s, 34 * s, 8 * s, L(38));
+  rect(cx - 15 * s, y, 30 * s, 30 * s, lg(0, y, 0, y + 30 * s, [[0, L(44)], [1, L(28)]]));
+}
+function drawOffice(a, now, gt) {
+  poly([[0, 0], [640, 0], [580, 50], [60, 50]], lg(0, 0, 0, 50, [[0, L(14)], [1, L(30)]]));
+  ctx.strokeStyle = L(10, 0.7); ctx.lineWidth = 1;
+  for (var i = 0; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(i * 80, 0); ctx.lineTo(60 + i * 65, 50); ctx.stroke(); }
+  [14, 30, 42].forEach(function (y) { ctx.beginPath(); ctx.moveTo(y * 1.2, y); ctx.lineTo(640 - y * 1.2, y); ctx.stroke(); });
+  var floor = [[0, 360], [640, 360], [580, 235], [60, 235]];
+  poly(floor, lg(0, 235, 0, 360, [[0, L(46)], [1, L(30)]])); tex(floor, texCarpet, 0.9);
+  var lw = [[0, 0], [60, 50], [60, 235], [0, 360]], rw = [[640, 0], [580, 50], [580, 235], [640, 360]];
+  poly(lw, lg(0, 0, 60, 0, [[0, L(30)], [1, L(54)]])); poly(rw, lg(580, 0, 640, 0, [[0, L(50)], [1, L(28)]]));
+  var bw = [[60, 50], [580, 50], [580, 235], [60, 235]];
+  poly(bw, lg(0, 50, 0, 235, [[0, L(52)], [1, L(66)]])); tex(bw, texConcrete, 0.5);
+  rect(60, 224, 520, 11, L(36));
+  // 窓
+  rect(86, 76, 118, 78, L(84));
+  if (a[3]) {
+    rect(90, 80, 110, 70, lg(0, 80, 0, 150, [[0, L(16)], [1, L(40)]]));
+    glow(172, 102, 30, 0.5); ctx.fillStyle = L(235); ctx.beginPath(); ctx.arc(172, 102, 6, 0, Math.PI * 2); ctx.fill();
+    [[92, 128, 18, 22], [114, 118, 22, 32], [140, 132, 16, 18], [160, 124, 24, 26], [186, 134, 12, 16]].forEach(function (b) { rect(b[0], b[1], b[2], b[3], L(7)); });
+    poly([[96, 236], [206, 236], [250, 320], [58, 320]], L(160, 0.06));
+  } else {
+    rect(90, 80, 110, 70, L(24));
+    for (var s = 0; s < 10; s++) rect(90, 80 + s * 7, 110, 4, L(72 - s * 2));
+  }
+  // 書類棚
+  rect(450, 90, 100, 130, L(52));
+  for (var r = 0; r < 4; r++) {
+    rect(454, 118 + r * 25 - 27, 92, 3, L(84));
+    for (var k = 0; k < 8; k++) rect(456 + k * 11, 96 + r * 25 + (k % 3), 8, 21 - (k % 3), L(36 + ((k * 37 + r * 11) % 34)));
+  }
+  // ホワイトボード
+  rect(372, 70, 74, 52, L(112)); rect(375, 73, 68, 46, L(146));
+  [0, 1, 2, 3].forEach(function (n) { rect(380, 82 + n * 9, 28 + ((n * 17) % 26), 2, L(60)); });
+  // 棚の陰から覗く顔
+  if (a[4]) {
+    var pk = a[4].prog, hx = 458 - pk * 14, hy = 150;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 452, H); ctx.clip();
+    ctx.fillStyle = L(7); ctx.beginPath(); ctx.ellipse(hx, hy - 6, 15, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(170); ctx.beginPath(); ctx.ellipse(hx, hy, 12, 17, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(2);
+    ctx.beginPath(); ctx.ellipse(hx - 4, hy - 4, 3, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(hx - 3, hy + 10, 3, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(250); ctx.fillRect(hx - 5, hy - 6, 2, 2);
+    ctx.restore();
+    for (var fg = 0; fg < 4; fg++) rect(443 - pk * 2, 166 + fg * 6, 10, 3, L(155));
+  }
+  // 時計
+  var hf = gt / HOUR;
+  var hAng = ((hf % 12) / 12) * Math.PI * 2, mAng = (hf % 1) * Math.PI * 2;
+  if (a[0]) { mAng = -(hf % 1) * Math.PI * 2 * 5 - gt * 0.2; hAng = -hAng; }
+  ctx.fillStyle = L(30); ctx.beginPath(); ctx.arc(320, 100, 27, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = L(122); ctx.beginPath(); ctx.arc(320, 100, 24, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = L(60); ctx.lineWidth = 1;
+  for (var t = 0; t < 12; t++) { var ta = t * Math.PI / 6; ctx.beginPath(); ctx.moveTo(320 + Math.sin(ta) * 20, 100 - Math.cos(ta) * 20); ctx.lineTo(320 + Math.sin(ta) * 23, 100 - Math.cos(ta) * 23); ctx.stroke(); }
+  ctx.strokeStyle = L(18); ctx.lineCap = 'round';
+  ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(320, 100); ctx.lineTo(320 + Math.sin(hAng) * 13, 100 - Math.cos(hAng) * 13); ctx.stroke();
+  ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(320, 100); ctx.lineTo(320 + Math.sin(mAng) * 20, 100 - Math.cos(mAng) * 20); ctx.stroke();
+  ctx.lineCap = 'butt';
+  // 机と椅子
+  var lit = !!a[2];
+  [110, 270, 430].forEach(function (x) { desk(x, 205, 100, lit, 1); chair(x + 50, 222, 1); });
+  [70, 270, 470].forEach(function (x) { desk(x, 270, 130, lit, 1.3); chair(x + 65, 292, 1.25); });
+  plant(604, 300);
+  if (a[1]) {
+    var p = a[1].prog, cx = 335, hy = 262, hr = 12 + p * 4;
+    shadow(cx, 316, 36, 6, 0.4);
+    poly([[cx - 30, 314], [cx + 30, 314], [cx + 24, 276], [cx - 24, 276]], L(5));
+    ctx.fillStyle = L(5); ctx.beginPath(); ctx.arc(cx, hy, hr, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = L(80, 0.3); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, hy, hr, Math.PI * 1.1, Math.PI * 1.7); ctx.stroke();
+    if (p > 0.7) { ctx.fillStyle = L(160); ctx.beginPath(); ctx.ellipse(cx, hy + 1, hr * 0.62, hr * 0.78, 0, 0, Math.PI * 2); ctx.fill(); }
+  }
+  // 天井照明
+  [[170, 80, 1], [285, 70, flick2], [400, 80, 1]].forEach(function (l) {
+    var k = l[2];
+    poly([[l[0], 26], [l[0] + l[1], 26], [l[0] + l[1] + 60, 235], [l[0] - 60, 235]], L(255, 0.03 * k));
+    pool(l[0] + l[1] / 2, 300, l[1] * 1.1, 28, 0.1 * k);
+    lamp(l[0], 20, l[1], 6, k);
+  });
+}
+
+/* ---------- CAM4 地下駐車場 ---------- */
+function car(cx) {
+  shadow(cx, 308, 78, 8, 0.6);
+  rect(cx - 54, 298, 20, 12, L(6)); rect(cx + 34, 298, 20, 12, L(6));
+  poly([[cx - 62, 304], [cx - 62, 268], [cx - 54, 258], [cx + 54, 258], [cx + 62, 268], [cx + 62, 304]], lg(0, 258, 0, 304, [[0, L(66)], [0.5, L(46)], [1, L(30)]]));
+  poly([[cx - 50, 258], [cx - 42, 234], [cx + 42, 234], [cx + 50, 258]], lg(0, 234, 0, 258, [[0, L(56)], [1, L(42)]]));
+  poly([[cx - 42, 256], [cx - 36, 240], [cx + 36, 240], [cx + 42, 256]], lg(0, 240, 0, 256, [[0, L(38)], [1, L(10)]]));
+  poly([[cx - 30, 254], [cx - 20, 242], [cx - 12, 242], [cx - 22, 254]], L(100, 0.25));
+  rect(cx - 62, 296, 124, 8, L(22));
+  rect(cx - 14, 281, 28, 10, L(140)); rect(cx - 12, 283, 24, 1, L(60));
+  redGlow(cx - 48, 272, 18, 0.28); redGlow(cx + 48, 272, 18, 0.28);
+  rect(cx - 58, 268, 20, 8, 'rgba(150,26,20,0.95)'); rect(cx + 38, 268, 20, 8, 'rgba(150,26,20,0.95)');
+}
+function drawParking(a) {
+  rect(0, 0, 640, 150, lg(0, 0, 0, 150, [[0, L(12)], [1, L(30)]]));
+  rect(0, 70, 640, 14, lg(0, 70, 0, 84, [[0, L(72)], [1, L(26)]]));
+  rect(0, 92, 640, 7, lg(0, 92, 0, 99, [[0, L(60)], [1, L(20)]]));
+  var bw = [[0, 150], [640, 150], [640, 230], [0, 230]];
+  poly(bw, lg(0, 150, 0, 230, [[0, L(34)], [1, L(56)]])); tex(bw, texConcrete, 0.8);
+  var fl = [[0, 230], [640, 230], [640, 360], [0, 360]];
+  poly(fl, lg(0, 230, 0, 360, [[0, L(42)], [1, L(26)]])); tex(fl, texConcrete, 0.9);
+  [[90, 332, 36, 7], [420, 320, 52, 9], [570, 344, 42, 8]].forEach(function (s) { shadow(s[0], s[1], s[2], s[3], 0.5); });
+  var xf = [40, 230, 420, 610], xn = [-20, 215, 450, 685];
+  ctx.strokeStyle = L(136, 0.8); ctx.lineWidth = 3;
+  for (var k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(xf[k], 240); ctx.lineTo(xn[k], 345); ctx.stroke(); }
+  ctx.fillStyle = L(124, 0.55); ctx.font = '16px "IBM Plex Mono",monospace'; ctx.textAlign = 'center';
+  ['12', '13', '14'].forEach(function (n, i) { ctx.fillText(n, (xn[i] + xn[i + 1]) / 2, 354); });
+  // 床への映り込み
+  [[230, 80, 1], [380, 80, flick2]].forEach(function (l) {
+    poly([[l[0] + 10, 236], [l[0] + l[1] - 10, 236], [l[0] + l[1] + 6, 340], [l[0] - 6, 340]], L(200, 0.05 * l[2]));
+    pool(l[0] + l[1] / 2, 290, l[1] * 1.3, 34, 0.12 * l[2]);
+  });
+  // 柱
+  [150, 490].forEach(function (x) {
+    rect(x, 18, 44, 292, lg(x, 0, x + 44, 0, [[0, L(78)], [0.7, L(56)], [1, L(30)]]));
+    tex([[x, 18], [x + 44, 18], [x + 44, 310], [x, 310]], texConcrete, 0.7);
+    for (var s = 0; s < 6; s++) rect(x, 270 + s * 7, 44, 7, s % 2 ? L(24) : L(100));
+    ctx.fillStyle = L(128); ctx.font = '14px "IBM Plex Mono",monospace'; ctx.textAlign = 'center';
+    ctx.fillText('B2-' + (x < 300 ? 'C' : 'D'), x + 20, 120);
+  });
+  // 誘導灯
+  var lit = !a[2];
+  rect(288, 156, 64, 24, L(lit ? 44 : 20));
+  if (lit) glow(320, 168, 72, 0.24);
+  ctx.fillStyle = L(lit ? 255 : 46); ctx.font = '15px "DotGothic16","Hiragino Kaku Gothic ProN",sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('出口', 320, 173);
+  car(116); car(541);
+  if (a[0]) car(328);
+  // 無人の車の運転席から振り向く人
+  if (a[4]) {
+    var dq = a[4].prog, al = 0.35 + 0.65 * dq;
+    redGlow(68, 272, 46, 0.55 * al); redGlow(164, 272, 46, 0.55 * al);
+    rect(58, 268, 20, 8, 'rgba(240,44,32,' + al + ')'); rect(154, 268, 20, 8, 'rgba(240,44,32,' + al + ')');
+    ctx.save(); ctx.beginPath(); ctx.rect(76, 240, 80, 16); ctx.clip();
+    ctx.fillStyle = L(3); ctx.beginPath(); ctx.ellipse(116, 254, 16, 14, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(175 * al); ctx.beginPath(); ctx.ellipse(116, 247, 6.5, 8.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = L(2);
+    ctx.beginPath(); ctx.ellipse(113.5, 246, 1.5, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(118.5, 246, 1.5, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(116, 251, 1.6, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  if (a[3]) {
+    var q = a[3].prog, rx = 26 + q * 52, ry = 6 + q * 11;
+    shadow(330, 326, rx * 1.2, ry * 1.2, 0.9);
+    ell(330, 326, rx, ry, 'rgba(0,0,0,0.85)');
+    ctx.strokeStyle = L(170, 0.22); ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(322, 324, rx * 0.5, ry * 0.35, 0, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+  }
+  if (a[1]) { var p = a[1].prog; figure(222 + p * 40, 290 + p * 60, 62 + p * 150, 5, p > 0.8 ? 100 : 0); }
+  [[230, 80, 1], [380, 80, flick2]].forEach(function (l) {
+    poly([[l[0], 36], [l[0] + l[1], 36], [l[0] + l[1] + 70, 240], [l[0] - 70, 240]], L(255, 0.035 * l[2]));
+    lamp(l[0], 30, l[1], 5, l[2]);
+  });
+}
+var DRAW = [drawHall, drawCorridor, drawOffice, drawParking];
+
+/* ---------- 存在しない部屋(1プレイに1回だけ映る) ---------- */
+function drawGhostRoom(now, age) {
+  var sw = RM ? 6 : 38, i, v;
+  var bx = 320 + Math.sin(now * 1.5) * sw, by = 76 + Math.abs(Math.cos(now * 1.5)) * 4;
+  var fl = (!RM && Math.random() < 0.12) ? 0.3 : 1;
+  poly([[0, 0], [640, 0], [470, 80], [170, 80]], lg(0, 0, 0, 80, [[0, L(8)], [1, L(26)]]));
+  poly([[0, 360], [640, 360], [470, 240], [170, 240]], lg(0, 240, 0, 360, [[0, L(40)], [1, L(22)]]));
+  poly([[0, 0], [170, 80], [170, 240], [0, 360]], lg(0, 0, 170, 0, [[0, L(24)], [1, L(64)]]));
+  poly([[640, 0], [470, 80], [470, 240], [640, 360]], lg(470, 0, 640, 0, [[0, L(64)], [1, L(24)]]));
+  poly([[170, 80], [470, 80], [470, 240], [170, 240]], lg(0, 80, 0, 240, [[0, L(62)], [1, L(84)]]));
+  // タイルの目地
+  ctx.strokeStyle = L(8, 0.7); ctx.lineWidth = 1;
+  for (i = 0; i <= 10; i++) { v = i / 10; ctx.beginPath(); ctx.moveTo(170 + v * 300, 80); ctx.lineTo(170 + v * 300, 240); ctx.stroke(); }
+  for (i = 0; i <= 8; i++) {
+    v = i / 8;
+    ctx.beginPath(); ctx.moveTo(170, 80 + v * 160); ctx.lineTo(470, 80 + v * 160); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, v * 360); ctx.lineTo(170, 80 + v * 160); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(640, v * 360); ctx.lineTo(470, 80 + v * 160); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(170 + v * 300, 240); ctx.lineTo(v * 640, 360); ctx.stroke();
+  }
+  for (i = 1; i <= 4; i++) {
+    var yy = 240 + (i / 4) * (i / 4) * 120, k = (yy - 240) / 120;
+    ctx.beginPath(); ctx.moveTo(170 - k * 170, yy); ctx.lineTo(470 + k * 170, yy); ctx.stroke();
+  }
+  // 壁の文字
+  ctx.save(); ctx.globalAlpha = 0.4; ctx.fillStyle = L(10);
+  ctx.font = '20px "DotGothic16","Hiragino Kaku Gothic ProN",sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('みている', 186, 132); ctx.restore();
+  // 排水口
+  ell(320, 318, 24, 5, L(3));
+  ctx.strokeStyle = L(60, 0.5); ctx.lineWidth = 1;
+  for (i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(320 + i * 8, 315); ctx.lineTo(320 + i * 8, 321); ctx.stroke(); }
+  // 浴槽
+  shadow(320, 242, 120, 8, 0.5);
+  rect(222, 188, 196, 52, lg(222, 0, 418, 0, [[0, L(92)], [0.5, L(128)], [1, L(86)]]));
+  rect(218, 181, 204, 9, L(154));
+  ell(320, 181, 96, 7, L(4));
+  for (i = 0; i < 3; i++) {
+    var rp = (now * 0.5 + i / 3) % 1;
+    ctx.strokeStyle = L(130, (1 - rp) * 0.4); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(320, 181, 6 + rp * 82, 1 + rp * 5, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  // カーテンの向こうの人影(時間とともに近づく)
+  var sx = 447 - Math.max(0, age - 1.6) * 7;
+  poly([[sx - 24, 240], [sx - 17, 128], [sx + 17, 128], [sx + 24, 240]], L(2));
+  ctx.fillStyle = L(3); ctx.beginPath(); ctx.ellipse(sx, 112, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = lg(420, 0, 472, 0, [[0, L(120, 0.55)], [0.5, L(160, 0.5)], [1, L(110, 0.55)]]);
+  ctx.fillRect(420, 58, 52, 182);
+  ctx.strokeStyle = L(30, 0.5); ctx.lineWidth = 1;
+  for (i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(420 + i * 8.6, 58); ctx.lineTo(420 + i * 8.6 + (i % 2 ? 2 : -2), 240); ctx.stroke(); }
+  rect(410, 52, 70, 4, L(130));
+  // 浴槽の縁をつかむ手
+  if (age > 1.9) {
+    ell(325, 178, 26, 5, L(150));
+    ctx.lineCap = 'round';
+    [11, 16, 18, 15, 9].forEach(function (len, n) {
+      var fx = 305 + n * 10;
+      ctx.strokeStyle = L(205); ctx.lineWidth = 5.5;
+      ctx.beginPath(); ctx.moveTo(fx, 179); ctx.lineTo(fx + (n - 2) * 0.8, 184); ctx.lineTo(fx + (n - 2) * 1.4, 184 + len * 0.7); ctx.stroke();
+      ctx.strokeStyle = L(40, 0.6); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(fx + 3, 184); ctx.lineTo(fx + 3 + (n - 2) * 0.6, 184 + len * 0.6); ctx.stroke();
+    });
+    ctx.lineCap = 'butt';
+  }
+  // 揺れる裸電球
+  ctx.strokeStyle = L(70); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(320, 0); ctx.lineTo(bx, by - 6); ctx.stroke();
+  ell(bx, by, 6, 8, L(255 * fl));
+  glow(bx, by, 200, 0.28 * fl);
+  pool(bx, 300, 170, 28, 0.2 * fl);
+  rect(0, 0, W, H, 'rgba(0,0,0,0.16)');
+  ctx.textAlign = 'left';
+}
+
+/* ---------- 画面効果 ---------- */
+var noiseTiles = [];
+(function () {
+  for (var i = 0; i < 5; i++) {
+    var c = document.createElement('canvas'); c.width = 160; c.height = 90;
+    var x = c.getContext('2d'), id = x.createImageData(160, 90);
+    for (var p = 0; p < id.data.length; p += 4) {
+      var v = (Math.random() * 255) | 0;
+      id.data[p] = v * 0.8; id.data[p + 1] = v; id.data[p + 2] = v * 0.84; id.data[p + 3] = 255;
+    }
+    x.putImageData(id, 0, 0); noiseTiles.push(c);
+  }
+})();
+var scan = document.createElement('canvas'); scan.width = W; scan.height = H;
+(function () {
+  var x = scan.getContext('2d');
+  for (var y = 0; y < H; y += 3) { x.fillStyle = 'rgba(0,0,0,0.2)'; x.fillRect(0, y, W, 1); }
+})();
+var vig = document.createElement('canvas'); vig.width = W; vig.height = H;
+(function () {
+  var x = vig.getContext('2d'), g = x.createRadialGradient(W / 2, H / 2, H * 0.32, W / 2, H / 2, W * 0.62);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.72)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+})();
+
+/* ---------- 音 ---------- */
+var ac = null, master = null, muted = false, noiseBuf = null;
+function audioInit() {
+  if (ac) { try { ac.resume(); } catch (e) {} return; }
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = muted ? 0 : 0.9;
+    var comp = ac.createDynamicsCompressor(); master.connect(comp); comp.connect(ac.destination);
+    var o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 50;
+    var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 130;
+    var g = ac.createGain(); g.gain.value = 0.05; o.connect(f); f.connect(g); g.connect(master); o.start();
+    var o2 = ac.createOscillator(); o2.type = 'sine'; o2.frequency.value = 7800;
+    var g2 = ac.createGain(); g2.gain.value = 0.0025; o2.connect(g2); g2.connect(master); o2.start();
+    noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    var d = noiseBuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  } catch (e) { ac = null; }
+}
+function tone(freq, dur, type, vol, slide) {
+  if (!ac) return;
+  try {
+    var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+  } catch (e) {}
+}
+function burst(dur, vol, fc) {
+  if (!ac || !noiseBuf) return;
+  try {
+    var s = ac.createBufferSource(); s.buffer = noiseBuf;
+    var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = fc; f.Q.value = 0.9;
+    var g = ac.createGain(), t = ac.currentTime;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.05);
+  } catch (e) {}
+}
+function screamVoice(dur, vol) {
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    [[520, 1], [785, 1.05], [1240, 0.9]].forEach(function (p, i) {
+      var o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lgn = ac.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(p[0] * 0.7, t);
+      o.frequency.exponentialRampToValueAtTime(p[0] * 1.5, t + 0.12);
+      o.frequency.exponentialRampToValueAtTime(p[0] * 0.85, t + dur);
+      lfo.frequency.value = 26 + i * 7; lgn.gain.value = 36 * (i + 1);
+      lfo.connect(lgn); lgn.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol * p[1], t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(master);
+      o.start(t); lfo.start(t); o.stop(t + dur + 0.05); lfo.stop(t + dur + 0.05);
+    });
+    burst(dur, vol * 2.4, 2600);
+    tone(48, Math.min(dur, 0.9), 'sine', vol * 4, 26);
+  } catch (e) {}
+}
+var sfx = {
+  switchCam: function () { burst(0.18, 0.18, 2400); },
+  ok: function () { tone(880, 0.12, 'square', 0.06); setTimeout(function () { tone(1320, 0.16, 'square', 0.06); }, 110); },
+  bad: function () { tone(160, 0.35, 'sawtooth', 0.09, 90); },
+  miss: function () { tone(60, 1.1, 'sawtooth', 0.2, 32); burst(0.8, 0.25, 500); },
+  creak: function () { burst(0.7, 0.07, 260); tone(95, 0.7, 'triangle', 0.03, 70); },
+  scare: function () { screamVoice(1.7, 0.09); },
+  lunge: function () { screamVoice(0.7, 0.07); },
+  thud: function () { tone(68, 0.3, 'sine', 0.4, 32); burst(0.14, 0.22, 320); },
+  ghostIn: function () { tone(110, 2.6, 'sine', 0.09, 92); tone(117, 2.6, 'sine', 0.07, 96); burst(0.6, 0.06, 700); },
+  chime: function () { tone(784, 0.5, 'sine', 0.05); setTimeout(function () { tone(587, 0.8, 'sine', 0.05); }, 380); },
+  sting: function () { tone(233, 1.1, 'sawtooth', 0.045, 200); tone(247, 1.1, 'sawtooth', 0.04, 210); burst(0.5, 0.08, 1200); }
+};
+
+/* ---------- ゲーム状態 ---------- */
+var st;
+function freshState(phase) {
+  return { phase: phase, t: 0, cam: 0, acts: [], bag: [], lastCam: -1, missed: 0, fals: 0, solved: 0, next: GRACE, lock: 0,
+    glitch: 0, switchAt: -9, log: [], toastUntil: 0, creak: 12, dying: 0, endInfo: null,
+    scare: null, flash: 0, phantomIn: GRACE + 8 + Math.random() * 12,
+    roomShown: false, ghost: null, announced: false };
+}
+st = freshState('idle');
+
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function clockParts(gt) {
+  var hf = Math.min(6, gt / HOUR), hh = Math.floor(hf), fr = hf - hh;
+  var mm = Math.floor(fr * 60), ss = Math.floor((fr * 3600) % 60);
+  return { hh: hh, mm: mm, ss: ss };
+}
+
+var logEl = document.getElementById('logList');
+function addLog(text, cls) {
+  var c = clockParts(st.t);
+  st.log.unshift({ time: pad(c.hh) + ':' + pad(c.mm), text: text, cls: cls || '' });
+  if (st.log.length > 40) st.log.pop();
+  renderLog();
+}
+function renderLog() {
+  logEl.innerHTML = '';
+  st.log.forEach(function (e) {
+    var li = document.createElement('li'); li.className = e.cls;
+    var t = document.createElement('time'); t.textContent = e.time;
+    var s = document.createElement('span'); s.textContent = e.text;
+    li.appendChild(t); li.appendChild(s); logEl.appendChild(li);
+  });
+}
+
+var toastEl = document.getElementById('toast'), toastText = document.getElementById('toastText');
+function toast(text, cls) {
+  toastText.textContent = text; toastEl.className = 'toast show ' + (cls || '');
+  st.toastUntil = performance.now() / 1000 + 2.2;
+}
+
+function newGame() {
+  st = freshState('play');
+  dbgOpen = false; document.getElementById('dbg').hidden = true;
+  renderLog(); syncCamButtons();
+  addLog('勤務開始。異常なし。', 'sys');
+  hideOverlay();
+}
+
+/* 異常は「全16種類を一巡するまで同じものを出さない」袋から引く */
+function isActive(p) { return st.acts.some(function (a) { return a.cam === p.cam && a.kind === p.kind; }); }
+function refillBag() {
+  var b = [], i, j, t;
+  for (i = 0; i < CAMS.length; i++) for (j = 0; j < KINDS; j++) b.push({ cam: i, kind: j });
+  for (i = b.length - 1; i > 0; i--) { j = (Math.random() * (i + 1)) | 0; t = b[i]; b[i] = b[j]; b[j] = t; }
+  st.bag = b;
+}
+function findIn(fn) { for (var i = 0; i < st.bag.length; i++) if (fn(st.bag[i])) return i; return -1; }
+function takeAnomaly() {
+  if (!st.bag.length) refillBag();
+  var i = findIn(function (p) { return !isActive(p) && p.cam !== st.cam && p.cam !== st.lastCam; });
+  if (i < 0) i = findIn(function (p) { return !isActive(p) && p.cam !== st.cam; });
+  if (i < 0) i = findIn(function (p) { return !isActive(p); });
+  if (i < 0) {
+    refillBag();
+    i = findIn(function (p) { return !isActive(p) && p.cam !== st.cam; });
+    if (i < 0) i = findIn(function (p) { return !isActive(p); });
+  }
+  return i < 0 ? null : st.bag.splice(i, 1)[0];
+}
+
+function spawn() {
+  var hour = Math.floor(st.t / HOUR);
+  var maxActive = Math.min(4, 2 + Math.floor(hour / 2));
+  if (st.acts.length >= maxActive) { st.next = st.t + 3; return; }
+  var ch = takeAnomaly();
+  if (!ch) { st.next = st.t + 3; return; }
+  st.lastCam = ch.cam;
+  var life = Math.max(26, 46 - hour * 3.4);
+  st.acts.push({ cam: ch.cam, kind: ch.kind, born: st.t, dl: st.t + life, prog: 0 });
+  var base = Math.max(6, 15 - hour * 1.8);
+  st.next = st.t + base * (0.75 + Math.random() * 0.5);
+}
+
+function endGame(win, reason) {
+  st.endInfo = { win: win, reason: reason };
+  if (!win && reason === 'miss') { st.phase = 'dying'; st.dying = 2.2; sfx.scare(); }
+  else { st.phase = 'over'; showEnd(); }
+}
+
+/* 人影・顔の異変は4段階で「ジャンプ」して近づく。見ていない間も進み、切り替えた瞬間に近くなっている */
+/* 存在しない部屋は1プレイに1回だけ。映っている間は通報できず、誤報にもならない */
+function startGhost() {
+  st.roomShown = true;
+  st.ghost = { age: 0, dur: 2.8, cam: st.cam };
+  st.glitch = Math.max(st.glitch, 0.8);
+  sfx.ghostIn();
+}
+function endGhost() {
+  if (!st.ghost) return;
+  var g = st.ghost; st.ghost = null;
+  st.glitch = Math.max(st.glitch, 1); sfx.thud();
+  if (!g.dbg) addLog('CAM' + (g.cam + 1) + '：記録にない部屋の映像を確認。場所は不明。', 'sys');
+}
+var STAGE_P = [0.2, 0.45, 0.72, 1];
+function isEntity(a) { return a.kind === 1 || a.kind === 4; }
+function startScare(type) {
+  if (type === 'lunge') {
+    st.scare = { type: 'lunge', age: 0, dur: 0.7 };
+    st.glitch = Math.max(st.glitch, 1); sfx.lunge();
+  } else {
+    st.scare = { type: 'phantom', age: 0, dur: 0.16, x: 160 + Math.random() * 320, y: 190 + Math.random() * 50, size: 120 + Math.random() * 60 };
+    sfx.thud();
+  }
+  st.flash = 0.07;
+}
+function watchAnomalies() {
+  if (st.ghost) return;
+  if (st.scare) return;
+  for (var i = 0; i < st.acts.length; i++) {
+    var a = st.acts[i];
+    if (a.cam !== st.cam) continue;
+    if (a.stage === 3 && !a.lunged) { a.lunged = true; a.shown = a.stage; startScare('lunge'); return; }
+    if (a.shown !== a.stage) {
+      var first = a.shown == null; a.shown = a.stage;
+      if (isEntity(a)) {
+        st.flash = 0.07; st.glitch = Math.max(st.glitch, 0.5);
+        if (first) sfx.sting(); else sfx.thud();
+        return;
+      }
+    }
+  }
+}
+function update(dt) {
+  if (st.phase === 'dying') {
+    st.dying -= dt; st.glitch = 1.2;
+    if (st.dying <= 0) {
+      if (st.dbgPreview) { st.dbgPreview = false; st.phase = 'play'; st.glitch = 0; st.endInfo = null; }
+      else { st.phase = 'over'; showEnd(); }
+    }
+    return;
+  }
+  if (dbgOpen) {
+    /* デバッグ中は時刻・出現・期限を止め、演出のタイマーだけ進める */
+    st.glitch = Math.max(0, st.glitch - dt);
+    st.flash = Math.max(0, st.flash - dt);
+    if (st.scare) { st.scare.age += dt; if (st.scare.age >= st.scare.dur) st.scare = null; }
+    if (st.ghost) { st.ghost.age += dt; if (st.ghost.age >= st.ghost.dur) endGhost(); }
+    watchAnomalies();
+    return;
+  }
+  st.t += dt;
+  st.lock = Math.max(0, st.lock - dt);
+  st.glitch = Math.max(0, st.glitch - dt);
+  st.flash = Math.max(0, st.flash - dt);
+  if (st.scare) { st.scare.age += dt; if (st.scare.age >= st.scare.dur) st.scare = null; }
+  if (st.ghost) { st.ghost.age += dt; if (st.ghost.age >= st.ghost.dur) endGhost(); }
+  st.creak -= dt;
+  if (st.creak <= 0) { sfx.creak(); st.creak = 12 + Math.random() * 14; if (Math.random() < 0.5) st.glitch = Math.max(st.glitch, 0.25); }
+  if (st.t >= st.next) spawn();
+  if (st.t > GRACE) {
+    st.phantomIn -= dt;
+    if (st.phantomIn <= 0) { st.phantomIn = 20 + Math.random() * 20; if (!RM && !st.scare && !st.ghost) startScare('phantom'); }
+  }
+  for (var i = st.acts.length - 1; i >= 0; i--) {
+    var a = st.acts[i];
+    var raw = Math.max(0, Math.min(1, (st.t - a.born) / (a.dl - a.born)));
+    a.stage = Math.min(3, Math.floor(raw * 4));
+    a.prog = isEntity(a) ? STAGE_P[a.stage] : raw;
+    if (st.t > a.dl) {
+      st.acts.splice(i, 1); st.missed++; st.glitch = 1.4; sfx.miss();
+      addLog('CAM' + (a.cam + 1) + ' ' + CAMS[a.cam].name + '：異常を見逃した。何かが入り込んだ。', 'bad');
+      if (st.missed >= 3) { endGame(false, 'miss'); return; }
+      /* 同じ異常で既に飛びかかり演出を見せていた場合や、演出の再生中は繰り返さない */
+      if (!a.lunged && !(st.scare && st.scare.type === 'lunge')) startScare('lunge');
+    }
+  }
+  if (!st.announced && st.t >= GRACE) {
+    st.announced = true; sfx.chime();
+    addLog('【館内放送】警備員の皆様に連絡します。これより異変の多い時間帯になりますのでご注意ください。', 'ann');
+  }
+  watchAnomalies();
+  if (st.t >= TOTAL) { st.t = TOTAL; endGame(true, 'dawn'); }
+}
+
+function report() {
+  if (st.phase !== 'play' || st.lock > 0) return;
+  if (st.ghost) { toast('映像を確認できません', 'bad'); return; }
+  var idx = -1;
+  for (var i = 0; i < st.acts.length; i++) if (st.acts[i].cam === st.cam) { idx = i; break; }
+  if (idx >= 0) {
+    var a = st.acts.splice(idx, 1)[0]; st.solved++;
+    addLog('CAM' + (a.cam + 1) + ' ' + CAMS[a.cam].name + '：' + CAMS[a.cam].kinds[a.kind] + '。対処済み。', 'ok');
+    toast('通報を受理しました', 'good'); sfx.ok();
+  } else {
+    st.fals++; st.lock = 3; st.glitch = Math.max(st.glitch, 0.35);
+    addLog('CAM' + (st.cam + 1) + ' ' + CAMS[st.cam].name + '：異常なし。誤報として記録された。', 'bad');
+    toast('異常は確認できません。誤報です', 'bad'); sfx.bad();
+    st.phantomIn = Math.min(st.phantomIn, 0.2);
+    if (st.fals >= 3) endGame(false, 'false');
+  }
+}
+
+function setCam(i) {
+  if (st.phase !== 'play' || i === st.cam) return;
+  trackCombo(i);
+  endGhost();
+  st.cam = i; st.switchAt = performance.now() / 1000; sfx.switchCam(); syncCamButtons();
+  if (!st.roomShown && st.t > GRACE && Math.random() < 0.07) startGhost();
+}
+
+/* ---------- 描画 ---------- */
+function render(now) {
+  var gt = st.t; gNow = now;
+  flick = (!RM && Math.random() < 0.035) ? 0.45 : 1;
+  flick2 = (!RM && Math.random() < 0.07) ? 0.3 : 1;
+  var acts = [];
+  for (var c = 0; c < CAMS.length; c++) { var row = []; for (var k = 0; k < KINDS; k++) row.push(null); acts.push(row); }
+  st.acts.forEach(function (a) { acts[a.cam][a.kind] = a; });
+
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'left';
+  if (st.ghost) drawGhostRoom(now, st.ghost.age); else DRAW[st.cam](acts[st.cam], now, gt);
+  ctx.textAlign = 'left';
+
+  var gl = RM ? st.glitch * 0.3 : st.glitch;
+  if (gl > 0) {
+    var n = 3 + ((gl * 7) | 0);
+    for (var i = 0; i < n; i++) {
+      var y = (Math.random() * H) | 0, h = 4 + ((Math.random() * 30) | 0), off = (Math.random() - 0.5) * 70 * Math.min(1, gl);
+      ctx.drawImage(sc, 0, y, W, h, off, y, W, h);
+    }
+  }
+
+  if (st.flash > 0 && !RM) { ctx.fillStyle = 'rgba(215,255,228,' + Math.min(0.6, st.flash * 8) + ')'; ctx.fillRect(0, 0, W, H); }
+  var shk = RM ? 3 : 14;
+  if (st.phase === 'dying') {
+    var ag = 2.2 - st.dying, gk = Math.min(1, ag / 0.14);
+    ctx.fillStyle = 'rgba(0,0,0,0.78)'; ctx.fillRect(0, 0, W, H);
+    drawFace(320 + (Math.random() - 0.5) * shk * 2, 160 + (Math.random() - 0.5) * shk, 470 + gk * 280 + ag * 30, 1, 0.55 + 0.45 * Math.abs(Math.sin(ag * 38)));
+    ctx.fillStyle = 'rgba(190,24,12,' + (0.14 + (RM ? 0.04 : 0.22 * Math.random())) + ')'; ctx.fillRect(0, 0, W, H);
+    if (ag > 1.7) { ctx.fillStyle = 'rgba(0,0,0,' + Math.min(1, (ag - 1.7) / 0.45) + ')'; ctx.fillRect(0, 0, W, H); }
+  } else if (st.scare) {
+    var sq = st.scare;
+    if (sq.type === 'lunge') {
+      var qq = sq.age / sq.dur;
+      ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0, 0, W, H);
+      drawFace(320 + (Math.random() - 0.5) * shk * 1.6, 185 + (Math.random() - 0.5) * shk, 320 + Math.min(1, qq * 4) * 300, 1, 1);
+      ctx.fillStyle = 'rgba(190,24,12,' + (0.12 + (RM ? 0.03 : 0.18 * Math.random())) + ')'; ctx.fillRect(0, 0, W, H);
+      if (qq > 0.7) { ctx.fillStyle = 'rgba(0,0,0,' + Math.min(1, (qq - 0.7) / 0.3) + ')'; ctx.fillRect(0, 0, W, H); }
+    } else {
+      drawFace(sq.x, sq.y, sq.size, 0.85, 0.3);
+    }
+  }
+
+  // 表示用キャンバスへ。軽いぼかしとブルームでレンズの甘さを出す
+  octx.globalCompositeOperation = 'source-over'; octx.globalAlpha = 1;
+  octx.fillStyle = '#000'; octx.fillRect(0, 0, W, H);
+  var filtered = false;
+  try { octx.filter = 'blur(0.55px) contrast(1.1) brightness(0.98)'; filtered = true; } catch (e) {}
+  octx.drawImage(sc, 0, 0);
+  if (filtered) octx.filter = 'none';
+  bctx.clearRect(0, 0, 160, 90); bctx.drawImage(sc, 0, 0, 160, 90);
+  octx.globalCompositeOperation = 'lighter'; octx.globalAlpha = 0.2; octx.drawImage(bloom, 0, 0, W, H);
+  octx.globalCompositeOperation = 'source-over';
+
+  octx.globalAlpha = 0.085 + (RM ? 0 : gl * 0.2);
+  octx.drawImage(noiseTiles[(Math.random() * 5) | 0], 0, 0, W, H);
+  var sw = 1 - (now - st.switchAt) / 0.35;
+  if (sw > 0) { octx.globalAlpha = Math.min(1, sw * 1.1); octx.drawImage(noiseTiles[(Math.random() * 5) | 0], 0, 0, W, H); }
+  octx.globalAlpha = 1;
+  if (!RM) {
+    var by = ((now * 38) % (H + 80)) - 60;
+    octx.fillStyle = lgOut(by);
+    octx.fillRect(0, by, W, 60);
+  }
+  octx.drawImage(scan, 0, 0); octx.drawImage(vig, 0, 0);
+
+  // HUD
+  var cp = clockParts(gt);
+  octx.save();
+  octx.shadowColor = 'rgba(0,0,0,.9)'; octx.shadowBlur = 3;
+  octx.fillStyle = '#e2ab3c';
+  octx.font = '16px "DotGothic16","Hiragino Kaku Gothic ProN",monospace';
+  octx.fillText('CAM' + (st.cam + 1) + '  ' + (st.ghost ? '■■■■' : CAMS[st.cam].name), 16, 28);
+  octx.font = '14px "IBM Plex Mono",monospace'; octx.textAlign = 'right';
+  octx.fillText(st.ghost ? '--/--  --:--:--' : '10/30  ' + pad(cp.hh) + ':' + pad(cp.mm) + ':' + pad(cp.ss), W - 16, 28);
+  octx.textAlign = 'left';
+  if (Math.floor(now * 1.2) % 2 === 0) { octx.fillStyle = '#d9442f'; octx.beginPath(); octx.arc(24, H - 24, 5, 0, Math.PI * 2); octx.fill(); }
+  octx.fillStyle = '#b9cfbf'; octx.font = '12px "IBM Plex Mono",monospace'; octx.fillText('REC', 36, H - 20);
+  octx.restore();
+}
+function lgOut(y) {
+  var g = octx.createLinearGradient(0, y, 0, y + 60);
+  g.addColorStop(0, 'rgba(200,230,210,0)'); g.addColorStop(0.5, 'rgba(200,230,210,0.045)'); g.addColorStop(1, 'rgba(200,230,210,0)');
+  return g;
+}
+
+/* ---------- DOM ---------- */
+var clockEl = document.getElementById('clock'), reportBtn = document.getElementById('report');
+var pipsMiss = document.getElementById('pipsMiss'), pipsFalse = document.getElementById('pipsFalse');
+function buildPips(el) { for (var i = 0; i < 3; i++) { var s = document.createElement('span'); s.className = 'pip'; el.appendChild(s); } }
+buildPips(pipsMiss); buildPips(pipsFalse);
+var camBtns = Array.prototype.slice.call(document.querySelectorAll('.cam'));
+function syncCamButtons() { camBtns.forEach(function (b, i) { b.classList.toggle('on', i === st.cam); }); }
+var cache = {};
+function setText(el, key, v) { if (cache[key] !== v) { cache[key] = v; el.textContent = v; } }
+function syncHud(now) {
+  var c = clockParts(st.t);
+  setText(clockEl, 'clock', pad(c.hh) + ':' + pad(c.mm));
+  var m = st.missed + ':' + st.fals;
+  if (cache.pips !== m) {
+    cache.pips = m;
+    Array.prototype.forEach.call(pipsMiss.children, function (p, i) { p.classList.toggle('on', i < st.missed); });
+    Array.prototype.forEach.call(pipsFalse.children, function (p, i) { p.classList.toggle('on', i < st.fals); });
+  }
+  var locked = st.phase !== 'play' || st.lock > 0;
+  if (reportBtn.disabled !== locked) reportBtn.disabled = locked;
+  setText(reportBtn, 'rb', st.lock > 0 ? '再確認中  ' + Math.ceil(st.lock) : '通報  [Space]');
+  if (st.toastUntil && now > st.toastUntil) { st.toastUntil = 0; toastEl.className = 'toast'; }
+}
+
+var ov = document.getElementById('ov'), ovBtn = document.getElementById('ovBtn');
+function hideOverlay() { ov.hidden = true; }
+function showEnd() {
+  var info = st.endInfo, win = info.win;
+  document.getElementById('ovEye').textContent = win ? '06:00' : 'SHIFT ENDED';
+  document.getElementById('ovTitle').textContent = win ? '夜が明けた' : (info.reason === 'miss' ? '侵入を許した' : '解雇');
+  document.getElementById('ovLead').textContent = win
+    ? '午前6時。交代の警備員が来た。今夜は何事もなかったことになっている。'
+    : (info.reason === 'miss' ? '見逃しが3件に達した。カメラの外から、何かが入ってきた。' : '誤報が3回続いた。警備会社は今夜限りであなたを外した。');
+  document.getElementById('ovRules').hidden = true;
+  document.getElementById('ovNote').hidden = true;
+  document.getElementById('ovStats').hidden = false;
+  document.getElementById('stOk').textContent = st.solved;
+  document.getElementById('stMiss').textContent = st.missed;
+  document.getElementById('stFalse').textContent = st.fals;
+  ovBtn.textContent = 'もう一度、夜勤に入る';
+  ov.hidden = false;
+  ovBtn.focus();
+}
+ovBtn.addEventListener('click', function () { audioInit(); newGame(); ovBtn.blur(); });
+
+camBtns.forEach(function (b, i) { b.addEventListener('click', function () { setCam(i); b.blur(); }); });
+var lastReport = 0;
+function tryReport() {
+  var n = performance.now();
+  if (n - lastReport < 180) return;
+  lastReport = n; report();
+}
+reportBtn.addEventListener('click', function () { tryReport(); reportBtn.blur(); });
+document.addEventListener('keydown', function (e) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!ov.hidden) return;
+  if (e.key === 'Escape' && dbgOpen) { closeDebug(); return; }
+  if (e.target && e.target.closest && e.target.closest('#dbg')) return;
+  if (e.key >= '1' && e.key <= '4') { setCam(Number(e.key) - 1); }
+  else if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) tryReport(); }
+});
+document.addEventListener('keyup', function (e) { if (e.code === 'Space' && ov.hidden && !(e.target && e.target.closest && e.target.closest('#dbg'))) e.preventDefault(); });
+
+var muteBtn = document.getElementById('mute');
+muteBtn.addEventListener('click', function () {
+  muted = !muted; muteBtn.textContent = muted ? '音 OFF' : '音 ON'; muteBtn.setAttribute('aria-pressed', String(muted));
+  if (master) master.gain.value = muted ? 0 : 0.9;
+  muteBtn.blur();
+});
+
+/* ---------- デバッグモード ----------
+   1番と4番のカメラを素早く交互に切り替える(往復4回=8回の切替)と開く。開いている間は時間が止まる */
+var dbgOpen = false;
+var dbgEl = document.getElementById('dbg');
+var comboN = 0, comboLast = -1, comboAt = 0;
+function trackCombo(i) {
+  var n = performance.now(), edge = (i === 0 || i === 3);
+  if (edge && comboLast !== -1 && i !== comboLast && n - comboAt < 700) comboN++;
+  else comboN = edge ? 1 : 0;
+  comboLast = edge ? i : -1; comboAt = n;
+  if (comboN >= 8) { comboN = 0; openDebug(); }
+}
+function openDebug() {
+  if (dbgOpen || st.phase !== 'play') return;
+  dbgOpen = true; dbgEl.hidden = false;
+  addLog('デバッグモード開始。時間停止中。', 'sys');
+}
+function closeDebug() {
+  if (!dbgOpen) return;
+  dbgOpen = false; dbgEl.hidden = true;
+  addLog('デバッグモード終了。', 'sys');
+}
+function dbgGoto(cam) {
+  if (cam === st.cam) return;
+  endGhost(); st.cam = cam; st.switchAt = performance.now() / 1000; syncCamButtons();
+}
+var FX = [
+  ['飛びかかり(顔)', function () { startScare('lunge'); }],
+  ['一瞬の顔', function () { startScare('phantom'); }],
+  ['死亡演出', function () { st.scare = null; st.ghost = null; st.endInfo = { win: false, reason: 'miss' }; st.dbgPreview = true; st.phase = 'dying'; st.dying = 2.2; sfx.scare(); }],
+  ['存在しない部屋', function () { var was = st.roomShown; startGhost(); st.roomShown = was; st.ghost.dbg = true; }],
+  ['画面ノイズ', function () { st.glitch = 1.4; }],
+  ['フラッシュ', function () { st.flash = 0.07; }],
+  ['見逃し音', function () { sfx.miss(); }],
+  ['軋み音', function () { sfx.creak(); }],
+  ['放送チャイム', function () { sfx.chime(); }]
+];
+var fxRow = document.getElementById('dbgFx');
+FX.forEach(function (f) {
+  var b = document.createElement('button'); b.type = 'button'; b.textContent = f[0];
+  b.addEventListener('click', function () { if (st.phase === 'play') f[1](); b.blur(); });
+  fxRow.appendChild(b);
+});
+var kindSel = document.getElementById('dbgKind'), stageSel = document.getElementById('dbgStage');
+CAMS.forEach(function (c, ci) {
+  c.kinds.forEach(function (k, ki) {
+    var o = document.createElement('option'); o.value = ci + ':' + ki; o.textContent = 'CAM' + (ci + 1) + ' ' + k; kindSel.appendChild(o);
+  });
+});
+var DBG_RAW = [0.1, 0.35, 0.6, 0.9];
+['段階1(発生直後)', '段階2', '段階3', '段階4(最終)'].forEach(function (t, i) {
+  var o = document.createElement('option'); o.value = i; o.textContent = t; stageSel.appendChild(o);
+});
+document.getElementById('dbgSpawn').addEventListener('click', function () {
+  if (st.phase !== 'play') return;
+  var v = kindSel.value.split(':'), cam = Number(v[0]), kind = Number(v[1]), raw = DBG_RAW[Number(stageSel.value)], life = 40;
+  st.acts = st.acts.filter(function (a) { return !(a.cam === cam && a.kind === kind); });
+  var a = { cam: cam, kind: kind, born: st.t - raw * life, dl: st.t - raw * life + life, prog: 0 };
+  a.stage = Math.min(3, Math.floor(raw * 4)); a.prog = isEntity(a) ? STAGE_P[a.stage] : raw;
+  st.acts.push(a);
+  dbgGoto(cam);
+  this.blur();
+});
+document.getElementById('dbgClear').addEventListener('click', function () { st.acts.length = 0; this.blur(); });
+document.getElementById('dbgClose').addEventListener('click', function () { closeDebug(); this.blur(); });
+kindSel.addEventListener('change', function () { kindSel.blur(); });
+stageSel.addEventListener('change', function () { stageSel.blur(); });
+
+/* ---------- ループ ---------- */
+var last = 0, lastDraw = 0;
+function frame(ts) {
+  requestAnimationFrame(frame);
+  if (ts - lastDraw < 62) return;
+  var dt = Math.min(0.25, (ts - (last || ts)) / 1000);
+  last = ts; lastDraw = ts;
+  if (st.phase === 'play' || st.phase === 'dying') update(dt);
+  render(ts / 1000);
+  syncHud(ts / 1000);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
