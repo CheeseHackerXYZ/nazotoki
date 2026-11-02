@@ -1,0 +1,1092 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>闇の回廊</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+/* Layout: 3D view on top, a fixed bottom panel holding the minimap (centre) and touch controls (sides). */
+:root {
+  --bg: #050606;
+  --ink: #d8ddd4;
+  --dim: #7b857b;
+  --blood: #b3201f;
+  --exit: #5dffa0;
+  --lamp: #ffd9a0;
+  --panel: #0a0c0b;
+  --line: #222a26;
+  --display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) clamp(148px, 26%, 200px);
+}
+#view { position: relative; min-height: 0; overflow: hidden; touch-action: none; background: #000; }
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#vignette, #redpulse { position: absolute; inset: 0; pointer-events: none; }
+#vignette { background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 28%, rgba(0,0,0,.82) 100%); }
+#redpulse {
+  background: radial-gradient(ellipse at 50% 50%, rgba(120,0,0,0) 38%, rgba(160,0,12,.6) 100%);
+  opacity: var(--danger, 0);
+}
+#flash { position: absolute; inset: 0; pointer-events: none; background: #7a0000; opacity: 0; transition: opacity .12s; }
+#flash.on { opacity: .75; }
+
+#hud {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  padding-block: 10px 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+#clock { font-weight: 700; font-size: 15px; letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--ink); text-shadow: 0 1px 6px #000; }
+#sta { margin-top: 6px; width: 92px; height: 4px; background: rgba(255,255,255,.14); border-radius: 2px; overflow: hidden; }
+#stai { display: block; height: 100%; width: 100%; background: var(--lamp); transform-origin: left center; transition: background .2s; }
+#sta.low #stai { background: var(--blood); }
+#snd {
+  pointer-events: auto; font: 700 12px/1 var(--body); letter-spacing: .08em; color: var(--ink);
+  background: rgba(0,0,0,.45); border: 1px solid var(--line); border-radius: 3px; padding: 8px 10px; min-height: 32px;
+}
+#snd:focus-visible, .btn:focus-visible, #run:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
+
+#panel {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px;
+  background: var(--panel); border-top: 1px solid var(--line);
+  padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  touch-action: none;
+}
+.side { display: flex; align-items: center; min-width: 0; }
+.side.left { justify-content: flex-start; }
+.side.right { justify-content: flex-end; text-align: right; }
+.hint { margin: 0; font-size: 12px; line-height: 1.7; color: var(--dim); letter-spacing: .04em; }
+.mmwrap { position: relative; line-height: 0; }
+#mm { display: block; background: #050706; border: 1px solid var(--line); border-radius: 3px; }
+.north { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font: 700 10px/1 var(--body); color: var(--dim); letter-spacing: .1em; line-height: 1; }
+
+#stick, #run { display: none; touch-action: none; }
+.touch #stick { display: block; }
+.touch #run { display: block; }
+.touch .hint { display: none; }
+#stick {
+  position: relative; width: 86px; height: 86px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.05), rgba(255,255,255,.12));
+  border: 1px solid #2c3631;
+}
+#knob {
+  position: absolute; left: 50%; top: 50%; width: 38px; height: 38px; margin: -19px 0 0 -19px; border-radius: 50%;
+  background: #3a4640; border: 1px solid #55655c; pointer-events: none;
+}
+#run {
+  width: 68px; height: 68px; border-radius: 50%; color: var(--ink); font: 700 14px/1 var(--body); letter-spacing: .06em;
+  background: #1a201d; border: 1px solid #3a4640;
+}
+#run.on { background: #3b2a12; border-color: var(--lamp); color: var(--lamp); }
+
+#overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.84); }
+.screen {
+  display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; max-width: 100%;
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+.kicker { margin: 0; font-size: 12px; letter-spacing: .32em; color: var(--dim); }
+.logo {
+  margin: 0; font-family: var(--display); font-weight: 800; line-height: 1.1; letter-spacing: .14em;
+  font-size: clamp(54px, 15vmin, 108px); writing-mode: vertical-rl; color: var(--ink);
+  text-shadow: 0 0 22px rgba(179,32,31,.55);
+  animation: flick 5.5s infinite;
+}
+.lead { margin: 0; max-width: 24em; font-size: 15px; line-height: 1.9; }
+.how { margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.9; color: var(--dim); max-width: 26em; }
+.how-touch { display: none; }
+.touch .how-touch { display: block; }
+.touch .how-pc { display: none; }
+.btn {
+  font: 700 16px/1 var(--body); letter-spacing: .24em; padding: 16px 34px 16px 38px; min-height: 48px;
+  color: var(--ink); background: transparent; border: 1px solid var(--blood); border-radius: 2px; cursor: pointer;
+}
+.btn:hover { background: rgba(179,32,31,.22); }
+.result { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(40px, 11vw, 72px); letter-spacing: .12em; line-height: 1.2; text-wrap: balance; }
+#s-dead .result { color: var(--blood); text-shadow: 0 0 24px rgba(179,32,31,.6); }
+#s-clear .result { color: var(--exit); text-shadow: 0 0 24px rgba(93,255,160,.4); }
+.info { margin: 0; font-size: 15px; line-height: 1.8; font-variant-numeric: tabular-nums; }
+@keyframes flick { 0%, 92%, 100% { opacity: 1 } 93% { opacity: .55 } 94% { opacity: 1 } 96% { opacity: .35 } 97% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .logo { animation: none; } #flash { transition: none; } }
+</style>
+
+<div id="app">
+  <div id="view">
+    <canvas id="gl"></canvas>
+    <div id="vignette"></div>
+    <div id="redpulse"></div>
+    <div id="flash"></div>
+    <div id="hud">
+      <div>
+        <div id="clock">0:00</div>
+        <div id="sta"><i id="stai"></i></div>
+      </div>
+      <button id="snd" type="button" aria-label="音の入り切り">音 入</button>
+    </div>
+    <div id="overlay">
+      <section id="s-title" class="screen">
+        <p class="kicker">3Dホラー迷宮</p>
+        <h1 class="logo">闇の回廊</h1>
+        <p class="lead">暗い回廊を北へ進み、出口の緑の光を探してください。遠くに赤い目が見えたら、走ってください。</p>
+        <ul class="how">
+          <li class="how-touch">左のスティックで移動、画面をドラッグして視点を動かします。右下の「走る」で加速します。</li>
+          <li class="how-pc">W A S D または矢印キーで移動、ドラッグで視点、Shift で走ります。</li>
+          <li>ミニマップには歩いた場所だけが映ります。</li>
+        </ul>
+        <button id="go" class="btn" type="button">はじめる</button>
+      </section>
+      <section id="s-dead" class="screen" hidden>
+        <h2 class="result">つかまった</h2>
+        <p class="info" id="dead-info"></p>
+        <button class="btn retry" type="button">もう一度</button>
+      </section>
+      <section id="s-clear" class="screen" hidden>
+        <h2 class="result">脱出成功</h2>
+        <p class="info" id="clear-info"></p>
+        <button class="btn retry" type="button">もう一度</button>
+      </section>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div class="side left">
+      <div id="stick"><div id="knob"></div></div>
+      <p class="hint">移動<br>W A S D / 矢印</p>
+    </div>
+    <div class="mmwrap"><canvas id="mm"></canvas><span class="north">N</span></div>
+    <div class="side right">
+      <button id="run" type="button">走る</button>
+      <p class="hint">視点 ドラッグ<br>走る Shift</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script id="gen">
+const mapAreaSize = 3;
+const mapPartSize = 15;
+const seeds = [114,514,364,721,810,1919,8315,114514,101000818];
+const types = ['wall','road','room','door1','door2'];
+const mapArea = [];
+let roomIndex = 0;
+
+for (let i = 0; i < mapAreaSize ** 2; i++) {
+    let hasTop = !(i < mapAreaSize);
+    let hasRight = !(i % mapAreaSize == mapAreaSize - 1);
+    let hasBottom = !(i > mapAreaSize * (mapAreaSize - 1) - 1);
+    let hasLeft = !(i % mapAreaSize == 0);
+    mapArea.push(generateMapPart(seeds[i], mapPartSize, hasTop, hasRight, hasBottom, hasLeft))
+}
+
+const map = combine(mapArea, mapPartSize, mapAreaSize)
+
+
+function generateMapPart(seed, size, hasTop, hasRight, hasBottom, hasLeft) {
+    const TL = types.length;
+    const s = seed;
+    const sz = size;
+    let mapPart = Array(sz).fill(0).map(() => Array(sz).fill(0));
+
+    // 道作成
+    const cross1X = $RN(s, 0, sz - 2) + 1;
+    const cross1Y = $RN(s, 1, sz - 2) + 1;
+    const cross2X = $RN(s, 2, sz - 2) + 1;
+    const cross2Y = $RN(s, 3, sz - 2) + 1;
+
+    mapPart[cross1Y][cross1X] = 1;
+    mapPart[cross2Y][cross2X] = 1;
+
+    const createStreet = (fromX, fromY, toX, toY, index) => {
+        let currentX = fromX;
+        let currentY = fromY;
+
+        let diffX = Math.abs(toX - fromX);
+        let diffY = Math.abs(toY - fromY);
+        const signX = Math.sign(toX - fromX);
+        const signY = Math.sign(toY - fromY);
+
+        const diffSum = diffX + diffY;
+        const checkValid = (nextX, nextY) => {
+            if (nextX === toX && nextY === toY) return true;
+            if (nextX === 0 || nextX === sz - 1 || nextY === 0 || nextY === sz - 1) {
+                return false;
+            }
+            return true;
+        };
+
+        const moveX = () => {
+            diffX -= 1;
+            currentX += signX;
+            mapPart[currentY][currentX] = 1;
+        };
+        const moveY = () => {
+            diffY -= 1;
+            currentY += signY;
+            mapPart[currentY][currentX] = 1;
+        };
+
+        for (let i = 0; i < diffSum; i++) {
+            if (diffX === 0) { moveY(); continue; }
+            if (diffY === 0) { moveX(); continue; }
+
+            const nextX = currentX + signX;
+            const nextY = currentY + signY;
+
+            const ableX = checkValid(nextX, currentY);
+            const ableY = checkValid(currentX, nextY);
+
+            if (!ableX && ableY) { moveY(); continue; }
+            if (!ableY && ableX) { moveX(); continue; }
+
+            const random = $R(seed, index * 100 + i);
+            if (random < 0.5) {
+                moveX();
+            } else {
+                moveY();
+            }
+        }
+    };
+
+    createStreet(cross1X, cross1Y, cross2X, cross2Y, 0);
+
+    const h = (sz - 1) / 2;
+    let [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] = [h, 0, sz - 1, h, h, sz - 1, 0, h];
+
+    const checkDist = (x, y) => {
+        let dist1 = Math.abs(cross1X - x) + Math.abs(cross1Y - y);
+        let dist2 = Math.abs(cross2X - x) + Math.abs(cross2Y - y);
+        let dist = Math.min(dist1, dist2);
+        if (dist1 < dist2) {
+            return [1, dist];
+        } else {
+            return [2, dist];
+        }
+    };
+
+    const [topNear, distTop] = checkDist(topX, topY);
+    const [rightNear, distRight] = checkDist(rightX, rightY);
+    const [bottomNear, distBottom] = checkDist(bottomX, bottomY);
+    const [leftNear, distLeft] = checkDist(leftX, leftY);
+
+    const directions = [
+        { dist: distTop, has: hasTop, near: topNear, posX: topX, posY: topY, index: 1 },
+        { dist: distRight, has: hasRight, near: rightNear, posX: rightX, posY: rightY, index: 2 },
+        { dist: distBottom, has: hasBottom, near: bottomNear, posX: bottomX, posY: bottomY, index: 3 },
+        { dist: distLeft, has: hasLeft, near: leftNear, posX: leftX, posY: leftY, index: 4 }
+    ];
+    directions.sort((a, b) => (a.dist - b.dist));
+    directions.forEach(dir => {
+        if (dir.has) {
+            let [crossX, crossY] = dir.near === 1 ? [cross1X, cross1Y] : [cross2X, cross2Y];
+            createStreet(crossX, crossY, dir.posX, dir.posY, 1);
+        }
+    });
+    // 部屋とドアの配置
+    function generateRooms(targetRoomCount = 2, roomSize, maxTrials = 100) {
+        let roomCount = 0;
+        let trial = 0;
+
+        const overlapRoadMax = roomSize ** 2 / 3;
+        const roomAreaMin = (roomSize ** 2 / 3) * 2;
+
+        while (roomCount < targetRoomCount && trial < maxTrials) {
+            const rx = $RN(seed, trial * 10 + 1, sz - roomSize);
+            const ry = $RN(seed, trial * 10 + 2, sz - roomSize);
+            const rw = roomSize;
+            const rh = roomSize;
+
+            // この部屋用の基本値（エンコード用）
+            const currentRoomId = roomIndex + 1;
+            const roomValue = currentRoomId * TL + 2;        // 属性: 2 (部屋)
+            const doorSingleValue = currentRoomId * TL + 3;  // 属性: 3 (1連ドア)
+            const doorDoubleValue = currentRoomId * TL + 4;  // 属性: 4 (2連ドア)
+
+            let canPlace = true;
+            let overlapRoadCount = 0;
+
+            for (let y = ry; y < ry + rh; y++) {
+                for (let x = rx; x < rx + rw; x++) {
+                    const tileType = mapPart[y][x] % TL;
+                    if (tileType === 1) overlapRoadCount++;
+                    if (tileType === 2) canPlace = false; // すでに部屋がある
+                }
+            }
+
+            if (!canPlace || overlapRoadCount > overlapRoadMax) {
+                trial++;
+                continue;
+            }
+
+            let roomTiles = [];
+            for (let y = ry; y < ry + rh; y++) {
+                for (let x = rx; x < rx + rw; x++) {
+                    if (mapPart[y][x] === 0) {
+                        mapPart[y][x] = roomValue;
+                        roomTiles.push({ x, y });
+                    }
+                }
+            }
+
+            if (roomTiles.length < roomAreaMin) {
+                roomTiles.forEach(t => mapPart[t.y][t.x] = 0);
+                trial++;
+                continue;
+            }
+
+            // 部屋がつながっているかの確認
+            const dirVectors = [{x:0, y:-1}, {x:1, y:0}, {x:0, y:1}, {x:-1, y:0}];
+            const isConnected = () => {
+                const visited = new Set();
+                const queue = [roomTiles[0]];
+                visited.add(`${roomTiles[0].x},${roomTiles[0].y}`);
+                let reachedCount = 0;
+
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    reachedCount++;
+                    for (const d of dirVectors) {
+                        const nx = current.x + d.x;
+                        const ny = current.y + d.y;
+                        const key = `${nx},${ny}`;
+
+                        if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
+                            // 同じ部屋のマスかを判定
+                            if (mapPart[ny][nx] === roomValue && !visited.has(key)) {
+                                visited.add(key);
+                                queue.push({ x: nx, y: ny });
+                            }
+                        }
+                    }
+                }
+                return reachedCount === roomTiles.length;
+            };
+
+            if (!isConnected()) {
+                roomTiles.forEach(t => mapPart[t.y][t.x] = 0);
+                trial++;
+                continue;
+            }
+
+            // ドアの配置候補抽出
+            const candidateSingleDoors = [];
+
+            roomTiles.forEach(tile => {
+                let roadNeighborCount = 0;
+                let roadDir = null;
+                dirVectors.forEach(d => {
+                    const nx = tile.x + d.x;
+                    const ny = tile.y + d.y;
+                    if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
+                        // 道路(属性1)に接しているかを判定
+                        if (mapPart[ny][nx] % TL === 1) {
+                            roadNeighborCount++;
+                            roadDir = d;
+                        }
+                    }
+                });
+
+                if (roadNeighborCount === 1) {
+                    candidateSingleDoors.push({ tile, dir: roadDir });
+                }
+            });
+
+            if (candidateSingleDoors.length === 0) {
+                roomTiles.forEach(t => mapPart[t.y][t.x] = 0);
+                trial++;
+                continue;
+            }
+
+            // 2連ドアの探索
+            const candidateDoubleDoors = [];
+            for (let i = 0; i < candidateSingleDoors.length; i++) {
+                for (let j = i + 1; j < candidateSingleDoors.length; j++) {
+                    const d1 = candidateSingleDoors[i];
+                    const d2 = candidateSingleDoors[j];
+                    if (d1.dir.x === d2.dir.x && d1.dir.y === d2.dir.y) {
+                        const dist = Math.abs(d1.tile.x - d2.tile.x) + Math.abs(d1.tile.y - d2.tile.y);
+                        if (dist === 1) {
+                            candidateDoubleDoors.push([d1.tile, d2.tile]);
+                        }
+                    }
+                }
+            }
+
+            if (candidateDoubleDoors.length > 0) {
+                // 2連ドア配置
+                const pairIdx = Math.floor($R(seed, trial * 10 + 3) * candidateDoubleDoors.length);
+                const [t1, t2] = candidateDoubleDoors[pairIdx];
+
+                mapPart[t1.y][t1.x] = doorDoubleValue;
+                mapPart[t2.y][t2.x] = doorDoubleValue;
+            } else {
+                // 普通のドア配置
+                const doorIdx = Math.floor($R(seed, trial * 10 + 3) * candidateSingleDoors.length);
+                const selectedDoor = candidateSingleDoors[doorIdx];
+
+                mapPart[selectedDoor.tile.y][selectedDoor.tile.x] = doorSingleValue;
+            }
+
+            roomCount++;
+            roomIndex++; // 全体の累積部屋数インデックスを加算
+            trial++;
+        }
+
+        return mapPart;
+    }
+
+    generateRooms(2, 5, 100);
+    generateRooms(2, 4, 100);
+    return mapPart;
+}
+function $R(seed, index) {
+    let hash = Math.sin(seed * 9999 + index * 7777) * 10000;
+    return hash - Math.floor(hash);
+}
+
+function $RN(seed,index,num) {
+    return Math.floor($R(seed,index) * num);
+}
+
+function combine(mapArea, mapPartSize, mapAreaSize) {
+    const totalSize = mapPartSize * mapAreaSize; // 15 * 3 = 45
+    const map = Array(totalSize).fill(0).map(() => Array(totalSize).fill(0));
+
+    for (let areaIndex = 0; areaIndex < mapArea.length; areaIndex++) {
+        const areaX = areaIndex % mapAreaSize;
+        const areaY = Math.floor(areaIndex / mapAreaSize);
+
+        const part = mapArea[areaIndex];
+
+        for (let py = 0; py < mapPartSize; py++) {
+            for (let px = 0; px < mapPartSize; px++) {
+                const mapY = areaY * mapPartSize + py;
+                const mapX = areaX * mapPartSize + px;
+                map[mapY][mapX] = part[py][px];
+            }
+        }
+    }
+
+    return map;
+}
+</script>
+
+<script id="game">
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const T = types.length, CS = 2, WH = 2.5, N = map.length;
+const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const walk = (x, y) => x >= 0 && y >= 0 && x < N && y < N && map[y][x] % T !== 0;
+const kind = (x, y) => map[y][x] % T;
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+if (isTouch) document.body.classList.add('touch');
+
+/* ---------- grid helpers ---------- */
+function bfsField(sx, sy) {
+  const d = new Int16Array(N * N).fill(-1);
+  const q = new Int32Array(N * N);
+  let h = 0, t = 0;
+  d[sy * N + sx] = 0; q[t++] = sy * N + sx;
+  while (h < t) {
+    const c = q[h++], cx = c % N, cy = (c / N) | 0, dc = d[c];
+    for (const [dx, dy] of DIRS) {
+      const nx = cx + dx, ny = cy + dy;
+      if (walk(nx, ny) && d[ny * N + nx] < 0) { d[ny * N + nx] = dc + 1; q[t++] = ny * N + nx; }
+    }
+  }
+  return d;
+}
+const comp = new Int16Array(N * N).fill(-1);
+let mainComp = -1, mainSize = 0, nComp = 0;
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+  if (!walk(x, y) || comp[y * N + x] >= 0) continue;
+  const f = bfsField(x, y); let size = 0;
+  for (let i = 0; i < N * N; i++) if (f[i] >= 0) { comp[i] = nComp; size++; }
+  if (size > mainSize) { mainSize = size; mainComp = nComp; }
+  nComp++;
+}
+const mainCells = [];
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (walk(x, y) && comp[y * N + x] === mainComp) mainCells.push([x, y]);
+
+/* ---------- renderer ---------- */
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: !isTouch });
+} catch (e) {
+  $('s-title').innerHTML = '<h2 class="result">表示できません</h2><p class="info">このブラウザでは WebGL が使えません。</p>';
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.fog = new THREE.Fog(0x000000, 1.2, 9.5);
+const camera = new THREE.PerspectiveCamera(74, 1, 0.05, 60);
+camera.rotation.order = 'YXZ';
+
+scene.add(new THREE.AmbientLight(0x20262b, 0.55));
+const lamp = new THREE.PointLight(0xffc890, 0.6, 8, 1.4);
+scene.add(lamp);
+const spot = new THREE.SpotLight(0xfff0d0, 1.7, 16, 0.64, 0.6, 1.3);
+scene.add(spot, spot.target);
+
+/* ---------- textures ---------- */
+function tex(draw, repeat) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  draw(c.getContext('2d'), 256);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+  if (repeat) t.repeat.set(repeat, repeat);
+  return t;
+}
+function grain(g, s, n, a) {
+  for (let i = 0; i < n; i++) {
+    const v = Math.random() < 0.5 ? 0 : 255, w = 1 + Math.random() * 3;
+    g.fillStyle = `rgba(${v},${v},${v},${Math.random() * a})`;
+    g.fillRect(Math.random() * s, Math.random() * s, w, w);
+  }
+}
+const wallTex = tex((g, s) => {
+  g.fillStyle = '#5c625b'; g.fillRect(0, 0, s, s);
+  grain(g, s, 7000, 0.2);
+  g.strokeStyle = 'rgba(0,0,0,.5)'; g.lineWidth = 2;
+  for (let r = 0; r < 8; r++) {
+    g.beginPath(); g.moveTo(0, r * 32); g.lineTo(s, r * 32); g.stroke();
+    const off = (r % 2) * 32;
+    for (let x = off; x <= s; x += 64) { g.beginPath(); g.moveTo(x, r * 32); g.lineTo(x, r * 32 + 32); g.stroke(); }
+  }
+  for (let i = 0; i < 16; i++) {
+    const x = Math.random() * s, w = 4 + Math.random() * 16;
+    const gr = g.createLinearGradient(0, 0, 0, s);
+    gr.addColorStop(0, 'rgba(8,12,6,.6)'); gr.addColorStop(1, 'rgba(8,12,6,0)');
+    g.fillStyle = gr; g.fillRect(x, 0, w, 40 + Math.random() * (s - 40));
+  }
+});
+const floorTex = tex((g, s) => {
+  g.fillStyle = '#4a4d4a'; g.fillRect(0, 0, s, s);
+  grain(g, s, 6000, 0.2);
+  for (let i = 0; i < 5; i++) {
+    const x = Math.random() * s, y = Math.random() * s, r = 20 + Math.random() * 40;
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, 'rgba(20,10,6,.45)'); gr.addColorStop(1, 'rgba(20,10,6,0)');
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  g.strokeStyle = 'rgba(0,0,0,.65)'; g.lineWidth = 3;
+  g.strokeRect(0, 0, s, s);
+  g.beginPath(); g.moveTo(s / 2, 0); g.lineTo(s / 2, s); g.moveTo(0, s / 2); g.lineTo(s, s / 2); g.stroke();
+});
+const ceilTex = tex((g, s) => {
+  g.fillStyle = '#2b2d2c'; g.fillRect(0, 0, s, s);
+  grain(g, s, 4000, 0.16);
+  g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 3; g.strokeRect(0, 0, s, s);
+}, N);
+
+const phong = (map_, color) => new THREE.MeshPhongMaterial({ map: map_, color: color || 0xffffff, shininess: 6, specular: 0x0c0c0c });
+
+/* ---------- static level geometry ---------- */
+const wallCells = [], floorCells = [], doorCells = [];
+for (let y = -1; y <= N; y++) for (let x = -1; x <= N; x++) {
+  if (walk(x, y)) {
+    floorCells.push([x, y]);
+    if (kind(x, y) >= 3) doorCells.push([x, y]);
+  } else {
+    let near = false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (walk(x + dx, y + dy)) near = true;
+    if (near) wallCells.push([x, y]);
+  }
+}
+const tmpM = new THREE.Matrix4();
+function instanced(geo, mat, cells, yPos, colorFn) {
+  const m = new THREE.InstancedMesh(geo, mat, cells.length);
+  cells.forEach(([x, y], i) => {
+    tmpM.makeTranslation((x + 0.5) * CS, yPos, (y + 0.5) * CS);
+    m.setMatrixAt(i, tmpM);
+    if (colorFn) m.setColorAt(i, colorFn(x, y));
+  });
+  m.instanceMatrix.needsUpdate = true;
+  if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  scene.add(m);
+  return m;
+}
+instanced(new THREE.BoxGeometry(CS, WH, CS), phong(wallTex), wallCells, WH / 2);
+const cRoad = new THREE.Color(0xcfd2cc), cRoom = new THREE.Color(0xb59272), cDoor = new THREE.Color(0x805536);
+const floorGeo = new THREE.PlaneGeometry(CS, CS); floorGeo.rotateX(-Math.PI / 2);
+instanced(floorGeo, phong(floorTex), floorCells, 0, (x, y) => { const k = kind(x, y); return k === 1 ? cRoad : k === 2 ? cRoom : cDoor; });
+instanced(new THREE.BoxGeometry(CS, 0.55, CS), phong(null, 0x2b1c12), doorCells, WH - 0.275);
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(N * CS, N * CS), phong(ceilTex));
+ceil.rotation.x = Math.PI / 2; ceil.position.set(N * CS / 2, WH, N * CS / 2);
+scene.add(ceil);
+
+/* ---------- goal ---------- */
+const goal = new THREE.Group();
+const beamMat = new THREE.MeshBasicMaterial({ color: 0x5dffa0, transparent: true, opacity: 0.35, fog: false, side: THREE.DoubleSide, depthWrite: false });
+goal.add(new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, WH - 0.05, 20, 1, true), beamMat));
+goal.children[0].position.y = WH / 2;
+const goalLight = new THREE.PointLight(0x44ff88, 1.2, 9, 1.4);
+goalLight.position.y = 1.2; goal.add(goalLight);
+scene.add(goal);
+
+/* ---------- enemy ---------- */
+const enemyG = new THREE.Group();
+(function () {
+  const dark = new THREE.MeshPhongMaterial({ color: 0x1a1a1f, shininess: 4, specular: 0x050505 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.36, 1.55, 10), dark); body.position.y = 1.0; enemyG.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), dark); head.scale.set(0.9, 1.3, 0.9); head.position.y = 1.98; enemyG.add(head);
+  const legGeo = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+  [-1, 1].forEach(s => {
+    const leg = new THREE.Mesh(legGeo, dark); leg.position.set(s * 0.12, 0.25, 0); enemyG.add(leg);
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.4, 0.08), dark);
+    arm.position.set(s * 0.4, 1.2, 0.12); arm.rotation.z = s * 0.1; enemyG.add(arm);
+  });
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2a1a, fog: false });
+  [-1, 1].forEach(s => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.036, 8, 6), eyeMat);
+    eye.position.set(s * 0.075, 2.02, 0.17); enemyG.add(eye);
+  });
+  const glow = new THREE.PointLight(0xff1a0a, 0.7, 5, 1.6); glow.position.y = 1.9; enemyG.add(glow);
+})();
+scene.add(enemyG);
+
+/* ---------- audio ---------- */
+let AC = null, master = null, droneGain = null, soundOn = true, noiseBuf = null;
+function initAudio() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    master = AC.createGain(); master.gain.value = soundOn ? 0.9 : 0; master.connect(AC.destination);
+    const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 150;
+    droneGain = AC.createGain(); droneGain.gain.value = 0.14;
+    [43, 43.8, 64.6].forEach((fr, i) => {
+      const o = AC.createOscillator(); o.type = i === 2 ? 'sine' : 'sawtooth'; o.frequency.value = fr; o.connect(f); o.start();
+    });
+    const lfo = AC.createOscillator(); lfo.frequency.value = 0.07;
+    const lg = AC.createGain(); lg.gain.value = 50; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+    f.connect(droneGain); droneGain.connect(master);
+  } catch (e) { AC = null; }
+}
+function noise() {
+  if (!noiseBuf) {
+    const n = Math.floor(AC.sampleRate * 0.3);
+    noiseBuf = AC.createBuffer(1, n, AC.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return noiseBuf;
+}
+function stepSnd(vol, pan, freq) {
+  if (!AC) return;
+  const t = AC.currentTime, s = AC.createBufferSource();
+  s.buffer = noise();
+  const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
+  const g = AC.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+  s.connect(f); f.connect(g);
+  if (AC.createStereoPanner) { const p = AC.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); g.connect(p); p.connect(master); } else g.connect(master);
+  s.start(t); s.stop(t + 0.15);
+}
+function thump(vol) {
+  if (!AC) return;
+  const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(36, t + 0.13);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.25);
+}
+function tone(freq, start, dur, vol, type) {
+  if (!AC) return;
+  const t = AC.currentTime + start, o = AC.createOscillator(), g = AC.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+}
+function scare() {
+  if (!AC) return;
+  const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(220, t);
+  o.frequency.exponentialRampToValueAtTime(880, t + 0.25); o.frequency.exponentialRampToValueAtTime(300, t + 0.9);
+  f.type = 'bandpass'; f.frequency.value = 1200;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 1);
+  o.connect(f); f.connect(g); g.connect(master); o.start(t); o.stop(t + 1.05);
+  stepSnd(0.9, 0, 3000);
+}
+function chime() { tone(523, 0, 0.9, 0.18); tone(659, 0.18, 0.9, 0.18); tone(784, 0.36, 1.4, 0.2); }
+
+/* ---------- game state ---------- */
+const player = { x: 0, z: 0, yaw: 0, pitch: 0, stamina: 1, exhausted: false };
+const en = { x: 0, z: 0, mode: 'patrol', field: null, timer: 0, stepT: 0, rot: 0 };
+let state = 'title', tPlay = 0, tAll = 0, pField = null, goalCell = [0, 0];
+let explored = new Uint8Array(N * N);
+let deadT = 0, hbT = 0, ambT = 8, stepT = 0, bobT = 0, flickT = 0, danger = 0, moveAmt = 0;
+
+function newLevel() {
+  let cand = [];
+  const lo = Math.floor(N / 3), hi = Math.floor(N * 2 / 3) - 1;
+  for (let y = N - 1; y >= 0 && !cand.length; y--)
+    for (let x = lo; x <= hi; x++) if (walk(x, y) && comp[y * N + x] === mainComp) cand.push([x, y]);
+  const [sx, sy] = pick(cand);
+  cand = [];
+  for (let y = 0; y < N && !cand.length; y++)
+    for (let x = 0; x < N; x++) if (walk(x, y) && comp[y * N + x] === mainComp) cand.push([x, y]);
+  const [gx, gy] = pick(cand);
+  goalCell = [gx, gy];
+  goal.position.set((gx + 0.5) * CS, 0, (gy + 0.5) * CS);
+
+  const ds = bfsField(sx, sy), dg = bfsField(gx, gy);
+  const pool = (minS, minG) => mainCells.filter(([x, y]) => ds[y * N + x] >= minS && dg[y * N + x] >= minG);
+  let ec = pool(30, 10); if (!ec.length) ec = pool(15, 6); if (!ec.length) ec = mainCells;
+  const [ex, ey] = pick(ec);
+  en.x = (ex + 0.5) * CS; en.z = (ey + 0.5) * CS; en.mode = 'patrol'; en.field = null; en.timer = 0; en.stepT = 0;
+
+  player.x = (sx + 0.5) * CS; player.z = (sy + 0.5) * CS; player.pitch = 0;
+  player.stamina = 1; player.exhausted = false;
+  const open = [[0, -1, 0], [1, 0, -Math.PI / 2], [-1, 0, Math.PI / 2], [0, 1, Math.PI]].find(([dx, dy]) => walk(sx + dx, sy + dy));
+  player.yaw = open ? open[2] : 0;
+  explored = new Uint8Array(N * N);
+  pField = bfsField(sx, sy);
+  tPlay = 0; deadT = 0; danger = 0; hbT = 0; ambT = 8;
+  $('flash').classList.remove('on');
+  enemyG.visible = true;
+}
+
+/* ---------- input ---------- */
+const keys = {};
+let sprintBtn = false;
+addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+const stick = $('stick'), knob = $('knob'), joy = { x: 0, y: 0 };
+let stickId = null, sc = { x: 0, y: 0 };
+function moveStick(e) {
+  const R = stick.clientWidth / 2 - 6;
+  let dx = e.clientX - sc.x, dy = e.clientY - sc.y;
+  const l = Math.hypot(dx, dy);
+  if (l > R) { dx *= R / l; dy *= R / l; }
+  joy.x = dx / R; joy.y = dy / R;
+  knob.style.transform = `translate(${dx}px,${dy}px)`;
+}
+stick.addEventListener('pointerdown', e => {
+  stickId = e.pointerId; stick.setPointerCapture(e.pointerId);
+  const r = stick.getBoundingClientRect(); sc.x = r.left + r.width / 2; sc.y = r.top + r.height / 2;
+  moveStick(e); e.preventDefault();
+});
+stick.addEventListener('pointermove', e => { if (e.pointerId === stickId) moveStick(e); });
+const endStick = e => {
+  if (e.pointerId !== stickId) return;
+  stickId = null; joy.x = joy.y = 0; knob.style.transform = 'translate(0,0)';
+};
+stick.addEventListener('pointerup', endStick);
+stick.addEventListener('pointercancel', endStick);
+
+const runBtn = $('run');
+const runOn = e => { sprintBtn = true; runBtn.classList.add('on'); try { runBtn.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); };
+const runOff = () => { sprintBtn = false; runBtn.classList.remove('on'); };
+runBtn.addEventListener('pointerdown', runOn);
+runBtn.addEventListener('pointerup', runOff);
+runBtn.addEventListener('pointercancel', runOff);
+
+const view = $('view');
+let lookId = null, lx = 0, ly = 0;
+view.addEventListener('pointerdown', e => {
+  if (state !== 'play' || lookId !== null || e.target.closest('button')) return;
+  lookId = e.pointerId; lx = e.clientX; ly = e.clientY;
+  try { view.setPointerCapture(e.pointerId); } catch (_) {}
+});
+view.addEventListener('pointermove', e => {
+  if (e.pointerId !== lookId) return;
+  player.yaw -= (e.clientX - lx) * 0.0055;
+  player.pitch = clamp(player.pitch - (e.clientY - ly) * 0.0045, -0.7, 0.7);
+  lx = e.clientX; ly = e.clientY;
+});
+['pointerup', 'pointercancel'].forEach(t => view.addEventListener(t, e => { if (e.pointerId === lookId) lookId = null; }));
+
+$('snd').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('snd').textContent = soundOn ? '音 入' : '音 切';
+  if (master) master.gain.value = soundOn ? 0.9 : 0;
+});
+
+/* ---------- screens ---------- */
+const fmt = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+function showScreen(id) {
+  ['s-title', 's-dead', 's-clear'].forEach(s => { $(s).hidden = s !== id; });
+  $('overlay').hidden = !id;
+}
+function startPlay() {
+  initAudio();
+  newLevel();
+  state = 'play';
+  showScreen(null);
+}
+$('go').addEventListener('click', startPlay);
+document.querySelectorAll('.retry').forEach(b => b.addEventListener('click', startPlay));
+
+/* ---------- player ---------- */
+const R = 0.42;
+function blocked(x, z) {
+  return [[-R, -R], [R, -R], [-R, R], [R, R]].some(([ox, oz]) => !walk(Math.floor((x + ox) / CS), Math.floor((z + oz) / CS)));
+}
+function updatePlayer(dt) {
+  const turn = (keys.ArrowLeft ? 1 : 0) - (keys.ArrowRight ? 1 : 0);
+  player.yaw += turn * 1.9 * dt;
+  let f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+  let s = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+  const jm = Math.hypot(joy.x, joy.y);
+  if (jm > 0.15) { f += -joy.y; s += joy.x; }
+  let len = Math.hypot(f, s);
+  if (len > 1) { f /= len; s /= len; len = 1; }
+  const wantRun = (keys.ShiftLeft || keys.ShiftRight || sprintBtn) && len > 0.2;
+  if (player.exhausted && player.stamina > 0.3) player.exhausted = false;
+  const running = wantRun && !player.exhausted && player.stamina > 0;
+  if (running) {
+    player.stamina -= 0.27 * dt;
+    if (player.stamina <= 0) { player.stamina = 0; player.exhausted = true; }
+  } else player.stamina = Math.min(1, player.stamina + (len > 0.2 ? 0.14 : 0.3) * dt);
+  const speed = (running ? 5.6 : 3.4) * len;
+  const sy = Math.sin(player.yaw), cy = Math.cos(player.yaw);
+  const vx = (-sy * f + cy * s) * (running ? 5.6 : 3.4);
+  const vz = (-cy * f - sy * s) * (running ? 5.6 : 3.4);
+  let nx = player.x + vx * dt;
+  if (!blocked(nx, player.z)) player.x = nx;
+  let nz = player.z + vz * dt;
+  if (!blocked(player.x, nz)) player.z = nz;
+  moveAmt = speed;
+  if (speed > 0.3) {
+    bobT += speed * dt * 2.1;
+    stepT -= dt * speed / 3.4;
+    if (stepT <= 0) { stepT = 0.5; stepSnd(running ? 0.22 : 0.14, 0, 380); }
+  }
+  // reveal map near the player
+  const pcx = Math.floor(player.x / CS), pcy = Math.floor(player.z / CS);
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
+    if (dx * dx + dy * dy <= 5 && walk(pcx + dx, pcy + dy)) explored[(pcy + dy) * N + pcx + dx] = 1;
+  for (const [dx, dy] of DIRS) for (let k = 1; k <= 6; k++) {
+    const x = pcx + dx * k, y = pcy + dy * k;
+    if (!walk(x, y)) break;
+    explored[y * N + x] = 1;
+  }
+}
+
+/* ---------- enemy ---------- */
+function updateEnemy(dt) {
+  if (tPlay < 4) return;
+  en.timer -= dt;
+  const ecx = clamp(Math.floor(en.x / CS), 0, N - 1), ecy = clamp(Math.floor(en.z / CS), 0, N - 1);
+  const dEuc = Math.hypot(player.x - en.x, player.z - en.z);
+  if (en.timer <= 0) {
+    en.timer = 0.3;
+    pField = bfsField(clamp(Math.floor(player.x / CS), 0, N - 1), clamp(Math.floor(player.z / CS), 0, N - 1));
+    const dp = pField[ecy * N + ecx];
+    if (en.mode === 'patrol' && ((dp >= 0 && dp <= 12) || dEuc < 5)) en.mode = 'chase';
+    else if (en.mode === 'chase' && (dp < 0 || dp > 24) && dEuc > 12) { en.mode = 'patrol'; en.field = null; }
+    if (en.mode === 'patrol' && (!en.field || en.field[ecy * N + ecx] <= 1)) {
+      for (let i = 0; i < 30; i++) {
+        const [tx, ty] = pick(mainCells);
+        en.field = bfsField(tx, ty);
+        if (en.field[ecy * N + ecx] >= 8) break;
+      }
+    }
+  }
+  const chase = en.mode === 'chase';
+  const field = chase ? pField : en.field;
+  const speed = chase ? 3.9 : 1.8;
+  let tx = en.x, tz = en.z;
+  if (field) {
+    const cur = field[ecy * N + ecx];
+    if (cur > 0) {
+      let best = cur, bx = -1, by = -1;
+      for (const [dx, dy] of DIRS) {
+        const nx = ecx + dx, ny = ecy + dy;
+        if (!walk(nx, ny)) continue;
+        const v = field[ny * N + nx];
+        if (v >= 0 && v < best) { best = v; bx = nx; by = ny; }
+      }
+      if (bx >= 0) { tx = (bx + 0.5) * CS; tz = (by + 0.5) * CS; }
+    } else if (chase) { tx = player.x; tz = player.z; }
+  }
+  const dx = tx - en.x, dz = tz - en.z, dist = Math.hypot(dx, dz);
+  if (dist > 0.001) {
+    const st = Math.min(dist, speed * dt);
+    en.x += dx / dist * st; en.z += dz / dist * st;
+    const want = Math.atan2(dx, dz);
+    let diff = want - en.rot; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    en.rot += diff * Math.min(1, dt * 7);
+    en.stepT -= dt * speed / 2;
+    if (en.stepT <= 0 && dEuc < 18) {
+      en.stepT = 0.5;
+      const rx = Math.cos(player.yaw), rz = -Math.sin(player.yaw);
+      const lat = ((en.x - player.x) * rx + (en.z - player.z) * rz) / Math.max(dEuc, 0.01);
+      stepSnd(clamp(1 - dEuc / 18, 0, 1) * (chase ? 0.9 : 0.6), lat, 260);
+    }
+  }
+}
+function placeEnemy(t) {
+  enemyG.position.set(en.x, 0, en.z);
+  enemyG.rotation.y = en.rot;
+  enemyG.children.forEach((c, i) => { if (c.isMesh && c.geometry.type === 'BoxGeometry' && c.position.y > 1) c.rotation.x = Math.sin(t * 2 + i) * 0.12; });
+}
+
+/* ---------- minimap ---------- */
+const mm = $('mm'), mctx = mm.getContext('2d');
+const MR = 12;
+function drawMini(t) {
+  const W = mm.width, cell = W / (2 * MR + 1);
+  mctx.fillStyle = '#050706'; mctx.fillRect(0, 0, W, W);
+  const pcx = player.x / CS, pcz = player.z / CS;
+  const bx = Math.floor(pcx), by = Math.floor(pcz);
+  for (let dy = -MR - 1; dy <= MR + 1; dy++) for (let dx = -MR - 1; dx <= MR + 1; dx++) {
+    const cx = bx + dx, cy = by + dy;
+    if (!walk(cx, cy) || !explored[cy * N + cx]) continue;
+    const k = kind(cx, cy);
+    mctx.fillStyle = k === 1 ? '#3a4a40' : k === 2 ? '#4a4334' : '#9a6a30';
+    mctx.fillRect(W / 2 + (cx - pcx) * cell, W / 2 + (cy - pcz) * cell, cell + 0.6, cell + 0.6);
+  }
+  const [gx, gy] = goalCell;
+  if (explored[gy * N + gx]) {
+    mctx.fillStyle = `rgba(93,255,160,${0.65 + 0.35 * Math.sin(t * 4)})`;
+    mctx.beginPath();
+    mctx.arc(W / 2 + (gx + 0.5 - pcx) * cell, W / 2 + (gy + 0.5 - pcz) * cell, cell * 0.55, 0, 6.2832);
+    mctx.fill();
+  }
+  const fx = -Math.sin(player.yaw), fy = -Math.cos(player.yaw), c = W / 2, u = cell;
+  mctx.fillStyle = '#ffe6bd';
+  mctx.beginPath();
+  mctx.moveTo(c + fx * u * 1.5, c + fy * u * 1.5);
+  mctx.lineTo(c - fx * u * 0.8 - fy * u * 0.8, c - fy * u * 0.8 + fx * u * 0.8);
+  mctx.lineTo(c - fx * u * 0.8 + fy * u * 0.8, c - fy * u * 0.8 - fx * u * 0.8);
+  mctx.closePath(); mctx.fill();
+}
+
+/* ---------- loop ---------- */
+function resize() {
+  const w = view.clientWidth, h = view.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  const p = $('panel'), ph = p.clientHeight, pw = p.clientWidth;
+  const s = Math.max(96, Math.floor(Math.min(ph - 20, isTouch ? pw - 32 - 2 * 98 : pw * 0.5)));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  mm.style.width = mm.style.height = s + 'px';
+  mm.width = mm.height = Math.round(s * dpr);
+}
+new ResizeObserver(resize).observe($('app'));
+resize();
+
+function update(dt) {
+  tAll += dt;
+  if (state === 'play') {
+    tPlay += dt;
+    updatePlayer(dt);
+    updateEnemy(dt);
+    const dEuc = Math.hypot(player.x - en.x, player.z - en.z);
+    danger = tPlay < 4 ? 0 : Math.pow(clamp(1 - (dEuc - 1.5) / 11, 0, 1), 1.4);
+    if (tPlay >= 4 && dEuc < 0.95) {
+      state = 'dead'; deadT = 0; danger = 1; scare();
+      $('flash').classList.add('on');
+      try { navigator.vibrate && navigator.vibrate([120, 60, 200]); } catch (_) {}
+    } else if (Math.hypot(player.x - goal.position.x, player.z - goal.position.z) < 0.9) {
+      state = 'clear'; chime();
+      $('clear-info').textContent = `脱出までの時間 ${fmt(tPlay)}`;
+      showScreen('s-clear');
+    }
+    $('clock').textContent = fmt(tPlay);
+    $('stai').style.transform = `scaleX(${player.stamina.toFixed(3)})`;
+    $('sta').classList.toggle('low', player.exhausted || player.stamina < 0.2);
+  } else if (state === 'dead') {
+    deadT += dt;
+    const dx = en.x - player.x, dz = en.z - player.z;
+    const want = Math.atan2(-dx, -dz);
+    let diff = want - player.yaw; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    player.yaw += diff * Math.min(1, dt * 9);
+    player.pitch += (0.1 - player.pitch) * Math.min(1, dt * 6);
+    if (deadT > 0.35) $('flash').classList.remove('on');
+    if (deadT > 1.3 && $('s-dead').hidden) {
+      $('dead-info').textContent = `生き延びた時間 ${fmt(tPlay)}`;
+      showScreen('s-dead');
+    }
+  } else if (state === 'title') {
+    player.yaw += Math.sin(tAll * 0.3) * 0.0015;
+  }
+
+  // heartbeat, ambience
+  if (state === 'play' && AC) {
+    if (danger > 0.05) {
+      hbT -= dt;
+      if (hbT <= 0) {
+        const bpm = 62 + 100 * danger;
+        hbT = 60 / bpm;
+        thump(0.35 + 0.35 * danger); setTimeout(() => thump(0.22 + 0.25 * danger), 170);
+      }
+    }
+    ambT -= dt;
+    if (ambT <= 0) {
+      ambT = 9 + Math.random() * 13;
+      const pan = Math.random() * 2 - 1;
+      stepSnd(0.5, pan, 170); setTimeout(() => stepSnd(0.4, pan, 150), 260);
+    }
+    droneGain.gain.setTargetAtTime(0.13 + 0.2 * danger, AC.currentTime, 0.3);
+  }
+
+  // camera, lights
+  const moving = state === 'play' ? Math.min(1, moveAmt / 3.4) : 0;
+  const shake = danger * 0.025;
+  camera.position.set(
+    player.x + (Math.random() - 0.5) * shake,
+    1.2 + Math.sin(bobT) * 0.035 * moving + (state === 'dead' ? -0.15 * Math.min(1, deadT * 2) : 0),
+    player.z + (Math.random() - 0.5) * shake
+  );
+  camera.rotation.set(player.pitch, player.yaw, 0);
+  let flick = 1;
+  if (flickT > 0) { flickT -= dt; flick = 0.2 + Math.random() * 0.4; }
+  else if (Math.random() < 0.004 + danger * 0.04) flickT = 0.06 + Math.random() * 0.16;
+  lamp.position.copy(camera.position); lamp.position.y += 0.1;
+  lamp.intensity = 0.6 * flick;
+  spot.position.copy(camera.position);
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  spot.target.position.copy(camera.position).addScaledVector(dir, 5);
+  spot.intensity = 1.7 * flick;
+  goalLight.intensity = 1.1 + 0.4 * Math.sin(tAll * 3);
+  beamMat.opacity = 0.3 + 0.1 * Math.sin(tAll * 2.4);
+  placeEnemy(tAll);
+  view.style.setProperty('--danger', danger.toFixed(3));
+  drawMini(tAll);
+}
+
+newLevel();
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  update(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
