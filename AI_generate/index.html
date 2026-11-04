@@ -1,75 +1,226 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directory Index</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      background-color: #0f172a;
-      color: #f8fafc;
-    }
-    h1 {
-      font-size: 1.25rem;
-      color: #94a3b8;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #334155;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    li a {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #38bdf8;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.15s ease;
-    }
-    li a:hover {
-      background-color: #334155;
-      border-color: #38bdf8;
-      transform: translateY(-1px);
-    }
-    li a::after {
-      content: "→";
-      color: #64748b;
-    }
-    li a:hover::after {
-      color: #38bdf8;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>何切る？ 麻雀打牌トレーニング</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#e6ece7;--ink:#1c2622;--sub:#56655e;--panel:#fbfcf9;--line:#c9d4cc;--felt:#1f3d35;--felt2:#17302a;--tile:#f8f4e4;--edge:#3f8c6a;--best:#1f7a52;--ok:#a8740d;--bad:#b83d32;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121816;--ink:#e8eee9;--sub:#9fb0a7;--panel:#1b2420;--line:#2f3d37;--best:#4fc08a;--ok:#e0a73a;--bad:#ef7468;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121816;--ink:#e8eee9;--sub:#9fb0a7;--panel:#1b2420;--line:#2f3d37;--best:#4fc08a;--ok:#e0a73a;--bad:#ef7468;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.8 "Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 26px/1.3 "Shippori Mincho","Hiragino Mincho ProN",serif;margin:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.stat{color:var(--sub);font-size:14px}
+.stat b{color:var(--ink)}
+.theme{font:500 15px "Shippori Mincho",serif;margin:0 0 8px;color:var(--sub)}
+.situ{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.table{background:radial-gradient(ellipse at 50% 0,var(--felt),var(--felt2));border-radius:16px;padding:16px 12px 20px}
+.river{display:flex;flex-wrap:wrap;gap:3px;align-items:center;color:#cfe0d6;font-size:13px;margin-bottom:16px}
+.river .lbl{margin-right:6px}
+.hand{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 4px}
+.tile{width:46px;height:64px;border:0;padding:0;border-radius:6px;background:var(--tile);box-shadow:0 5px 0 var(--edge),0 7px 8px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:#222;font-family:"Shippori Mincho",serif;cursor:pointer;transition:transform .12s}
+.tile .n{font-size:26px;font-weight:700}
+.tile .s{font-size:13px;margin-top:5px;font-weight:700}
+.tile.m{color:#b2342b}.tile.p{color:#1f5b9a}.tile.s{color:#1f7a45}
+.tile.z .n{font-size:30px;color:#222}.tile.z.r .n{color:#c0372b}.tile.z.g .n{color:#1f7a45}.tile.z.w .n{color:#8a8f8c}
+.tile.sm{width:26px;height:36px;box-shadow:0 3px 0 var(--edge);cursor:default;border-radius:4px}
+.tile.sm .n{font-size:15px}.tile.sm .s{font-size:8px;margin-top:2px}.tile.sm.z .n{font-size:17px}
+.tile.rot{transform:rotate(90deg);margin:0 5px}
+.hand .tile:not(.sm):not(:disabled):hover{transform:translateY(-8px)}
+.tile:focus-visible{outline:3px solid #ffd35a;outline-offset:3px}
+.tile:disabled{cursor:default}
+.tile.draw{margin-left:14px}
+.tile.picked{outline:4px solid var(--bad);outline-offset:2px;transform:translateY(-8px)}
+.tile.picked.best,.tile.picked.ok{outline-color:var(--best)}
+.tile.picked.ok{outline-color:var(--ok)}
+.tile.answer{outline:4px solid var(--best);outline-offset:2px}
+.hint{text-align:center;color:#cfe0d6;font-size:13px;margin:14px 0 0}
+.fb{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-top:18px;padding:16px 18px}
+.verdict{display:inline-block;font-weight:700;color:#fff;border-radius:8px;padding:0 14px;font-size:18px}
+.verdict.best{background:var(--best)}.verdict.ok{background:var(--ok)}.verdict.bad{background:var(--bad)}
+.fb h3{font:700 17px "Shippori Mincho",serif;margin:16px 0 4px}
+.fb p,.fb ul{margin:0}.fb ul{padding-left:20px}
+.fb li{margin:2px 0}
+.maxim{border-left:4px solid var(--edge);padding-left:12px}
+.btn{font:700 16px "Zen Kaku Gothic New",sans-serif;background:var(--felt);color:#fff;border:0;border-radius:10px;padding:8px 22px;margin-top:16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--sub);border:1px solid var(--line);margin-left:8px;font-weight:500}
+.btn:focus-visible{outline:3px solid #ffd35a;outline-offset:2px}
+.res{text-align:center;padding:24px 8px}
+.res .big{font:700 44px "Shippori Mincho",serif}
+.modes{display:flex;gap:8px;margin-bottom:16px}
+.modes button{font:500 15px "Zen Kaku Gothic New",sans-serif;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 16px;cursor:pointer}
+.modes button[aria-pressed=true]{background:var(--felt);border-color:var(--felt);color:#fff;font-weight:700}
+.modes button:focus-visible{outline:3px solid #ffd35a;outline-offset:2px}
+.tb{margin:4px 0 0;font-size:14px}
+.tb .row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tb .row.me{background:color-mix(in srgb,var(--edge) 16%,transparent);border-radius:6px;font-weight:700}
+.tb .c{min-width:92px}.tb .w{display:flex;flex-wrap:wrap;gap:2px}
+.ai{white-space:pre-wrap;line-height:1.85;margin-top:2px}
+.ai.err{color:var(--sub)}
+[hidden]{display:none!important}
+@media (max-width:520px){.tile{width:40px;height:56px}.tile .n{font-size:22px}.tile .s{font-size:11px}.tile.draw{margin-left:10px}h1{font-size:22px}}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}}
+</style>
 </head>
 <body>
-
-  <h1>Index</h1>
-
-  <ul>
-    <li><a href="1.html">Page 1 (1.html)</a></li>
-    <li><a href="2.html">Page 2 (2.html)</a></li>
-    <li><a href="3.html">Page 3 (3.html)</a></li>
-    <li><a href="4.html">Page 4 (4.html)</a></li>
-    <li><a href="5/index.html">Page 5 (5/index.html)</a></li>
-    <li><a href="6/index.html">Page 6 (6/index.html)</a></li>
-  </ul>
-
+<main>
+  <div class="top">
+    <h1>何切る？ 打牌トレーニング</h1>
+    <div class="stat" id="stat"></div>
+  </div>
+  <nav class="modes" aria-label="モード"><button id="m-fix" aria-pressed="true">問題集</button><button id="m-rand" aria-pressed="false">ランダム</button><button id="m-seq" aria-pressed="false">連続（手牌継続）</button></nav>
+  <section id="quiz">
+    <p class="theme" id="theme"></p>
+    <div class="situ" id="situ"></div>
+    <div class="table">
+      <div class="river" id="river" hidden></div>
+      <div class="hand" id="hand" role="group" aria-label="手牌"></div>
+      <p class="hint" id="hint">切る牌をタップ</p>
+    </div>
+    <div class="fb" id="fb" hidden></div>
+  </section>
+  <section id="result" class="fb res" hidden></section>
+</main>
+<script>
+var NUM=["","一","二","三","四","五","六","七","八","九"],SUIT={m:"萬",p:"筒",s:"索"},HON={"東":"","南":"","西":"","北":"","白":"w","發":"g","中":"r"};
+var P=[
+{theme:"テーマ：孤立牌の整理（字牌の価値差）",round:"東1局",turn:5,wind:"南",dora:"8p",pts:"25000点 / 25000点",
+ hand:["2m","3m","4m","9m","9m","6p","7p","8p","3s","4s","7s","7s","白"],draw:"北",
+ best:"北",ok:["白"],
+ bad:"ターツや対子を崩すと2向聴に後退し、受け入れが大きく減ります。",
+ notes:{"北":"場風は東、自風は南なので北は役にならない完全な不要牌です。","白":"受け入れは北と同じですが、白は役牌で鳴けば役になるため、北より価値があります。","9m":"9mを1枚切ると対子が1つ減り、2向聴になります。","7s":"7sを1枚切ると対子が1つ減り、2向聴になります。"},
+ reason:"現在は1向聴です。受け入れは2s・5s（34sのターツ）と、7s・9m（対子の刻子化）で、2s4枚＋5s4枚＋7s2枚＋9m2枚の計12枚。北と白はどちらを切っても12枚で変わりません。",
+ compare:["北切り：12枚。不要牌を処理でき、白は役牌として残る（最善）","白切り：12枚で同じ。ただし役牌のポンチャンスを手放す（許容）","9m・7s切り：対子が減り2向聴。受け入れも減る","3s・4s切り：ターツが減り2向聴","2m・4m切り：234mが崩れ2向聴"],
+ theory:"「受け入れが同じなら、価値の低い牌から切る」。役牌と客風牌（自分に関係のない風牌）は、同じ孤立牌でも価値がまったく違います。"},
+{theme:"テーマ：ターツ選択（受け入れ最大化）",round:"東2局",turn:7,wind:"南",dora:"8s",pts:"26000点 / 24000点",
+ hand:["2m","3m","4m","7m","8m","1p","6p","7p","8p","5s","6s","西","西"],draw:"3p",
+ best:"1p",ok:["3p"],
+ bad:"面子・ターツ・頭のどれかを崩すため、受け入れが減るか1向聴を維持できません。",
+ notes:{"1p":"1pと3pは嵌張のターツ。1pを切って3pを残すと、後で2p・4p・5pと結びつきやすくなります。","3p":"受け入れは1p切りと同じ16枚ですが、端牌の1pを残すより3pを残す方が柔軟です。","7m":"両面ターツ78mを崩すと、受け入れが16枚から12枚に減ります。","8m":"両面ターツ78mを崩すと、受け入れが16枚から12枚に減ります。","5s":"両面ターツ56sを崩すと、受け入れが16枚から12枚に減ります。","6s":"両面ターツ56sを崩すと、受け入れが16枚から12枚に減ります。","西":"西は頭です。頭を崩すとテンパイまでが遠くなります。"},
+ reason:"2メンツ（234m・678p）＋ターツ3つ（78m・56s・13p）＋頭（西）の1向聴で、ターツが1つ余っています。13pを外すと、受け入れは6m・9m・4s・7sの16枚です。",
+ compare:["1p切り：16枚（6m・9m・4s・7s）。3p残しで形が柔軟（最善）","3p切り：16枚で同じ。ただし1pが残り形が硬い（許容）","7m・8m切り：78mが消え、受け入れは12枚","5s・6s切り：56sが消え、受け入れは12枚","面子・頭を切る：1向聴を維持できない"],
+ theory:"「ターツが余ったら、両面を残して嵌張・辺張から払う」。同じ待ち枚数でも、両面ターツの方が受け入れ枚数は多くなります。"},
+{theme:"テーマ：守備（現物を切る）",round:"南2局",turn:9,wind:"南",dora:"7m",pts:"22000点 / 31000点",
+ river:["北","9p","2s","3m","7p","白"],riichi:"西",
+ hand:["1m","3m","6m","8m","2p","4p","5p","8p","1s","4s","6s","8s","發"],draw:"東",
+ best:"3m",ok:["發"],
+ bad:"リーチ者に通っていない牌で、放銃の危険があります。自分の手は4向聴なので、押す理由がありません。",
+ notes:{"3m":"リーチ者の河に3mがあるので現物です。この牌では絶対に放銃しません。","發":"1枚見えの字牌は比較的安全ですが、シャンポン待ちや単騎待ちなどで当たる可能性は残ります。現物があるので、そちらが優先です。","4p":"7pが河にあるので4pは筋ですが、嵌張・シャンポン・単騎には当たります。","8s":"2sが河にあるので8sは筋ですが、嵌張・シャンポン・単騎には当たります。","東":"場風の東はまだ見えていない牌です。役牌なのでシャンポン待ちで当たる危険があります。"},
+ reason:"自分の手は4向聴で、リーチに勝負する価値はありません。リーチ者の河にある牌（3m・北・9p・2s・7p・白・西）は現物なので、手牌の中では3mが最も安全です。",
+ compare:["3m切り：完全な現物で絶対安全（最善）","發切り：1枚見えの字牌で比較的安全（許容）","4p・8s切り：筋だが両面以外には当たる","東切り：場風で未見の牌は危険","他の数牌：無スジで最も危険"],
+ theory:"「手が遠いときは現物を切って降りる」。安全度は現物 → 字牌（見え枚数が多いもの）→ 筋 → 無筋の順です。"}
+];
+var mode="fix",cur=null,i=0,score={best:0,ok:0,bad:0},answered=false,hist=load();
+function load(){try{return JSON.parse(localStorage.getItem("mj-trainer")||"{}")}catch(e){return {}}}
+function save(){try{localStorage.setItem("mj-trainer",JSON.stringify(hist))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function tile(t,cls){var h="<span class='n'>",c="tile "+(cls||"");
+ if(HON[t]!==undefined){c+=" z "+HON[t];h+=t+"</span>"}else{c+=" "+t[1];h+=(t[1]=="m"?NUM[t[0]]:t[0])+"</span><span class='s'>"+SUIT[t[1]]+"</span>"}
+ return {cls:c,html:h}}
+function mini(t,extra){var o=tile(t,"sm "+(extra||""));return "<span class='"+o.cls+"' aria-label='"+t+"'>"+o.html+"</span>"}
+function stat(){if(mode=="seq"&&cur){$("stat").innerHTML="連続　<b>"+cur.n+" / "+cur.max+"</b>手目　最善 <b>"+cur.good+"</b>";return}if(mode=="rand"){var r=hist.rt?Math.round(100*(hist.rb||0)/hist.rt)+"%":"-";$("stat").innerHTML="ランダム　回答 <b>"+(hist.rt||0)+"</b>　正解率 <b>"+r+"</b>";return}var h=hist.total?Math.round(100*hist.best/hist.total)+"%":"-";$("stat").innerHTML="問題 <b>"+(i+1)+" / "+P.length+"</b>　通算正解率 <b>"+h+"</b>"}
+function show(){var p=mode!="fix"?cur:P[i];answered=false;stat();
+ $("theme").textContent=p.theme;
+ $("situ").innerHTML="<span class='chip'>"+p.round+"</span><span class='chip'>"+p.turn+"巡目</span><span class='chip'>場風 東</span><span class='chip'>自風 "+p.wind+"</span><span class='chip'>ドラ "+mini(p.dora)+"</span><span class='chip'>"+p.pts+"</span>";
+ var r=$("river");
+ if(p.river){r.hidden=false;r.innerHTML="<span class='lbl'>下家リーチ　河：</span>"+p.river.map(function(t){return mini(t)}).join("")+mini(p.riichi,"rot")}else r.hidden=true;
+ var all=p.hand.concat([p.draw]);
+ $("hand").innerHTML="";
+ all.forEach(function(t,k){var o=tile(t,k==all.length-1?"draw":""),b=document.createElement("button");
+  b.className=o.cls;b.innerHTML=o.html;b.dataset.t=t;b.setAttribute("aria-label",t+"を切る");b.onclick=function(){pick(b,t)};$("hand").appendChild(b)});
+ $("hint").hidden=false;$("fb").hidden=true;$("result").hidden=true;$("quiz").hidden=false}
+function grade(p,t){if(p.bests)return p.bests.indexOf(t)>=0?"best":p.oks.indexOf(t)>=0?"ok":"bad";return t==p.best?"best":p.ok.indexOf(t)>=0?"ok":"bad"}
+function pick(b,t){if(answered)return;answered=true;var p=mode!="fix"?cur:P[i],g=grade(p,t),L={best:"正解",ok:"許容（次善手）",bad:"不正解（悪手）"};
+ if(mode=="seq"){cur.done++;if(g=="best")cur.good++}else if(mode=="rand"){hist.rt=(hist.rt||0)+1;if(g=="best")hist.rb=(hist.rb||0)+1}else{score[g]++;hist.total=(hist.total||0)+1;hist[g]=(hist[g]||0)+1}save();
+ Array.prototype.forEach.call($("hand").children,function(e){e.disabled=true;if(p.bests?p.bests.indexOf(e.dataset.t)>=0:e.dataset.t==p.best)e.classList.add("answer")});
+ b.classList.add("picked",g);$("hint").hidden=true;
+ if(mode!="fix"){randFb(p,t,g,L);return}
+ var last=i==P.length-1;
+ $("fb").innerHTML="<span class='verdict "+g+"'>"+L[g]+"</span>　"+mini(t)+" を切る"
+  +"<h3>選択の理由</h3><p>"+(p.notes[t]||p.bad)+"</p>"
+  +"<h3>状況の分析</h3><p>"+p.reason+"</p>"
+  +"<h3>他の選択肢との比較</h3><ul>"+p.compare.map(function(x){return "<li>"+x+"</li>"}).join("")+"</ul>"
+  +"<h3>戦術メモ</h3><p class='maxim'>"+p.theory+"</p>"
+  +"<button class='btn' id='next'>"+(last?"結果を見る":"次の問題")+"</button>";
+ $("fb").hidden=false;stat();
+ $("next").onclick=function(){if(last)finish();else{i++;show();window.scrollTo(0,0)}};
+ $("fb").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function finish(){$("quiz").hidden=true;var n=P.length;
+ $("result").innerHTML="<div class='big'>"+score.best+" / "+n+"</div><p>正解 "+score.best+"問・許容 "+score.ok+"問・不正解 "+score.bad+"問</p><p class='stat'>通算：正解 "+(hist.best||0)+" / 回答 "+(hist.total||0)+"</p><button class='btn' id='again'>もう一度</button><button class='btn ghost' id='reset'>履歴を消す</button>";
+ $("result").hidden=false;$("again").onclick=function(){i=0;score={best:0,ok:0,bad:0};show()};
+ $("reset").onclick=function(){hist={};save();i=0;score={best:0,ok:0,bad:0};show()}}
+var HN="東南西北白發中",TERM=[0,8,9,17,18,26,27,28,29,30,31,32,33];
+function ix(t){var k=HN.indexOf(t);return k>=0?27+k:"mps".indexOf(t[1])*9+(+t[0])-1}
+function cd(k){return k>=27?HN[k-27]:(k%9+1)+"mps"[Math.floor(k/9)]}
+function cnt(a){var c=[];for(var k=0;k<34;k++)c.push(0);a.forEach(function(t){c[ix(t)]++});return c}
+function shN(c){var best=8;
+ function rec(k,m,t,p){while(k<34&&c[k]==0)k++;
+  if(k>=34){var s=8-2*m-Math.min(t,4-m)-p;if(s<best)best=s;return}
+  if(c[k]>=3){c[k]-=3;rec(k,m+1,t,p);c[k]+=3}
+  if(k<27&&k%9<=6&&c[k+1]>0&&c[k+2]>0){c[k]--;c[k+1]--;c[k+2]--;rec(k,m+1,t,p);c[k]++;c[k+1]++;c[k+2]++}
+  if(c[k]>=2){c[k]-=2;if(!p)rec(k,m,t,1);rec(k,m,t+1,p);c[k]+=2}
+  if(k<27&&k%9<=7&&c[k+1]>0){c[k]--;c[k+1]--;rec(k,m,t+1,p);c[k]++;c[k+1]++}
+  if(k<27&&k%9<=6&&c[k+2]>0){c[k]--;c[k+2]--;rec(k,m,t+1,p);c[k]++;c[k+2]++}
+  c[k]--;rec(k,m,t,p);c[k]++}
+ rec(0,0,0,0);return best}
+function shape(c){var pr=0,kd=0;c.forEach(function(v){if(v>=2)pr++;if(v>=1)kd++});return 6-pr+Math.max(0,7-kd)}
+function shKo(c){var kd=0,pr=0;TERM.forEach(function(k){if(c[k]>0)kd++;if(c[k]>=2)pr=1});return 13-kd-pr}
+function sh(c){return Math.min(shN(c),shape(c),shKo(c))}
+function evalHand(h,sn){var c=cnt(h),out=[];
+ for(var k=0;k<34;k++){if(!c[k])continue;c[k]--;var s=sh(c),w=[],n=0;
+  for(var t=0;t<34;t++){var left=4-c[t]-(t==k?1:0)-(sn?sn[t]:0);if(left<=0)continue;c[t]++;if(sh(c)<s){w.push(cd(t));n+=left}c[t]--}
+  c[k]++;out.push({t:cd(k),s:s,n:n,w:w})}
+ out.sort(function(a,b){return a.s-b.s||b.n-a.n});return out}
+function newRandom(){var all=[],r,tries=0,h,res,ms;for(var k=0;k<34;k++)for(var j=0;j<4;j++)all.push(cd(k));
+ do{tries++;var a=all.slice();for(var x=a.length-1;x>0;x--){var y=Math.floor(Math.random()*(x+1)),z=a[x];a[x]=a[y];a[y]=z}
+  h=a.slice(0,14);res=evalHand(h);ms=res[0].s}while((ms<1||ms>3)&&tries<300);
+ var d=h[Math.floor(Math.random()*14)],rest=h.slice();rest.splice(rest.indexOf(d),1);rest.sort(function(a,b){return ix(a)-ix(b)});
+ var cand=res.filter(function(e){return e.s==ms}),mx=cand[0].n;
+ var R=["東1局","東2局","東3局","南1局","南2局","南3局"];
+ cur={rand:true,theme:"ランダム問題：牌効率で最も良い1枚を選ぶ",round:R[Math.floor(Math.random()*R.length)],turn:4+Math.floor(Math.random()*7),wind:HN[Math.floor(Math.random()*4)],dora:cd(Math.floor(Math.random()*34)),pts:"25000点 / 25000点",hand:rest,draw:d,res:res,
+  bests:cand.filter(function(e){return e.n==mx}).map(function(e){return e.t}),oks:cand.filter(function(e){return e.n<mx&&e.n>=mx*0.8}).map(function(e){return e.t})}}
+function pr(n,N,k){var q=1;for(var j=0;j<k;j++)q*=Math.max(0,N-n-j)/(N-j);return 1-q}
+function pct(x){return (x*100).toFixed(1)+"%"}
+function randFb(p,t,g,L){
+ var seen=p.seen?p.seen.reduce(function(a,b){return a+b},0):0,N=122-seen;
+ function rows(list){return list.map(function(e){return "<div class='row"+(e.t==t?" me":"")+"'><span class='c'>"+mini(e.t)+" 切り</span><span>"+(e.s==0?"テンパイ":e.s+"向聴")+"</span><span>受け入れ "+e.n+"枚</span><span>1巡 "+pct(pr(e.n,N,1))+"</span><span>3巡 "+pct(pr(e.n,N,3))+"</span><span>6巡 "+pct(pr(e.n,N,6))+"</span><span class='w'>"+e.w.map(function(x){return mini(x)}).join("")+"</span></div>"}).join("")}
+ var B=p.res.filter(function(e){return p.bests.indexOf(e.t)>=0}),O=p.res.filter(function(e){return p.oks.indexOf(e.t)>=0}),R=p.res.filter(function(e){return p.bests.indexOf(e.t)<0&&p.oks.indexOf(e.t)<0});
+ function sec(h,l){return l.length?"<h3>"+h+"</h3><div class='tb'>"+rows(l)+"</div>":""}
+ $("fb").innerHTML="<span class='verdict "+g+"'>"+L[g]+"</span>\u3000"+mini(t)+" を切る"
+  +"<p class='stat'>確率は、その打牌の後に「向聴数が1つ進む牌（テンパイ形なら和了牌）」を1枚以上引く確率です。1巡・3巡・6巡以内を、山の推定残り"+N+"枚から超幾何分布で計算しています。次善は、最善と同じ向聴数で受け入れが8割以上の打牌です。ドラ・役・河・守備は考慮していません。</p>"
+  +sec("最善",B)+sec("次善",O)+sec("その他",R)
+  +"<button class='btn' id='next'>"+(mode=="seq"?"ツモ山から次を引く":"次のランダム問題")+"</button>";
+ $("fb").hidden=false;stat();
+ $("next").onclick=function(){if(mode=="seq")seqNext(t);else{newRandom();show();window.scrollTo(0,0)}};
+ $("fb").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function srt(a){return a.sort(function(x,y){return ix(x)-ix(y)})}
+function seqBuild(){var h=cur.hand.concat([cur.draw]);cur.res=evalHand(h,cur.seen);var ms=cur.res[0].s,cand=cur.res.filter(function(e){return e.s==ms}),mx=cand[0].n;
+ cur.bests=cand.filter(function(e){return e.n==mx}).map(function(e){return e.t});cur.oks=cand.filter(function(e){return e.n<mx&&e.n>=mx*0.8}).map(function(e){return e.t});
+ cur.turn=4+cur.n;cur.theme="連続モード："+cur.n+"手目"+(cur.disc.length?"　捨て牌 "+cur.disc.join(" "):"　配牌から開始")}
+function newSeq(){var all=[],h,r,tries=0;for(var k=0;k<34;k++)for(var j=0;j<4;j++)all.push(cd(k));
+ do{tries++;for(var x=all.length-1;x>0;x--){var y=Math.floor(Math.random()*(x+1)),z=all[x];all[x]=all[y];all[y]=z}
+  h=all.slice(0,14);r=evalHand(h)}while((r[0].s<2||r[0].s>3)&&tries<200);
+ var sn=[];for(var q=0;q<34;q++)sn.push(0);
+ cur={rand:true,seq:true,round:"東1局",wind:"南",dora:cd(Math.floor(Math.random()*34)),pts:"25000点 / 25000点",n:1,max:12,done:0,good:0,disc:[],seen:sn,wall:all.slice(14),hand:srt(h.slice(0,13)),draw:h[13]};
+ seqBuild()}
+function seqNext(t){var hh=cur.hand.concat([cur.draw]);hh.splice(hh.indexOf(t),1);cur.disc.push(t);cur.seen[ix(t)]++;cur.hand=srt(hh);
+ var s=sh(cnt(cur.hand));if(cur.n>=cur.max||!cur.wall.length)return seqEnd(s,false);
+ var d=cur.wall.pop();if(sh(cnt(cur.hand.concat([d])))==-1){cur.draw=d;return seqEnd(-1,true)}
+ cur.n++;cur.draw=d;seqBuild();show();window.scrollTo(0,0)}
+function seqEnd(s,win){$("quiz").hidden=true;var m=win?"ツモ和了！":s==0?"テンパイで終了":s+"向聴で終了";
+ $("result").innerHTML="<div class='big'>"+m+"</div><p>最善手 "+cur.good+" / "+cur.done+" 手</p><p class='stat'>捨て牌："+cur.disc.join(" ")+"</p><button class='btn' id='again'>新しい配牌で再開</button>";
+ $("result").hidden=false;$("again").onclick=function(){newSeq();show()}}
+function setMode(m){mode=m;$("m-fix").setAttribute("aria-pressed",m=="fix");$("m-rand").setAttribute("aria-pressed",m=="rand");$("m-seq").setAttribute("aria-pressed",m=="seq");
+ if(m=="rand")newRandom();else if(m=="seq")newSeq();else{i=0;score={best:0,ok:0,bad:0}}show()}
+$("m-fix").onclick=function(){setMode("fix")};$("m-rand").onclick=function(){setMode("rand")};$("m-seq").onclick=function(){setMode("seq")};
+show();
+</script>
 </body>
 </html>
