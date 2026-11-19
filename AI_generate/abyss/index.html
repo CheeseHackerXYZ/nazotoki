@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>ABYSS DIGGER</title>
+  <style>
+    :root {
+      --bg: #080d1b;
+      --panel: rgba(17, 26, 48, .9);
+      --panel-2: rgba(23, 35, 62, .9);
+      --line: rgba(139, 169, 220, .18);
+      --text: #edf4ff;
+      --muted: #9caecb;
+      --cyan: #69e5e8;
+      --blue: #7ca9ff;
+      --purple: #b69aff;
+      --gold: #ffd477;
+      --green: #83e4ae;
+      --red: #ff8e9d;
+      --shadow: 0 18px 50px rgba(0,0,0,.28);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      background: radial-gradient(ellipse at 10% -10%, rgba(51, 111, 169, .28), transparent 35%),
+                  radial-gradient(ellipse at 95% 20%, rgba(103, 70, 157, .2), transparent 33%),
+                  linear-gradient(155deg, #080d1b 0%, #0c1428 55%, #090f20 100%);
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    .shell { max-width: 1240px; margin: 0 auto; padding: 22px 22px 50px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:20px; }
+    .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+    .brand-mark { width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#174d6c,#392e70);border:1px solid rgba(132,224,239,.35);box-shadow:0 0 28px rgba(78,190,220,.15);font-size:23px; }
+    .brand h1 { margin:0; font-size:18px; letter-spacing:.15em; }
+    .brand p { margin:3px 0 0; color:var(--muted); font-size:11px; letter-spacing:.11em; }
+    .wallet { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .wallet-chip { display:flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid var(--line); border-radius:12px; background:rgba(18,28,49,.75); color:#dce9ff; font-size:12px; white-space:nowrap; }
+    .wallet-chip b { color:white; font-variant-numeric:tabular-nums; }
+    .nav { display:flex; gap:7px; overflow:auto; padding:6px; margin-bottom:18px; border:1px solid var(--line); border-radius:15px; background:rgba(9,16,31,.7); }
+    .nav button { flex:1; min-width:max-content; padding:10px 13px; color:var(--muted); background:transparent; border:0; border-radius:10px; font-size:13px; transition:.18s; }
+    .nav button.active { color:#06121d; background:linear-gradient(100deg,var(--cyan),#9cbcff); font-weight:800; box-shadow:0 5px 18px rgba(105,229,232,.18); }
+    .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin:10px 0 16px; }
+    .eyebrow { color:var(--cyan); font-size:10px; letter-spacing:.2em; font-weight:800; text-transform:uppercase; }
+    h2 { margin:4px 0 0; font-size:25px; letter-spacing:.04em; }
+    .sub { margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.6; }
+    .grid { display:grid; gap:14px; }
+    .grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .panel { min-width:0; padding:18px; border:1px solid var(--line); border-radius:18px; background:linear-gradient(145deg,rgba(22,34,59,.94),rgba(13,22,42,.94)); box-shadow:var(--shadow); }
+    .panel h3 { margin:0 0 12px; font-size:15px; letter-spacing:.04em; }
+    .panel p { color:var(--muted); font-size:13px; line-height:1.65; }
+    .hero { position:relative; overflow:hidden; padding:24px; border:1px solid rgba(105,229,232,.22); border-radius:22px; background:radial-gradient(circle at 85% 35%,rgba(105,229,232,.18),transparent 23%),linear-gradient(120deg,rgba(15,46,67,.96),rgba(29,31,70,.95)); box-shadow:var(--shadow); }
+    .hero::after { content:""; position:absolute; width:210px;height:210px; right:3%; top:-55px; border:1px solid rgba(105,229,232,.16); border-radius:50%; box-shadow:0 0 0 24px rgba(105,229,232,.025),0 0 0 50px rgba(105,229,232,.02); pointer-events:none; }
+    .hero-inner { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:25px; }
+    .hero h2 { font-size:30px; }
+    .hero .sub { max-width:570px; }
+    .hero-visual { min-width:145px; text-align:center; font-size:65px; filter:drop-shadow(0 12px 18px rgba(0,0,0,.35)); }
+    .hero-stats { display:flex; gap:18px; flex-wrap:wrap; margin-top:18px; }
+    .stat { min-width:100px; }
+    .stat small { display:block;color:var(--muted);font-size:10px;letter-spacing:.08em; }
+    .stat b { display:block;margin-top:4px;font-size:20px;font-variant-numeric:tabular-nums; }
+    .facility { display:flex; align-items:center; gap:13px; padding:15px; border:1px solid var(--line); border-radius:15px; background:rgba(12,21,40,.58); transition:transform .15s,border-color .15s; }
+    .facility:hover { transform:translateY(-2px); border-color:rgba(105,229,232,.4); }
+    .facility-icon { width:44px;height:44px;display:grid;place-items:center;flex:0 0 auto;border-radius:13px;background:rgba(105,229,232,.1);font-size:23px; }
+    .facility h4 { margin:0;font-size:14px; }
+    .facility p { margin:4px 0 0;font-size:11px; }
+    .facility button { margin-left:auto; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px 14px; border:1px solid rgba(122,180,220,.24); border-radius:11px; background:rgba(46,73,111,.55); color:#eaf5ff; font-size:12px; font-weight:750; transition:.15s; }
+    .btn:hover:not(:disabled) { border-color:rgba(105,229,232,.55); background:rgba(54,100,134,.62); transform:translateY(-1px); }
+    .btn.primary { color:#071420; border-color:transparent; background:linear-gradient(100deg,var(--cyan),#a3c1ff); }
+    .btn.gold { color:#231a08; border-color:transparent; background:linear-gradient(100deg,#ffd477,#f2ac5d); }
+    .btn.danger { color:#ffdce1; background:rgba(128,38,59,.25); border-color:rgba(255,142,157,.25); }
+    .btn.small { padding:7px 10px; font-size:11px; }
+    .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .spread { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .muted { color:var(--muted); }
+    .tiny { font-size:11px; }
+    .mono { font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+    .progress { height:9px; overflow:hidden; border-radius:99px; background:rgba(3,8,18,.65); border:1px solid rgba(144,173,219,.12); }
+    .progress > span { display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),#8b9eff);box-shadow:0 0 14px rgba(105,229,232,.25); }
+    .timer-card { text-align:center; padding:27px 20px; background:radial-gradient(circle at 50% 15%,rgba(105,229,232,.1),transparent 48%),linear-gradient(145deg,rgba(16,36,58,.96),rgba(16,24,48,.96)); }
+    .timer { margin:11px 0 7px;font-size:clamp(42px,7vw,66px);font-weight:850;letter-spacing:.04em;font-variant-numeric:tabular-nums;text-shadow:0 0 28px rgba(105,229,232,.16); }
+    .miner { font-size:60px; margin:6px 0 3px; animation:bob 2.8s ease-in-out infinite; }
+    @keyframes bob { 0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)} }
+    .loot-list { display:grid; gap:8px; margin-top:10px; }
+    .loot-line { display:flex; justify-content:space-between; gap:10px; padding:9px 11px; border-radius:10px; background:rgba(3,9,20,.36); font-size:12px; }
+    .loot-line b { color:#f2f8ff; }
+    .rarity { display:inline-flex; align-items:center; padding:3px 7px; border:1px solid currentColor; border-radius:6px; font-size:10px; font-weight:850; letter-spacing:.05em; white-space:nowrap; }
+    .N{color:#c1c9d8}.R{color:#8dc7ff}.SR{color:#c49bff}.SSR{color:#ff9ee8}.UR{color:#ffda7b}.LR{color:#ff9e75}.LEGEND{color:#9ff1db}.EX{color:#fff; text-shadow:0 0 8px #b48dff; border-color:#d7c0ff;background:linear-gradient(90deg,rgba(92,57,160,.35),rgba(29,103,135,.25))}
+    .item-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+    .item-card { min-width:0;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(5,12,25,.42); }
+    .item-card .item-name { margin:8px 0 5px;font-size:12px;font-weight:800;line-height:1.45; }
+    .item-card p { margin:0;font-size:11px;line-height:1.55; }
+    .item-card .count { margin-top:8px;color:#d9e8ff;font-size:11px; }
+    .pickaxe-art { display:grid;place-items:center;min-height:150px;border-radius:16px;background:radial-gradient(circle,rgba(105,229,232,.12),transparent 65%),rgba(4,11,23,.45);font-size:76px; }
+    .costs { display:flex;gap:7px;flex-wrap:wrap;margin:10px 0; }
+    .cost { padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:rgba(5,12,25,.38);font-size:11px;color:#dce8ff; }
+    .cost.ok { border-color:rgba(131,228,174,.35);color:var(--green); }
+    .cost.no { border-color:rgba(255,142,157,.28);color:var(--red); }
+    .tier-list { display:flex;gap:6px;flex-wrap:wrap; }
+    .tier-dot { width:27px;height:27px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:rgba(4,10,21,.5);font-size:10px;color:var(--muted); }
+    .tier-dot.unlocked { color:#08131b;background:var(--cyan);border-color:var(--cyan);font-weight:900; }
+    .table { width:100%;border-collapse:collapse;font-size:12px; }
+    .table th,.table td { padding:9px 8px;text-align:left;border-bottom:1px solid var(--line); }
+    .table th { color:var(--muted);font-size:10px;letter-spacing:.06em;font-weight:700; }
+    .notice { padding:12px 14px;border:1px solid rgba(105,229,232,.2);border-radius:12px;background:rgba(36,89,106,.13);color:#c9e9f1;font-size:12px;line-height:1.65; }
+    .achievement { display:flex;align-items:center;gap:11px;padding:11px;border-radius:12px;background:rgba(5,12,25,.38);border:1px solid var(--line); }
+    .achievement .medal { font-size:24px; }
+    .achievement h4 { margin:0;font-size:12px; }
+    .achievement p { margin:4px 0 0;font-size:10px; }
+    .achievement.done { border-color:rgba(255,212,119,.32); }
+    .empty { padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:13px;font-size:12px; }
+    select { max-width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#101b31;color:var(--text);font-size:12px; }
+    .footer { margin-top:28px;text-align:center;color:#70829e;font-size:10px;line-height:1.6; }
+    .toast { position:fixed;left:50%;bottom:22px;z-index:50;transform:translate(-50%,20px);opacity:0;pointer-events:none;max-width:min(90vw,480px);padding:12px 17px;border:1px solid rgba(105,229,232,.35);border-radius:12px;background:#13243a;color:#edfbff;box-shadow:var(--shadow);font-size:12px;transition:.25s;text-align:center; }
+    .toast.show { opacity:1;transform:translate(-50%,0); }
+    .modal-backdrop { position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:20px;background:rgba(2,6,16,.78);backdrop-filter:blur(7px); }
+    .modal { width:min(460px,100%);padding:25px;border:1px solid rgba(255,212,119,.35);border-radius:20px;background:linear-gradient(145deg,#1c2945,#101a31);box-shadow:0 25px 90px rgba(0,0,0,.55);text-align:center; }
+    .modal .chest { font-size:58px; }
+    .modal h3 { margin:8px 0;font-size:21px; }
+    .modal p { color:var(--muted);font-size:12px;line-height:1.6; }
+    .modal-items { display:grid;gap:8px;margin:15px 0;text-align:left; }
+    @media(max-width:800px){.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}.item-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-inner{align-items:flex-start}.hero-visual{font-size:52px;min-width:80px}}
+    @media(max-width:580px){.shell{padding:14px 12px 35px}.topbar{align-items:flex-start;flex-direction:column}.wallet{justify-content:flex-start}.wallet-chip{font-size:11px;padding:7px 9px}.grid.two,.grid.three{grid-template-columns:1fr}.hero{padding:19px}.hero h2{font-size:24px}.hero-inner{gap:8px}.hero-visual{font-size:42px;min-width:55px}.page-head{align-items:flex-start;flex-direction:column}.item-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:15px}.nav button{padding:9px 11px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">⛏</div><div><h1>ABYSS DIGGER</h1><p>STUDY · DIG · DISCOVER</p></div></div>
+      <div class="wallet" id="wallet"></div>
+    </header>
+    <nav class="nav" id="nav">
+      <button data-tab="home" class="active">🏠 拠点</button>
+      <button data-tab="mine">⛏ 採掘</button>
+      <button data-tab="forge">⚒ 鍛冶場</button>
+      <button data-tab="gacha">🎁 ガチャ</button>
+      <button data-tab="codex">📚 図鑑</button>
+      <button data-tab="records">📊 記録</button>
+    </nav>
+    <main id="app"></main>
+    <footer class="footer">ABYSS DIGGER — 勉強した時間を、冒険の記録に。<br>休憩や中断をしても、すでに獲得した報酬は失われません。</footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="modal-root"></div>
+<script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'abyssDiggerSave_v1';
+  const CHECKPOINT_MS = 5 * 60 * 1000;
+  const RARITIES = ['N','R','SR','SSR','UR','LR','LEGEND','EX'];
+  const RARITY_LABELS = {N:'ノーマル',R:'レア',SR:'スーパーレア',SSR:'ダブルスーパーレア',UR:'ウルトラレア',LR:'レジェンドレア',LEGEND:'LEGEND',EX:'EX'};
+  const RARITY_COLORS = {N:'#c1c9d8',R:'#8dc7ff',SR:'#c49bff',SSR:'#ff9ee8',UR:'#ffda7b',LR:'#ff9e75',LEGEND:'#9ff1db',EX:'#fff'};
+  const RARITY_WEIGHTS = [49,25,13,7,3.5,1.5,.8,.2];
+  const SHARD_REWARD = {N:1,R:2,SR:5,SSR:12,UR:30,LR:60,LEGEND:120,EX:250};
+  const SHARD_COST = {N:10,R:25,SR:60,SSR:120,UR:300,LR:600,LEGEND:1200,EX:2500};
+  const MATERIALS = [
+    {key:'stone',name:'石ころ',emoji:'🪨'}, {key:'copper',name:'銅鉱石',emoji:'🟠'},
+    {key:'iron',name:'鉄鉱石',emoji:'⚙️'}, {key:'silver',name:'銀鉱石',emoji:'🌙'},
+    {key:'gold',name:'金鉱石',emoji:'🟡'}, {key:'mithril',name:'ミスリル鉱石',emoji:'💠'},
+    {key:'dragon',name:'竜晶',emoji:'🐉'}, {key:'abyss',name:'深淵鉱石',emoji:'🔮'}
+  ];
+  const PICKAXES = [
+    'ひび割れ木製ツルハシ','石ころツルハシ','銅鉱のツルハシ','サビた鉄のツルハシ','鋼鉄のツルハシ','ミスリル・ピック','ネオン・ピックアクス','プラズマ・ドリル','オリハルコン・ブレイカー','竜晶のツルハシ','星喰いのドリル','深淵のルーン・ツルハシ','時空断層ドリル','創世兵器〈ZERO〉'
+  ];
+  const PICKAXE_EMOJI = ['🪵','🪨','🟠','🔩','⚒️','💠','💡','⚡','🔱','🐉','🌌','🌀','⏳','✨'];
+  const ITEMS = [
+    ['N','カピカピの消しゴムのカス','誰かの勉強を見守っていたらしい。'],['N','中身のないUSB','何も入っていないのに、なぜか重い。'],['N','曲がったクリップ','小さな紙をまとめる力はまだある。'],['N','片方だけのイヤホン','もう片方は深淵のどこかに。'],['N','謎のネジ','何の部品だったかは不明。'],['N','紙くずの王冠','王冠というには少し頼りない。'],['N','使い切ったボールペン','最後の一文字までよく働いた。'],['N','砂まみれの定規','目盛りの間に砂が詰まっている。'],
+    ['R','冷めないコーラの缶','何年経ってもひんやりしている。'],['R','絶対に折れないシャー芯','一本だけ異様に頑丈。'],['R','無限ふせんロール','貼っても貼っても終わらない。'],['R','夜光鉱石','暗い場所で淡く光る。'],['R','1秒だけ戻る時計','使いどころが難しい。'],['R','古代のコンパス','北ではなく、未発見の場所を指す。'],['R','迷子ミミックの鍵','持ち主のほうが迷子らしい。'],['R','静音ブーツ','歩く音がほとんどしない。'],
+    ['SR','徹夜明けの眼光レンズ','昔の探検家の道具。無理は禁物。'],['SR','無限プチプチシート','押すたびに小さな音がする。'],['SR','集中の砂時計','砂の流れが静かに美しい。'],['SR','星屑のランタン','小さな星が中でまたたく。'],['SR','深度測定ゴーグル','見えない層の境目が見える。'],['SR','音速の鉛筆','書いた線が一瞬だけ光る。'],['SR','発掘者のマント','古い地図の模様が浮かぶ。'],['SR','古代文明の学生証','有効期限は数千年前。'],
+    ['SSR','記憶の羅針盤','忘れた道のりをそっと示す。'],['SSR','鉱脈探知機・改','遠くの鉱脈まで見つけられる。'],['SSR','虹彩結晶','見る角度で色が変わる。'],['SSR','永久機関の心臓部','止まることなく静かに回る。'],['SSR','幻影の採掘者マスク','かつての探検家の姿を映す。'],['SSR','古代王の宝箱','鍵穴が星座の形をしている。'],['SSR','深海のオルゴール','海の底のような音色。'],['SSR','黄金のミミック像','動かないので安心。'],
+    ['UR','ドーパミン・コア','冒険を彩る不思議なエネルギー体。'],['UR','『あと5分だけ』の砂時計','時間の感じ方が少し変わる。'],['UR','深淵の王冠','深い青の宝石が輝く。'],['UR','時空を刻む懐中時計','針が二つの時間を指している。'],['UR','永遠の鉱脈','どこまでも続く鉱石の夢。'],['UR','虚空の宝石','光を吸い込むような輝き。'],['UR','創世のツルハシの欠片','古い伝説の一部らしい。'],['UR','深海龍の化石','太古の海の記憶を残す。'],
+    ['LR','第一採掘者の日誌','最初の拠点について書かれている。'],['LR','星喰いの心臓','小さな宇宙のように明滅する。'],['LR','時間停止の懐中時計','針は止まっているが壊れてはいない。'],['LR','深淵龍の王鱗','深海の光を反射する。'],['LR','無限回廊の地図','ページをめくるたび道が増える。'],['LR','神話級ミミック','宝箱の姿をした伝説の生き物。'],['LR','天空鉱石','地下で見つかった空のかけら。'],['LR','永劫のランタン','遠い場所まで光を届ける。'],
+    ['LEGEND','世界樹の根','地上と深淵をつないでいる。'],['LEGEND','深淵の創造主の瞳','見つめると星々が映る。'],['LEGEND','時空の管理者の鍵','まだ開けられていない扉がある。'],['LEGEND','始まりの鉱石','すべての採掘の原点。'],['LEGEND','神々の採掘許可証','署名欄には古代文字が並ぶ。'],['LEGEND','永遠の探検家の徽章','長い旅の証。'],['LEGEND','星海の王冠','星の海をかたどった王冠。'],['LEGEND','終焉と創世の書','最後のページは白紙。'],
+    ['EX','ABYSSの心臓','深淵そのものが結晶になったもの。'],['EX','存在しない鉱石','図鑑に載せると記録が少し揺れる。'],['EX','第一採掘者の魂','遠い冒険の記憶が宿っている。'],['EX','終わりなき地図','地図の端が見つからない。'],['EX','ゼロの設計図','すべての始まりを描いた設計図。'],['EX','世界の裏側','何が見えるかは、持ち主だけが知る。']
+  ].map(([rarity,name,desc],index)=>({id:'item_'+index,rarity,name,desc}));
+
+  const BASE_COSTS = {
+    2:{stone:40,copper:15}, 3:{stone:60,copper:30,iron:20}, 4:{silver:35,gold:25,mithril:8}
+  };
+  const PICKAXE_COSTS = {
+    2:{stone:15}, 3:{stone:25,copper:10}, 4:{stone:30,copper:20},
+    5:{copper:20,iron:10}, 6:{iron:25}, 7:{iron:30,silver:10},
+    8:{silver:25}, 9:{silver:30,gold:10}, 10:{gold:25},
+    11:{gold:30,mithril:10}, 12:{mithril:25}, 13:{mithril:30,dragon:8}, 14:{dragon:25,abyss:8}
+  };
+  const ACHIEVEMENTS = [
+    {id:'first5',name:'地底への第一歩',desc:'採掘時間が合計5分に到達',reward:1,test:s=>totalWithCurrent()>=5*60*1000},
+    {id:'first30',name:'新米ディガー',desc:'採掘時間が合計30分に到達',reward:2,test:s=>totalWithCurrent()>=30*60*1000},
+    {id:'hour1',name:'一時間の探検',desc:'採掘時間が合計1時間に到達',reward:3,test:s=>totalWithCurrent()>=60*60*1000},
+    {id:'hour3',name:'深層への挑戦者',desc:'採掘時間が合計3時間に到達',reward:5,test:s=>totalWithCurrent()>=180*60*1000},
+    {id:'pick3',name:'道具を育てる',desc:'ツルハシを3段階目に強化',reward:1,test:s=>s.pickaxeLevel>=3},
+    {id:'base2',name:'自分だけの拠点',desc:'拠点をレベル2にする',reward:2,test:s=>s.baseLevel>=2},
+    {id:'collect10',name:'小さなコレクター',desc:'10種類のアイテムを発見',reward:2,test:s=>Object.values(s.collection).filter(v=>v>0).length>=10}
+  ];
+  const LAYERS = ['忘れられた廃坑','蒼光晶洞','ネオン廃棄区画','灼熱マグマ地帯','深淵海溝','星屑の地殻','時空断層','創世の最深部'];
+
+  function defaultState(){
+    return {
+      version:1,
+      materials:{stone:35,copper:12,iron:0,silver:0,gold:0,mithril:0,dragon:0,abyss:0},
+      tickets:3, shards:0, abyssCrystals:0,
+      collection:{}, pickaxeLevel:1, baseLevel:1,
+      totalMiningMs:0, sessionsCompleted:0,
+      session:{active:false,running:false,elapsedMs:0,runStartedAt:null,processedCheckpoints:0,finds:[],startedAt:null},
+      achievements:{}, lastSession:null, createdAt:Date.now()
+    };
+  }
+  function loadState(){
+    const fallback=defaultState();
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return fallback;
+      const saved=JSON.parse(raw);
+      return {
+        ...fallback,...saved,
+        materials:{...fallback.materials,...(saved.materials||{})},
+        collection:{...(saved.collection||{})}, achievements:{...(saved.achievements||{})},
+        session:{...fallback.session,...(saved.session||{})},
+      };
+    }catch(e){ console.warn('セーブデータを読み込めませんでした',e); return fallback; }
+  }
+  let state=loadState();
+  let currentTab='home';
+  let toastTimer=null;
+  let lastShownSessionId=null;
+
+  const $=sel=>document.querySelector(sel);
+  const app=$('#app');
+  const wallet=$('#wallet');
+  const nav=$('#nav');
+  const fmtTime=ms=>{
+    const sec=Math.max(0,Math.floor(ms/1000));
+    const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+    return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+  const number=n=>new Intl.NumberFormat('ja-JP').format(n||0);
+  const escapeHtml=str=>String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  function save(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){ console.warn('保存できませんでした',e); toast('このブラウザでは保存できませんでした'); } }
+  function toast(message){ const el=$('#toast'); el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600); }
+  function activeElapsed(){
+    const s=state.session; if(!s.active) return 0;
+    return Math.max(0,s.elapsedMs+(s.running&&s.runStartedAt?Date.now()-s.runStartedAt:0));
+  }
+  function totalWithCurrent(){ return state.totalMiningMs+(state.session.active?activeElapsed():0); }
+  function depthNow(){ return Math.floor(totalWithCurrent()/(30*60*1000)); }
+  function layerNow(){ return LAYERS[Math.min(LAYERS.length-1,depthNow())]; }
+  function materialName(key){ return MATERIALS.find(m=>m.key===key)?.name||key; }
+  function materialEmoji(key){ return MATERIALS.find(m=>m.key===key)?.emoji||'◆'; }
+  function fmtMats(costs){return Object.entries(costs||{}).map(([k,v])=>`${materialEmoji(k)} ${materialName(k)} ×${v}`).join(' / ');}
+  function canAfford(costs){return Object.entries(costs||{}).every(([k,v])=>(state.materials[k]||0)>=v);}
+  function spend(costs){if(!canAfford(costs))return false;Object.entries(costs||{}).forEach(([k,v])=>state.materials[k]-=v);return true;}
+  function ownedCount(){return Object.values(state.collection).reduce((a,b)=>a+b,0);}
+  function discoveredCount(){return Object.values(state.collection).filter(v=>v>0).length;}
+  function grantItem(item,source='発掘'){
+    const old=state.collection[item.id]||0;
+    state.collection[item.id]=old+1;
+    if(old>0){const gain=SHARD_REWARD[item.rarity];state.shards+=gain;return {item,duplicate:true,shards:gain,source};}
+    return {item,duplicate:false,shards:0,source};
+  }
+  function chooseRarity(weights){
+    let roll=Math.random()*weights.reduce((a,b)=>a+b,0);
+    for(let i=0;i<weights.length;i++){roll-=weights[i];if(roll<0)return RARITIES[i];}
+    return 'N';
+  }
+  function itemOfRarity(rarity){const list=ITEMS.filter(i=>i.rarity===rarity);return list[Math.floor(Math.random()*list.length)];}
+  function mineRewardRarity(depth){
+    const weights=[72,21,5.5,1.2,.23,.05,.015,.005];
+    const boost=Math.min(8,depth)*.45;
+    weights[0]=Math.max(48,weights[0]-boost*2);
+    weights[1]+=boost;
+    weights[2]+=boost*.7;
+    weights[3]+=boost*.22;
+    return chooseRarity(weights);
+  }
+  function addFind(text){state.session.finds.unshift({text,at:Date.now()});if(state.session.finds.length>24)state.session.finds.length=24;}
+  function grantCheckpoint(checkpointNumber,elapsed){
+    const depth=Math.floor((state.totalMiningMs+elapsed)/(30*60*1000));
+    const stoneGain=3+Math.floor(Math.random()*4);
+    state.materials.stone+=stoneGain;
+    addFind(`🪨 石ころ ×${stoneGain}`);
+    const materialTier=Math.min(MATERIALS.length-1,Math.floor((depth+state.pickaxeLevel-1)/2));
+    if(materialTier>0 && Math.random()<.45){
+      const mat=MATERIALS[materialTier];const gain=1+Math.floor(Math.random()*2);state.materials[mat.key]+=gain;addFind(`${mat.emoji} ${mat.name} ×${gain}`);
+    } else if(materialTier===0 && Math.random()<.35){
+      const gain=1+Math.floor(Math.random()*2);state.materials.copper+=gain;addFind(`🟠 銅鉱石 ×${gain}`);
+    }
+    if(Math.random()<Math.min(.48,.23+depth*.025)){
+      const rarity=mineRewardRarity(depth);const found=grantItem(itemOfRarity(rarity));
+      addFind(`${found.item.name} [${rarity}]${found.duplicate?` → 欠片 +${found.shards}`:''}`);
+    }
+    if(checkpointNumber%3===0){state.tickets+=1;addFind('🎟 発掘チケット ×1（15分到達）');}
+    if(checkpointNumber%6===0){state.abyssCrystals+=1;addFind('🔮 深淵結晶 ×1（30分到達）');}
+    save();
+    toast(`${checkpointNumber*5}分チェックポイント達成！報酬を獲得しました`);
+  }
+  function processCheckpoints(elapsed){
+    const target=Math.floor(elapsed/CHECKPOINT_MS);
+    while(state.session.processedCheckpoints<target){
+      state.session.processedCheckpoints++;
+      grantCheckpoint(state.session.processedCheckpoints,elapsed);
+    }
+  }
+  function checkAchievements(){
+    let changed=false;
+    for(const a of ACHIEVEMENTS){
+      if(!state.achievements[a.id]&&a.test(state)){
+        state.achievements[a.id]=Date.now();
+        state.tickets+=a.reward;
+        toast(`実績解除「${a.name}」：発掘チケット +${a.reward}`);
+        changed=true;
+      }
+    }
+    if(changed)save();
+  }
+  function updateSessionProgress(){
+    if(state.session.active){const elapsed=activeElapsed();processCheckpoints(elapsed);checkAchievements();}
+  }
+  function startSession(){
+    if(state.session.active){toast('すでに採掘セッション中です');return;}
+    state.session={active:true,running:true,elapsedMs:0,runStartedAt:Date.now(),processedCheckpoints:0,finds:[],startedAt:Date.now()};
+    save();currentTab='mine';render();toast('採掘を開始しました。自分のペースで進めましょう！');
+  }
+  function pauseSession(){
+    if(!state.session.active||!state.session.running)return;
+    const elapsed=activeElapsed();state.session.elapsedMs=elapsed;state.session.running=false;state.session.runStartedAt=null;
+    processCheckpoints(elapsed);checkAchievements();save();render();toast('一時停止しました。獲得済み報酬はそのままです');
+  }
+  function resumeSession(){
+    if(!state.session.active||state.session.running)return;
+    state.session.running=true;state.session.runStartedAt=Date.now();save();render();toast('採掘を再開しました');
+  }
+  function finishSession(){
+    if(!state.session.active)return;
+    const elapsed=activeElapsed();processCheckpoints(elapsed);
+    state.session.elapsedMs=elapsed;state.totalMiningMs+=elapsed;state.sessionsCompleted++;
+    state.lastSession={elapsedMs:elapsed,finds:[...state.session.finds],finishedAt:Date.now()};
+    state.session={active:false,running:false,elapsedMs:0,runStartedAt:null,processedCheckpoints:0,finds:[],startedAt:null};
+    checkAchievements();save();render();showSessionModal(state.lastSession);
+  }
+  function showSessionModal(session){
+    const finds=(session.finds||[]).slice(0,10);
+    $('#modal-root').innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal" role="dialog" aria-modal="true" aria-label="採掘結果" onclick="event.stopPropagation()"><div class="chest">📦</div><div class="eyebrow">SESSION COMPLETE</div><h3>採掘結果</h3><div class="timer" style="font-size:34px">${fmtTime(session.elapsedMs)}</div><p>今回の採掘で確定した報酬は、すべて所持品に保存されています。</p>${finds.length?`<div class="modal-items">${finds.map(f=>`<div class="loot-line">${escapeHtml(f.text)}</div>`).join('')}</div>`:'<div class="empty">今回はチェックポイント報酬の対象時間に届きませんでした。次回に続けられます。</div>'}<button class="btn primary" data-action="close-modal">拠点へ戻る</button></div></div>`;
+  }
+
+  function header(eyebrow,title,sub,action=''){
+    return `<div class="page-head"><div><div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p class="sub">${sub}</p></div>${action}</div>`;
+  }
+  function panel(title,body,extra='') {return `<section class="panel ${extra}"><h3>${title}</h3>${body}</section>`;}
+  function walletRender(){
+    wallet.innerHTML=`<div class="wallet-chip">🪨 石ころ <b>${number(state.materials.stone)}</b></div><div class="wallet-chip">🎟 チケット <b>${number(state.tickets)}</b></div><div class="wallet-chip">🧩 遺物の欠片 <b>${number(state.shards)}</b></div><div class="wallet-chip">🔮 深淵結晶 <b>${number(state.abyssCrystals)}</b></div>`;
+  }
+  function homePage(){
+    const elapsed=totalWithCurrent();
+    const facilities=[
+      ['⚒️','鍛冶場','鉱石を使ってツルハシを強化する','forge'],
+      ['🎁','発掘ガチャルーム','チケットで新しい遺物を発見する','gacha'],
+      ['🗃️','遺物展示室','集めたアイテムを図鑑で確認する','codex'],
+      ['🧑‍🚀','採掘準備室','ツルハシと採掘状況を確認する','mine'],
+      ['🖥️','管理室','活動時間・実績・冒険の記録を見る','records']
+    ];
+    return `${header('PERSONAL BASE','拠点','ここは採掘の成果が集まる、あなたの地下基地です。')}
+      <section class="hero"><div class="hero-inner"><div><div class="eyebrow">WELCOME BACK, DIGGER</div><h2>深淵の拠点へようこそ。</h2><p class="sub">勉強や作業の時間が、地下世界を広げる力になります。今日はどこを探索しますか？</p><div class="hero-stats"><div class="stat"><small>BASE LEVEL</small><b>Lv.${state.baseLevel}</b></div><div class="stat"><small>PICKAXE</small><b>Lv.${state.pickaxeLevel}/14</b></div><div class="stat"><small>TOTAL TIME</small><b>${fmtTime(elapsed)}</b></div><div class="stat"><small>DISCOVERED</small><b>${discoveredCount()}/${ITEMS.length}</b></div></div></div><div class="hero-visual">🏕️</div></div></section>
+      <div style="height:14px"></div><div class="grid two">${facilities.map(([icon,name,desc,tab])=>`<div class="facility"><div class="facility-icon">${icon}</div><div><h4>${name}</h4><p>${desc}</p></div><button class="btn small" data-action="go" data-tab="${tab}">入る →</button></div>`).join('')}</div>
+      <div style="height:14px"></div><div class="grid two">${panel('拠点の拡張',`<div class="spread"><div><div style="font-size:25px;font-weight:850">BASE Lv.${state.baseLevel}</div><p style="margin:4px 0">施設を増やして、自分だけの基地に育てよう。</p></div><div style="font-size:36px">🏗️</div></div>${baseUpgradeSection()}`)}${panel('現在の探索エリア',`<div style="font-size:22px;font-weight:850">${layerNow()}</div><p>累計採掘時間を重ねると、より深い地層が記録されます。深度は30分ごとに進みます。</p><div class="progress"><span style="width:${Math.min(100,(totalWithCurrent()%(30*60*1000))/(30*60*1000)*100)}%"></span></div><p class="tiny">次の地層まで ${fmtTime(30*60*1000-(totalWithCurrent()%(30*60*1000)))}</p>` )}</div>`;
+  }
+  function baseUpgradeSection(){
+    if(state.baseLevel>=4)return `<div class="notice">拠点は現在の試作版での最大レベルです。今後のアップデートで拡張できます。</div>`;
+    const next=state.baseLevel+1,cost=BASE_COSTS[next];
+    return `<p class="tiny">次の拡張：BASE Lv.${next}</p><div class="costs">${Object.entries(cost).map(([k,v])=>`<span class="cost ${(state.materials[k]||0)>=v?'ok':'no'}">${materialEmoji(k)} ${materialName(k)} ${state.materials[k]||0}/${v}</span>`).join('')}</div><button class="btn primary" data-action="upgrade-base" ${canAfford(cost)?'':'disabled'}>拠点を拡張する</button>`;
+  }
+  function minePage(){
+    const s=state.session,elapsed=activeElapsed(),toNext=CHECKPOINT_MS-(elapsed%CHECKPOINT_MS),progress=(elapsed%CHECKPOINT_MS)/CHECKPOINT_MS*100;
+    const depth=depthNow();
+    const status=!s.active?'待機中':s.running?'採掘中':'一時停止中';
+    const actions=!s.active?`<button class="btn primary" data-action="start-session">⛏ 採掘を開始</button>`:s.running?`<button class="btn" data-action="pause-session">⏸ 一時停止</button><button class="btn gold" data-action="finish-session">帰還して報酬を確定</button>`:`<button class="btn primary" data-action="resume-session">▶ 再開</button><button class="btn gold" data-action="finish-session">帰還して報酬を確定</button>`;
+    const finds=s.finds||[];
+    return `${header('MINING ZONE','採掘','タイマーを動かして作業時間を記録。5分ごとに報酬が確定します。')}
+      <div class="grid two"><section class="panel timer-card"><div class="eyebrow">${status.toUpperCase()}</div><div class="miner">🧑‍🚀</div><div class="timer mono" id="timer-display">${fmtTime(elapsed)}</div><div class="muted tiny">${s.active?'今回の採掘時間':'採掘を始めると、ここに時間が表示されます'}</div><div class="row" style="justify-content:center;margin-top:17px">${actions}</div><p class="tiny" style="margin:15px 0 0">休憩するときは一時停止できます。途中で帰還しても、すでに確定した報酬はなくなりません。</p></section>
+      <div class="grid" style="align-content:start">${panel('次のチェックポイント',`<div class="spread"><div><div style="font-size:27px;font-weight:850" class="mono">${s.active?fmtTime(toNext):'05:00'}</div><p style="margin:4px 0">次の報酬まで</p></div><div style="font-size:32px">⏳</div></div><div class="progress"><span id="checkpoint-progress" style="width:${s.active?progress:0}%"></span></div><p class="tiny">5分ごと：鉱石など ／ 15分ごと：発掘チケット ／ 30分ごと：深淵結晶</p>`)}${panel('現在の探索エリア',`<div style="font-size:20px;font-weight:850">${layerNow()}</div><p>深度レベル：${depth}　/　装備：${PICKAXES[state.pickaxeLevel-1]}</p><div class="tier-list">${LAYERS.map((l,i)=>`<span class="tier-dot ${i<=depth?'unlocked':''}" title="${l}">${i+1}</span>`).join('')}</div>`)}</div></div>
+      <div style="height:14px"></div><div class="grid two">${panel('今回の発掘ログ',finds.length?`<div class="loot-list">${finds.slice(0,12).map(f=>`<div class="loot-line"><span>${escapeHtml(f.text)}</span><span class="muted">✓</span></div>`).join('')}</div>`:`<div class="empty">まだ発掘ログはありません。5分のチェックポイントで報酬が確定します。</div>`)}${panel('採掘のルール',`<div class="notice">タイマーはページを閉じている間も、採掘中なら経過時間を記録します。再び開いたときに到達済みチェックポイントの報酬をまとめて受け取れます。</div><p>一時停止・途中帰還はいつでも可能です。休憩したり、別の日に再開したりしても、すでに確定した報酬は保持されます。</p>`)}</div>`;
+  }
+  function forgePage(){
+    const level=state.pickaxeLevel,next=level+1,cost=PICKAXE_COSTS[next];
+    const current=PICKAXES[level-1];
+    return `${header('WORKSHOP','鍛冶場','鉱石を使ってツルハシを強化。新しい見た目と採掘効率を手に入れよう。')}
+      <div class="grid two"><section class="panel"><div class="eyebrow">EQUIPPED PICKAXE</div><div class="pickaxe-art">${PICKAXE_EMOJI[level-1]}</div><h3 style="text-align:center;font-size:18px;margin:14px 0 4px">${current}</h3><p style="text-align:center;margin:0">PICKAXE Lv.${level} / 14</p><div class="progress" style="margin:16px 0 8px"><span style="width:${level/14*100}%"></span></div><div class="spread tiny"><span class="muted">初期装備</span><b>${Math.round(level/14*100)}% 解放</b></div></section>
+      <section class="panel"><h3>次の強化</h3>${level>=14?`<div class="notice">最終ツルハシまで強化済みです！</div>`:`<div style="font-size:22px;font-weight:850">${PICKAXE_EMOJI[next-1]} ${PICKAXES[next-1]}</div><p>強化すると採掘画面の装備表示が変わり、深い層の素材を見つけやすくなります。</p><div class="costs">${Object.entries(cost).map(([k,v])=>`<span class="cost ${(state.materials[k]||0)>=v?'ok':'no'}">${materialEmoji(k)} ${materialName(k)} ${state.materials[k]||0}/${v}</span>`).join('')}</div><button class="btn primary" data-action="upgrade-pickaxe" ${canAfford(cost)?'':'disabled'}>ツルハシを強化する</button>`}</section></div>
+      <div style="height:14px"></div>${panel('ツルハシ・コレクション',`<div class="grid three">${PICKAXES.map((p,i)=>`<div class="item-card"><div class="spread"><span style="font-size:25px">${PICKAXE_EMOJI[i]}</span><span class="rarity ${i<3?'N':i<6?'R':i<9?'SR':i<12?'SSR':'UR'}">Lv.${i+1}</span></div><div class="item-name">${p}</div><p>${i<level?'解放済み':'未解放'}</p></div>`).join('')}</div>`)}
+      <div style="height:14px"></div>${panel('所持素材',`<div class="grid three">${MATERIALS.map(m=>`<div class="loot-line"><span>${m.emoji} ${m.name}</span><b>${number(state.materials[m.key])}</b></div>`).join('')}</div>`)}`;
+  }
+  function gachaPage(){
+    const odds=RARITIES.map((r,i)=>`<tr><td><span class="rarity ${r}">${r}</span> ${RARITY_LABELS[r]}</td><td class="mono">${RARITY_WEIGHTS[i]}%</td></tr>`).join('');
+    const rarityOptions=RARITIES.map(r=>`<option value="${r}">${r} — ${RARITY_LABELS[r]}（${SHARD_COST[r]}欠片）</option>`).join('');
+    return `${header('RELIC CHAMBER','発掘ガチャルーム','発掘チケットを使って遺物を発見。ここでのガチャはゲーム内報酬のみで、購入機能はありません。')}
+      <div class="grid two"><section class="panel"><div class="eyebrow">AVAILABLE TICKETS</div><div style="font-size:42px;font-weight:900;margin:8px 0">🎟 ${number(state.tickets)}</div><p>採掘の15分ごとの節目や実績解除で獲得できます。</p><div class="row"><button class="btn primary" data-action="pull-one" ${state.tickets<1?'disabled':''}>1回引く（1枚）</button><button class="btn gold" data-action="pull-ten" ${state.tickets<10?'disabled':''}>10回引く（10枚）</button></div></section>
+      <section class="panel"><h3>通常発掘ガチャの提供割合</h3><table class="table"><thead><tr><th>レアリティ</th><th>確率</th></tr></thead><tbody>${odds}</tbody></table><p class="tiny">表示確率はこの試作版の固定値です。10回ガチャにも別の確定枠はありません。</p></section></div>
+      <div style="height:14px"></div>${panel('遺物の欠片交換所',`<p>重複したアイテムは自動で欠片に変換されます。欠片を使って、欲しいレアリティのアイテムを1つ選んで交換できます。</p><div class="row"><select id="exchange-item">${ITEMS.map(i=>`<option value="${i.id}">${i.rarity} — ${i.name}</option>`).join('')}</select><button class="btn primary" data-action="exchange-item">選んだアイテムと交換</button></div><p class="tiny">現在の欠片：<b>${number(state.shards)}</b>　／　必要数はアイテムのレアリティによって異なります。</p>`)}
+      <div style="height:14px"></div>${panel('ガチャについて',`<div class="notice">すべての抽選は無料のゲーム内チケットで行います。現金購入や課金ガチャはありません。確率を確認してから遊べます。</div>`)}`;
+  }
+  function codexPage(){
+    const cards=ITEMS.map(item=>{
+      const count=state.collection[item.id]||0;
+      return `<div class="item-card"><div class="spread"><span class="rarity ${item.rarity}">${item.rarity}</span><span class="tiny muted">${count>0?'発見済み':'未発見'}</span></div><div class="item-name">${count>0?item.name:'？？？？？？'}</div><p>${count>0?item.desc:'まだこの遺物の記録はありません。'}</p><div class="count">所持数：${count}</div></div>`;
+    }).join('');
+    return `${header('COLLECTION ARCHIVE','遺物図鑑','発見した遺物がここに登録されます。重複しても図鑑の記録は残ります。')}
+      <div class="grid three"><div class="panel"><div class="muted tiny">DISCOVERED TYPES</div><div style="font-size:28px;font-weight:900">${discoveredCount()} / ${ITEMS.length}</div><div class="progress" style="margin-top:10px"><span style="width:${discoveredCount()/ITEMS.length*100}%"></span></div></div><div class="panel"><div class="muted tiny">TOTAL ITEMS</div><div style="font-size:28px;font-weight:900">${number(ownedCount())}</div><p style="margin:3px 0">重複を含む所持数</p></div><div class="panel"><div class="muted tiny">COLLECTION BONUS</div><div style="font-size:28px;font-weight:900">${Math.floor(discoveredCount()/ITEMS.length*100)}%</div><p style="margin:3px 0">全${RARITIES.length}段階の遺物を収録</p></div></div>
+      <div style="height:14px"></div>${panel('すべての遺物',`<div class="item-grid">${cards}</div>`)}`;
+  }
+  function recordsPage(){
+    const total=state.totalMiningMs;
+    const unlocked=ACHIEVEMENTS.filter(a=>state.achievements[a.id]).length;
+    return `${header('CONTROL ROOM','冒険の記録','これまでの採掘時間、拠点の成長、達成した実績を確認できます。')}
+      <div class="grid three"><div class="panel"><div class="muted tiny">TOTAL MINING TIME</div><div style="font-size:27px;font-weight:900" class="mono">${fmtTime(totalWithCurrent())}</div></div><div class="panel"><div class="muted tiny">COMPLETED SESSIONS</div><div style="font-size:27px;font-weight:900">${state.sessionsCompleted}</div></div><div class="panel"><div class="muted tiny">ACHIEVEMENTS</div><div style="font-size:27px;font-weight:900">${unlocked}/${ACHIEVEMENTS.length}</div></div></div>
+      <div style="height:14px"></div>${panel('実績一覧',`<div class="grid two">${ACHIEVEMENTS.map(a=>`<div class="achievement ${state.achievements[a.id]?'done':''}"><div class="medal">${state.achievements[a.id]?'🏅':'🔒'}</div><div><h4>${a.name} ${state.achievements[a.id]?'✓':''}</h4><p>${a.desc} ／ 報酬：🎟 ${a.reward}</p></div></div>`).join('')}</div>`)}
+      <div style="height:14px"></div><div class="grid two">${panel('セーブデータ',`<div class="notice">データはこのブラウザのローカルストレージに保存されます。同じブラウザ・同じ端末で開くと続きから遊べます。ブラウザのデータ削除や別端末への自動同期には対応していません。</div><div class="row" style="margin-top:12px"><button class="btn" data-action="export-save">セーブデータを書き出す</button><button class="btn danger" data-action="reset-save">最初からやり直す</button></div>`)}${panel('前回の採掘',state.lastSession?`<div style="font-size:25px;font-weight:850" class="mono">${fmtTime(state.lastSession.elapsedMs)}</div><p>終了：${new Date(state.lastSession.finishedAt).toLocaleString('ja-JP')}</p><div class="loot-list">${(state.lastSession.finds||[]).slice(0,8).map(f=>`<div class="loot-line">${escapeHtml(f.text)}</div>`).join('')||'<div class="empty">記録されたチェックポイント報酬はありません。</div>'}</div>`:`<div class="empty">まだ採掘セッションの記録がありません。</div>`)}</div>`;
+  }
+  function render(){
+    walletRender();
+    nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+    const pages={home:homePage,mine:minePage,forge:forgePage,gacha:gachaPage,codex:codexPage,records:recordsPage};
+    app.innerHTML=(pages[currentTab]||homePage)();
+  }
+
+  function upgradeBase(){
+    if(state.baseLevel>=4)return;
+    const next=state.baseLevel+1,cost=BASE_COSTS[next];if(!spend(cost)){toast('素材が足りません');return;}
+    state.baseLevel=next;checkAchievements();save();render();toast(`拠点が Lv.${next} になりました！`);
+  }
+  function upgradePickaxe(){
+    const next=state.pickaxeLevel+1;if(next>14)return;
+    const cost=PICKAXE_COSTS[next];if(!spend(cost)){toast('素材が足りません');return;}
+    state.pickaxeLevel=next;checkAchievements();save();render();toast(`ツルハシを「${PICKAXES[next-1]}」に強化しました！`);
+  }
+  function pull(count){
+    if(state.tickets<count){toast('発掘チケットが足りません');return;}
+    state.tickets-=count;
+    const results=[];
+    for(let i=0;i<count;i++){
+      const rarity=chooseRarity(RARITY_WEIGHTS);const result=grantItem(itemOfRarity(rarity),'ガチャ');results.push(result);
+    }
+    checkAchievements();save();render();showGachaModal(results);
+  }
+  function showGachaModal(results){
+    const best=results.reduce((a,b)=>RARITIES.indexOf(b.item.rarity)>RARITIES.indexOf(a.item.rarity)?b:a,results[0]);
+    $('#modal-root').innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal" role="dialog" aria-modal="true" aria-label="ガチャ結果" onclick="event.stopPropagation()"><div class="chest">${best.item.rarity==='EX'?'🌌':best.item.rarity==='LEGEND'?'👑':best.item.rarity==='UR'?'💎':'🎁'}</div><div class="eyebrow">RELIC DISCOVERY</div><h3>遺物を発見！</h3><div class="modal-items">${results.map(r=>`<div class="loot-line"><span><span class="rarity ${r.item.rarity}">${r.item.rarity}</span> <b>${r.item.name}</b>${r.duplicate?` <span class="muted">（重複 → 欠片 +${r.shards}）</span>`:''}</span></div>`).join('')}</div><button class="btn primary" data-action="close-modal">閉じる</button></div></div>`;
+  }
+  function exchangeSelected(){
+    const select=$('#exchange-item');if(!select)return;
+    const item=ITEMS.find(i=>i.id===select.value);if(!item)return;
+    const cost=SHARD_COST[item.rarity];if(state.shards<cost){toast(`欠片が足りません（必要：${cost}）`);return;}
+    state.shards-=cost;const result=grantItem(item,'交換');checkAchievements();save();render();
+    toast(result.duplicate?`${item.name}を交換。重複分の欠片に変換されました`:`${item.name}を図鑑に登録しました！`);
+  }
+  function exportSave(){
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='abyss-digger-save.json';a.click();URL.revokeObjectURL(url);toast('セーブデータを書き出しました');
+  }
+  function resetSave(){
+    const ok=confirm('セーブデータを初期化します。採掘時間・素材・アイテム・実績は元に戻せません。実行しますか？');
+    if(!ok)return;state=defaultState();save();currentTab='home';$('#modal-root').innerHTML='';render();toast('新しい採掘記録を始めました');
+  }
+
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;currentTab=b.dataset.tab;render();});
+  app.addEventListener('click',e=>{
+    const b=e.target.closest('[data-action]');if(!b)return;
+    const action=b.dataset.action;
+    switch(action){
+      case 'go':currentTab=b.dataset.tab;render();break;
+      case 'start-session':startSession();break;
+      case 'pause-session':pauseSession();break;
+      case 'resume-session':resumeSession();break;
+      case 'finish-session':finishSession();break;
+      case 'upgrade-base':upgradeBase();break;
+      case 'upgrade-pickaxe':upgradePickaxe();break;
+      case 'pull-one':pull(1);break;
+      case 'pull-ten':pull(10);break;
+      case 'exchange-item':exchangeSelected();break;
+      case 'export-save':exportSave();break;
+      case 'reset-save':resetSave();break;
+    }
+  });
+  $('#modal-root').addEventListener('click',e=>{if(e.target.closest('[data-action="close-modal"]'))$('#modal-root').innerHTML='';});
+
+  // Reloadした時点までの時間を計算し、到達済みチェックポイントを取りこぼさない。
+  if(state.session.active){
+    updateSessionProgress();
+    if(state.session.running&&!state.session.runStartedAt){state.session.runStartedAt=Date.now();save();}
+  }
+  checkAchievements();
+  render();
+  setInterval(()=>{
+    if(state.session.active){
+      updateSessionProgress();
+      const elapsed=activeElapsed();
+      const timer=$('#timer-display');if(timer)timer.textContent=fmtTime(elapsed);
+      const progress=$('#checkpoint-progress');if(progress)progress.style.width=`${(elapsed%CHECKPOINT_MS)/CHECKPOINT_MS*100}%`;
+      // ナビの表示などを壊さず、タイマー画面以外も累計時間の変化を反映するための更新。
+      if(currentTab==='home'){
+        const heroStat=app.querySelector('.hero-stats .stat:nth-child(3) b');if(heroStat)heroStat.textContent=fmtTime(totalWithCurrent());
+      }
+    }
+  },1000);
+})();
+</script>
+</body>
+</html>
